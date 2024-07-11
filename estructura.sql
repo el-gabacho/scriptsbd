@@ -185,3 +185,15 @@ CREATE TABLE entradaProductos (
   FOREIGN KEY (IdInventario) REFERENCES inventarioAutopartes(idInventario)
 );
 
+CREATE TABLE ventaProductos (
+  idVentaProductos INT auto_increment primary key,
+  idVenta INT,
+  idInventario INT,
+  cantidad FLOAT,
+  tipoVenta VARCHAR(50),
+  precioVenta FLOAT,
+  subtotal FLOAT,
+  estado BOOL default true,
+  FOREIGN KEY (idVenta) REFERENCES ventas(idVenta),
+  FOREIGN KEY (idInventario) REFERENCES inventarioAutopartes(idInventario)
+);
