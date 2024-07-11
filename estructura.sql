@@ -131,6 +131,30 @@ create table inventarioAutoparte (
     FOREIGN KEY (idUnidadMedida) REFERENCES unidadMedida(idUnidadMedida)
 );
 
+CREATE TABLE registroProductos (
+  idregistroProducto INT auto_increment PRIMARY KEY,
+  IdInventarioA INT,
+  idUsuarioRegistro INT,
+  fechaCreacion timestamp default CURRENT_TIMESTAMP,
+  idUsuarioElimino INT,
+  fechaElimino timestamp default CURRENT_TIMESTAMP,
+  FOREIGN KEY (idUsuarioRegistro) REFERENCES usuarios(idUsuario),
+  FOREIGN KEY (idUsuarioElimino) REFERENCES usuarios(idUsuario)
+);
+
+CREATE TABLE ventas (
+  idVenta INT auto_increment primary key,
+  idUsuario INT,
+  idCliente INT,
+  montoTotal FLOAT,
+  recibioDinero FLOAT,
+  folioTicket VAR,
+  conceptoTicket BOOL,
+  fechaVenta TIMESTAMP,
+  estado BOOL default true,
+  FOREIGN KEY (idUsuario) REFERENCES usuarios(idModeloAnio),
+  FOREIGN KEY (idCliente) REFERENCES clientes(idCliente)
+);
 
 
 
