@@ -113,22 +113,22 @@ CREATE TABLE modeloAnios (
 -- CREACION DE LA TABLA INVENTARIO AUTOPARTES
 
 create table inventarioAutoparte (
-	idInventarioA int,
-    idCategoria int,
-    idUnidadMedida int,
-    codigoBarras varchar(50),
-    nombreParte varchar(100),
-    descripcionParte varchar(150),
-    cantidadActual float,
-    cantidadMinima float,
-    precioCompra float,
-    precioMenudeo float,
-    precioMayoreo float,
-    precioColocado float,
-    urlImagen varchar(255),
-    estado bool default true,
-    FOREIGN KEY (idCategoria) REFERENCES categoria(idCategoria),
-    FOREIGN KEY (idUnidadMedida) REFERENCES unidadMedida(idUnidadMedida)
+	idInventarioA INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+   idCategoria INT,
+   idUnidadMedidas INT UNSIGNED NOT NULL,
+   codigoBarras VARCHAR(50) NOT NULL UNIQUE,
+   nombreParte VARCHAR(100) NOT NULL,
+   descripcionParte VARCHAR(150) NOT NULL,
+   cantidadActual FLOAT UNSIGNED DEFAULT 0 NOT NULL,
+   cantidadMinima FLOAT UNSIGNED DEFAULT 1 NOT NULL,
+   precioCompra FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
+   precioMenudeo FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
+   precioMayoreo FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
+   precioColocado FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
+   urlImagen VARCHAR(300),
+   estado BOOL DEFAULT TRUE,
+   FOREIGN KEY (idCategoria) REFERENCES categorias(idCategoria),
+   FOREIGN KEY (idUnidadMedidas) REFERENCES unidadMedidas(idUnidadMedida)
 );
 
 
