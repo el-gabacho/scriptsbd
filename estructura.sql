@@ -167,4 +167,21 @@ CREATE TABLE pagoVenta (
   FOREIGN KEY (idTipoPago) REFERENCES tipoPago(idTipoPago)
 );
 
+CREATE TABLE proveedorProductos (
+  idProveedorProducto INT auto_increment PRIMARY KEY,
+  idProveedor INT,
+  idInventario INT,
+  FOREIGN KEY (idProveedor) REFERENCES proveedores(idProveedor)
+);
+
+CREATE TABLE entradaProductos (
+  idEntradaProducto INT auto_increment PRIMARY KEY,
+  IdUsuario INT,
+  IdInventario INT,
+  cantidadNueva FLOAT,
+  precioCompra FLOAT,
+  fechaEntrada timestamp default CURRENT_TIMESTAMP,
+  FOREIGN KEY (IdUsuario) REFERENCES usuarios(idModelo),
+  FOREIGN KEY (IdInventario) REFERENCES inventarioAutopartes(idInventario)
+);
 
