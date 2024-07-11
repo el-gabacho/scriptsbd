@@ -8,7 +8,7 @@ CREATE OR REPLACE DATABASE el_gabacho;
 
 -- USAR LA BASE DE DATOS
 
- USE el_gabacho
+ USE el_gabacho;
  
  -- CREACION DE LA TABLA ROLES ** OCULTO **
  
@@ -173,5 +173,45 @@ CREATE TABLE registroProductos (
   fechaElimino TIMESTAMP DEFAULT NULL,
   FOREIGN KEY (idInventario) REFERENCES inventarioAutoparte(idInventario),
   FOREIGN KEY (idUsuarioRegistro) REFERENCES usuarios(idUsuario)
+  );
+
+-- CREACION DE LA TABLA RELACION VENTAS "REALCION TABLA USUARIO Y CLIENTE" 
+
+CREATE TABLE ventas (
+  idVenta INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+  idUsuario INT NOT NULL,
+  idCliente INT NOT NULL,
+  montoTotal FLOAT UNSIGNED NOT NULL,
+  recibioDinero FLOAT UNSIGNED NOT NULL,
+  folioTicket VARCHAR(50) NOT NULL,
+  imprimioTicket BOOL NOT NULL,
+  fechaVenta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  estado BOOL DEFAULT TRUE,
+  FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuario),
+  FOREIGN KEY (idCliente) REFERENCES clientes(idCliente)
+);
+
+CREATE TABLE pagoVenta (
+  idPagoVenta INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+  idVenta INT NOT NULL,
+  idTipoPago INT NOT NULL,
+  referenciaUnica VARCHAR(50),
+  descripcionPago VARCHAR(50),
+  estado BOOL DEFAULT TRUE,
+  FOREIGN KEY (idVenta) REFERENCES ventas(idVenta),
+  FOREIGN KEY (idTipoPago) REFERENCES tipoPagos(idTipoPago)
+);
+
+CREATE TABLE ventaProductos (
+  idVentaProductos INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+  idVenta INT NOT NULL,
+  idInventario INT NOT NULL,
+  cantidad FLOAT UNSIGNED NOT NULL,
+  tipoVenta VARCHAR(50) NOT NULL,
+  precioVenta FLOAT UNSIGNED NOT NULL,
+  subtotal FLOAT UNSIGNED NOT NULL,
+  estado BOOL DEFAULT TRUE,
+  FOREIGN KEY (idVenta) REFERENCES ventas(idVenta),
+  FOREIGN KEY (idInventario) REFERENCES inventarioAutoparte(idInventario)
 );
 
