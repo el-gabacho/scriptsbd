@@ -148,7 +148,7 @@ CREATE TABLE ventas (
   idCliente INT,
   montoTotal FLOAT,
   recibioDinero FLOAT,
-  folioTicket VAR,
+  folioTicket VARCHAR(50),
   conceptoTicket BOOL,
   fechaVenta TIMESTAMP,
   estado BOOL default true,
@@ -156,5 +156,15 @@ CREATE TABLE ventas (
   FOREIGN KEY (idCliente) REFERENCES clientes(idCliente)
 );
 
+CREATE TABLE pagoVenta (
+  idPagoVenta INT auto_increment primary key,
+  idVenta INT,
+  idTipoPago INT,
+  referenciaUnica VARCHAR(50),
+  descripcionPago VARCHAR(50),
+  estado BOOL default true,
+  FOREIGN KEY (idVenta) REFERENCES usuarios(idVenta),
+  FOREIGN KEY (idTipoPago) REFERENCES tipoPago(idTipoPago)
+);
 
 
