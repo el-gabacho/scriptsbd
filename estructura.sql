@@ -12,7 +12,7 @@ CREATE OR REPLACE DATABASE el_gabacho;
 
 -- USAR LA BASE DE DATOS
 
- USE el_gabacho;
+USE el_gabacho;
  
  -- CREACION DE LA TABLA ROLES ** OCULTO **
  
@@ -81,9 +81,8 @@ CREATE TABLE clientes (
 
 CREATE TABLE marcas (
 	idMarca INT AUTO_INCREMENT PRIMARY KEY,
-   nombreMarca VARCHAR(40) NOT NULL,
-   urlLogo VARCHAR(300),
-	estado BOOL DEFAULT TRUE
+   nombre VARCHAR(40) NOT NULL UNIQUE,
+   urlLogo VARCHAR(300)
 );
 
 -- CREACION DE LA TABLA MODELOS
@@ -92,7 +91,6 @@ CREATE TABLE modelos (
 	idModelo INT AUTO_INCREMENT PRIMARY KEY,
    idMarca INT NOT NULL,
    nombre VARCHAR(50) NOT NULL,
-   estado BOOL DEFAULT TRUE,
    FOREIGN KEY (idMarca) REFERENCES marcas(idMarca)
 );
 
@@ -102,7 +100,8 @@ CREATE TABLE anioModelos (
 	idAnioModelo INT AUTO_INCREMENT PRIMARY KEY,
    anioModeloInicio INT UNSIGNED NOT NULL,
    anioModeloFin INT UNSIGNED NOT NULL,
-   todoAnio BOOL DEFAULT FALSE
+   todoAnio BOOL DEFAULT FALSE,
+   UNIQUE (anioModeloInicio, anioModeloFin)
 );
 
 -- CREACION DE LA TABLA RELACION MODELO AÑOS "RELACION TABLA MODELOS Y AÑO MODELOS"
@@ -111,7 +110,6 @@ CREATE TABLE modeloAnios (
 	idModeloAnio INT AUTO_INCREMENT PRIMARY KEY,
 	idModelo INT NOT NULL,
 	idAnioModelo INT NOT NULL,
-	estado BOOL DEFAULT TRUE,
 	FOREIGN KEY (idModelo) REFERENCES modelos(idModelo),
 	FOREIGN KEY (idAnioModelo) REFERENCES anioModelos(idAnioModelo)
 );
