@@ -27,7 +27,7 @@ CREATE TABLE modelos (
     idMarca INT NOT NULL,
     nombre VARCHAR(50) NOT NULL UNIQUE,
     estado BOOL DEFAULT TRUE,
-    FOREIGN KEY (idMarca) REFERENCES marcas(idMarca)
+    FOREIGN KEY (idMarca) REFERENCES marcas(idMarca) ON DELETE CASCADE
     -- INDEX idx_nombre (nombre)
 );
 
@@ -53,7 +53,7 @@ CREATE TABLE modeloAnios (
     idModelo INT NOT NULL,
     idAnioModelo INT NOT NULL,
     estado BOOL DEFAULT TRUE,
-    FOREIGN KEY (idModelo) REFERENCES modelos(idModelo),
+    FOREIGN KEY (idModelo) REFERENCES modelos(idModelo) ON DELETE CASCADE,
     FOREIGN KEY (idAnioModelo) REFERENCES anioModelos(idAnioModelo)
     -- INDEX idx_idModelo (idModelo),
     -- INDEX idx_idAnioModelo (idAnioModelo)
@@ -87,35 +87,84 @@ CREATE TABLE modeloAutopartes (
     idModeloAutoparte INT AUTO_INCREMENT PRIMARY KEY,
     idModeloAnio INT NOT NULL,
     idInventario INT NOT NULL,
-    estado BOOL DEFAULT TRUE
+    estado BOOL DEFAULT TRUE,
+    FOREIGN KEY (idModeloAnio) REFERENCES modeloAnios(idModeloAnio) ON DELETE CASCADE
     -- INDEX idx_idModeloAnio (idModeloAnio),
     -- INDEX idx_idInventario (idInventario)
 );
 
+-- ----------------------------------------------------------------------------------------------------------------------------
 
--- INSERTAR MARCAS
+-- INSERTAR MARCAS (nombreMarca y LogoURL)
 INSERT INTO marcas (nombreMarca, urlLogo) VALUES
 ('ACURA','https://lofrev.net/wp-content/photos/2014/08/Acura-logo.gif'),
 ('ALFA ROMEO', NULL),
 ('AMC', NULL);
 
--- Inserts para la marca ACURA en la tabla modelos
+-- Inserts para la tabla modelos (idModelo y nombre del modelo)
 INSERT INTO modelos (idMarca, nombre) VALUES (1, 'CL');
 INSERT INTO modelos (idMarca, nombre) VALUES (1, 'CSX');
-INSERT INTO modelos (idMarca, nombre) VALUES (1, 'EL');
+INSERT INTO modelos (idMarca, nombre) VALUES (2, '1500');
 
--- Inserts para año
-INSERT INTO aniomodelos (anioModeloInicio, anioModeloFin) VALUES (2010,2014);
-INSERT INTO aniomodelos (anioModeloInicio, anioModeloFin) VALUES (2015,2020);
-INSERT INTO aniomodelos (anioModeloInicio, anioModeloFin) VALUES (2021,2024);
+-- Relacionar modelo con un año
+-- Parametros (idModelo, anioInicio, anioFin, todoAnio )
+CALL InsertarModeloConAnio(1, 2022, 2024, FALSE);
+CALL InsertarModeloConAnio(2, 2022, 2024, FALSE);
 
--- Inserts para modelos años
 
-INSERT INTO modeloanios (idModelo, idAnioModelo) VALUES (1,1);
-INSERT INTO modeloanios (idModelo, idAnioModelo) VALUES (2,2);
-INSERT INTO modeloanios (idModelo, idAnioModelo) VALUES (3,3);
+SELECT * FROM marcas;
+
+SELECT * FROM modelos;
+
+SELECT * FROM aniomodelos;
+
+SELECT * FROM modeloanios;
+
+SELECT * FROM modelos WHERE idModelo = 1;
+
+
+-- modelos con su marca
+
+SELECT marcas.nombreMarca AS MARCA, modelos.nombre AS MODELO 
+FROM marcas, modelos
+WHERE marcas.idMarca = modelos.idMarca;
+
+-- Eliminacion directa 
+
+DELETE FROM marcas WHERE idMarca = 1;
+
+-- RESETEAR, ELIMINA FILAS Y EMPIEZA DESDE UNO
+DELETE FROM marcas;
+ALTER TABLE marcas AUTO_INCREMENT = 1;
+
+DELETE FROM modelos;
+ALTER TABLE modelos AUTO_INCREMENT = 1;
+
+DELETE FROM aniomodelos;
+ALTER TABLE modelos AUTO_INCREMENT = 1;
+
+-- 
+CALL InsertarModeloConAnio(1, 2020, 0, FALSE);
+CALL InsertarModeloConAnio(modelo_id, anio_inicio, anio_fin, todo_anio)
+
+-- ----------------------------------------------------------------------------------------------------------------------------------------------
 
 -- CONSULTA ELIMINA CASCADA
+
+SELECT marcas.idMarca AS ID_MARCA, marcas.nombreMarca AS Marca,
+modelos.idModelo AS ID_MODELO, modelos.nombre AS Modelo,
+aniomodelos.idAnioModelo AS ID_AÑO, aniomodelos.anioModeloInicio AS INICIO, aniomodelos.anioModeloFin AS FIN,
+modeloanios.idModeloAnio AS ID_RELACION_MODELO_AÑOS
+FROM marcas, modelos, aniomodelos, modeloanios
+WHERE marcas.nombreMarca = 'ACURA' AND 
+modelos.idModelo = modeloanios.idModelo AND
+aniomodelos.idAnioModelo = modeloanios.idAnioModelo;
+
+UPDATE marcas SET estado = 0 WHERE nombreMarca = 'ACURA';
+
+CALL InsertarModeloConAnio(1, 2020, 0, FALSE);
+
+SELECT * FROM modelos;
 
 SELECT marcas.nombreMarca AS Marca, marcas.estado AS EstadoMarca,
 modelos.nombre AS Modelo, modelos.estado AS EstadoModelo,
@@ -125,10 +174,12 @@ FROM marcas, modelos, aniomodelos, modeloanios
 WHERE marcas.nombreMarca = 'ACURA' AND 
 modelos.idModelo = modeloanios.idModelo AND
 aniomodelos.idAnioModelo = modeloanios.idAnioModelo;
+-- ----------------------------------------------------------------------------------------------------------------------------------------------
 
-UPDATE marcas SET estado = 0 WHERE nombreMarca = 'ACURA';
-
+-- ******************************************
 -- SIRVE PARA ELIMINAR EN CASCADA UNA MARCA
+
+DROP TRIGGER marca_elimina_cascada;
 
 DELIMITER //
 
@@ -159,11 +210,14 @@ END //
 
 DELIMITER ;
 
+-- ************************************************************************
+
 -- TRIGGER: ANTES DE INSERTAR UN MARCA, VALIDA SI EXISTE EL NOMBRE DE ESA MARCA.
 -- CONDICIONES:
 -- SI EXISTE EL NOMBRE DE LA MARCA Y NO PONE UN URL, ACTIVAR ESTATUS.
 -- SI EXISTE EL NOMBRE DE LA MARCA Y INGRESA UN NUEVO URL, ACTIVAR ESTATUS Y ACTUALIZA EL CAMPO URL.
 -- SI NO EXISTE EL NOMBRE DE LA MARCA Y SI INGRESA O NO INGRESA UN URL, CREALO.
+DROP TRIGGER marca_actualiza_cascada;
 
 DELIMITER //
 
@@ -194,25 +248,99 @@ END //
 
 DELIMITER ;
 
--- Insertar o actualizar la marca
-INSERT INTO marcas (nombreMarca, urlLogo)
-VALUES ('ACURA', '')
-ON DUPLICATE KEY UPDATE
-    urlLogo = IF(VALUES(urlLogo) <> '', VALUES(urlLogo), urlLogo),
-    estado = TRUE;
+-- ******************************************
+-- Relaciona el modelo con el Año UTILIZADA
+DROP PROCEDURE InsertarModeloConAnio;
 
--- Insertar o actualizar la marca
-INSERT INTO marcas (nombreMarca, urlLogo)
-VALUES ('AUDI', '')
-ON DUPLICATE KEY UPDATE
-    urlLogo = IF(VALUES(urlLogo) <> '', VALUES(urlLogo), urlLogo),
-    estado = TRUE;
+DESCRIBE aniomodelos; -- encargada de los años
 
-SELECT * FROM marcas;
+DESCRIBE modeloanios; 
+
+DELIMITER //
+
+CREATE OR REPLACE PROCEDURE InsertarModeloConAnio(
+    IN modelo_id INT,
+    IN anio_inicio INT,
+    IN anio_fin INT,
+    IN todo_anio BOOL
+)
+BEGIN
+    DECLARE idAnioModelo INT;
+    DECLARE relacion_existente BOOLEAN DEFAULT FALSE;
+
+    -- Verificar si todo_anio es verdadero
+    IF todo_anio THEN
+        -- Verificar si ya existe un registro con todo_anio verdadero
+        SELECT idAnioModelo INTO idAnioModelo
+        FROM aniomodelos
+        WHERE anioModeloInicio = 0 AND anioModeloFin = 0 AND todoAnio = TRUE;
+        
+        SELECT 'Ya existe un registro con todos los años (VERDADERO)' AS mensaje;
+        
+    ELSE
+        -- Verificar si ya existe un registro con las mismas fechas
+        SELECT idAnioModelo INTO idAnioModelo 
+        FROM aniomodelos 
+        WHERE anioModeloInicio = anio_inicio AND anioModeloFin = anio_fin AND todoAnio = FALSE;
+        
+        SELECT 'Ya existe un registro con las mismas fechas' AS mensaje;
+        
+    END IF;
+
+    -- Si ya existe la relación, asignar el idAnioModelo existente
+    IF idAnioModelo IS NOT NULL THEN
+        SET relacion_existente = TRUE;
+    ELSE
+        -- Insertar un nuevo registro en la tabla anioModelos si no existe
+        INSERT INTO anioModelos (anioModeloInicio, anioModeloFin, todoAnio)
+        VALUES (anio_inicio, anio_fin, todo_anio);
+
+        -- Obtener el idAnioModelo del nuevo registro insertado
+        SET idAnioModelo = LAST_INSERT_ID();
+
+        -- Insertar la relación en modeloAnios
+        INSERT INTO modeloanios (idModelo, idAnioModelo)
+        VALUES (modelo_id, idAnioModelo);
+
+        SET relacion_existente = FALSE;
+    END IF;
+
+    -- Mostrar el mensaje según si la relación ya existía o se creó
+    IF relacion_existente THEN
+        SELECT 'Existe la relación del modelo con el año' AS mensaje;
+    ELSE
+        SELECT 'Modelo y año relacionado correctamente' AS mensaje;
+    END IF;
+    
+END //
+
+DELIMITER ;
 
 
 
+-- RELACONA LA TABLA MODELO AUTOPARTE CON EL MODELOANIO ... UTILIZADA
+DELIMITER //
 
+CREATE OR REPLACE PROCEDURE InsertarModeloAutoparte(
+    IN p_idInventario INT,
+    IN p_idModeloAnio INT
+)
+BEGIN
+    -- Verificar si la relación entre modeloAnios y la autoparte ya existe en modeloAutopartes
+    IF EXISTS (
+        SELECT 1 
+        FROM modeloAutopartes
+        WHERE idModeloAnio = p_idModeloAnio 
+          AND idInventario = p_idInventario
+    ) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'La relación entre el autoparte y el modelo ya existe.';
+    ELSE
+        -- Insertar la relación en modeloAutopartes
+        INSERT INTO modeloAutopartes (idModeloAnio, idInventario, estado)
+        VALUES (p_idModeloAnio, p_idInventario, TRUE);
+    END IF;
+END //
 
+DELIMITER ;
 
 
