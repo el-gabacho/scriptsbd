@@ -111,7 +111,6 @@ INSERT INTO modelos (idMarca, nombre) VALUES (2, '1500');
 CALL InsertarModeloConAnio(1, 2022, 2024, FALSE);
 CALL InsertarModeloConAnio(2, 2022, 2024, FALSE);
 
-
 SELECT * FROM marcas;
 
 SELECT * FROM modelos;
@@ -141,7 +140,10 @@ DELETE FROM modelos;
 ALTER TABLE modelos AUTO_INCREMENT = 1;
 
 DELETE FROM aniomodelos;
-ALTER TABLE modelos AUTO_INCREMENT = 1;
+ALTER TABLE aniomodelos AUTO_INCREMENT = 1;
+
+DELETE FROM modeloanios;
+ALTER TABLE modeloanios AUTO_INCREMENT = 1;
 
 -- 
 CALL InsertarModeloConAnio(1, 2020, 0, FALSE);
@@ -156,7 +158,7 @@ modelos.idModelo AS ID_MODELO, modelos.nombre AS Modelo,
 aniomodelos.idAnioModelo AS ID_AÑO, aniomodelos.anioModeloInicio AS INICIO, aniomodelos.anioModeloFin AS FIN,
 modeloanios.idModeloAnio AS ID_RELACION_MODELO_AÑOS
 FROM marcas, modelos, aniomodelos, modeloanios
-WHERE marcas.nombreMarca = 'ACURA' AND 
+WHERE marcas.idMarca = modelos.idMarca AND 
 modelos.idModelo = modeloanios.idModelo AND
 aniomodelos.idAnioModelo = modeloanios.idAnioModelo;
 
@@ -259,64 +261,155 @@ DESCRIBE modeloanios;
 DELIMITER //
 
 CREATE OR REPLACE PROCEDURE InsertarModeloConAnio(
-    IN modelo_id INT,
-    IN anio_inicio INT,
-    IN anio_fin INT,
-    IN todo_anio BOOL
+    IN proc_modelo_id INT,
+    IN proc_anio_inicio INT,
+    IN proc_anio_fin INT,
+    IN proc_todo_anio BOOL
 )
 BEGIN
-    DECLARE idAnioModelo INT;
-    DECLARE relacion_existente BOOLEAN DEFAULT FALSE;
+
+    DECLARE idRegistro INT DEFAULT NULL;
+    DECLARE idRegistroMA INT DEFAULT NULL;
+    DECLARE anioexiste BOOLEAN DEFAULT FALSE;
 
     -- Verificar si todo_anio es verdadero
-    IF todo_anio THEN
+    IF proc_todo_anio THEN
         -- Verificar si ya existe un registro con todo_anio verdadero
-        SELECT idAnioModelo INTO idAnioModelo
-        FROM aniomodelos
-        WHERE anioModeloInicio = 0 AND anioModeloFin = 0 AND todoAnio = TRUE;
-        
-        SELECT 'Ya existe un registro con todos los años (VERDADERO)' AS mensaje;
-        
+        SELECT idAnioModelo INTO idRegistro
+        FROM anioModelos
+        WHERE anioModeloInicio = 0 AND anioModeloFin = 0 AND todoAnio = TRUE
+        LIMIT 1;
     ELSE
         -- Verificar si ya existe un registro con las mismas fechas
-        SELECT idAnioModelo INTO idAnioModelo 
-        FROM aniomodelos 
-        WHERE anioModeloInicio = anio_inicio AND anioModeloFin = anio_fin AND todoAnio = FALSE;
-        
-        SELECT 'Ya existe un registro con las mismas fechas' AS mensaje;
-        
+        SELECT idAnioModelo INTO idRegistro
+        FROM anioModelos
+        WHERE anioModeloInicio = proc_anio_inicio AND anioModeloFin = proc_anio_fin AND todoAnio = FALSE
+        LIMIT 1;
     END IF;
 
     -- Si ya existe la relación, asignar el idAnioModelo existente
-    IF idAnioModelo IS NOT NULL THEN
-        SET relacion_existente = TRUE;
+    IF idRegistro IS NOT NULL THEN
+        SET anioexiste = TRUE;
+        SELECT CONCAT('Existe el año en la tabla AnioModelo ', idRegistro) AS mensaje;
     ELSE
-        -- Insertar un nuevo registro en la tabla anioModelos si no existe
+        -- Se registra el año del modelo
         INSERT INTO anioModelos (anioModeloInicio, anioModeloFin, todoAnio)
-        VALUES (anio_inicio, anio_fin, todo_anio);
+        VALUES (proc_anio_inicio, proc_anio_fin, proc_todo_anio);
 
-        -- Obtener el idAnioModelo del nuevo registro insertado
-        SET idAnioModelo = LAST_INSERT_ID();
-
-        -- Insertar la relación en modeloAnios
-        INSERT INTO modeloanios (idModelo, idAnioModelo)
-        VALUES (modelo_id, idAnioModelo);
-
-        SET relacion_existente = FALSE;
+        -- se guarda el id del registro 
+        SET idRegistro = LAST_INSERT_ID();
+        
+        SET anioexiste = FALSE;
+        
+        SELECT CONCAT('El año a sido insertado correctamente ID: ', idRegistro) AS mensaje;
+        
     END IF;
 
-    -- Mostrar el mensaje según si la relación ya existía o se creó
-    IF relacion_existente THEN
-        SELECT 'Existe la relación del modelo con el año' AS mensaje;
-    ELSE
-        SELECT 'Modelo y año relacionado correctamente' AS mensaje;
+    -- Insertar la relación en modeloAnios si no existe
+    IF anioexiste IS TRUE THEN
+        
+        SELECT idModeloAnio INTO idRegistroMA 
+		  FROM modeloanios 
+		  WHERE idModeloAnio = idRegistro 
+		  AND idModelo = proc_modelo_id;
+        
+        SELECT CONCAT('Existe la relación del modelo con el año. ID: ', idRegistroMA) AS mensaje2;
+        
+    ELSE    
+		  INSERT INTO modeloAnios (idModelo, idAnioModelo)
+        VALUES (proc_modelo_id, idRegistro);
+        
+        SELECT CONCAT('La relacion a sido insertada del modelo con el año. ID: ', idRegistroMA) AS mensaje2;
     END IF;
-    
+
 END //
 
 DELIMITER ;
 
 
+DELIMITER //
+
+CREATE OR REPLACE PROCEDURE InsertarModeloConAnio(
+    IN proc_modelo_id INT,
+    IN proc_anio_inicio INT,
+    IN proc_anio_fin INT,
+    IN proc_todo_anio BOOL
+)
+BEGIN
+
+    DECLARE idRegistro INT DEFAULT NULL;
+    DECLARE idRegistroMA INT DEFAULT NULL;
+    DECLARE anioexiste BOOLEAN DEFAULT FALSE;
+
+    -- Verificar si todo_anio es verdadero
+    IF proc_todo_anio THEN
+        -- Verificar si ya existe un registro con todo_anio verdadero
+        SELECT idAnioModelo INTO idRegistro
+        FROM anioModelos
+        WHERE anioModeloInicio = 0 AND anioModeloFin = 0 AND todoAnio = TRUE
+        LIMIT 1;
+    ELSE
+        -- Verificar si ya existe un registro con las mismas fechas
+        SELECT idAnioModelo INTO idRegistro
+        FROM anioModelos
+        WHERE anioModeloInicio = proc_anio_inicio AND anioModeloFin = proc_anio_fin AND todoAnio = FALSE
+        LIMIT 1;
+    END IF;
+
+    -- Si ya existe el año en la tabla anioModelos
+    IF idRegistro IS NOT NULL THEN
+        SET anioexiste = TRUE;
+        SELECT CONCAT('Existe el año en la tabla AnioModelo ', idRegistro) AS mensaje;
+    ELSE
+        -- Insertar el año/rango en anioModelos
+        INSERT INTO anioModelos (anioModeloInicio, anioModeloFin, todoAnio)
+        VALUES (proc_anio_inicio, proc_anio_fin, proc_todo_anio);
+
+        -- Obtener el idAnioModelo recién insertado
+        SET idRegistro = LAST_INSERT_ID();
+        
+        SET anioexiste = FALSE;
+        
+        SELECT CONCAT('El año ha sido insertado correctamente ID: ', idRegistro) AS mensaje;
+    END IF;
+
+    -- Verificar si la relación ya existe
+    IF anioexiste IS TRUE THEN
+        SELECT idModeloAnio INTO idRegistroMA 
+        FROM modeloAnios 
+        WHERE idAnioModelo = idRegistro 
+          AND idModelo = proc_modelo_id
+        LIMIT 1;
+
+        -- Si la relación existe, mostrar mensaje
+        IF idRegistroMA IS NOT NULL THEN
+            SELECT CONCAT('Existe la relación del modelo con el año. ID: ', idRegistroMA) AS mensaje2;
+        ELSE
+            -- Si no existe, insertar la relación
+            INSERT INTO modeloAnios (idModelo, idAnioModelo)
+            VALUES (proc_modelo_id, idRegistro);
+            
+            SET idRegistroMA = LAST_INSERT_ID();
+            
+            SELECT CONCAT('La relación ha sido insertada del modelo con el año. ID: ', idRegistroMA) AS mensaje2;
+        END IF;
+    ELSE
+        -- Insertar la relación si el año es nuevo
+        INSERT INTO modeloAnios (idModelo, idAnioModelo)
+        VALUES (proc_modelo_id, idRegistro);
+        
+        SET idRegistroMA = LAST_INSERT_ID();
+        
+        SELECT CONCAT('La relación ha sido insertada del modelo con el año. ID: ', idRegistroMA) AS mensaje2;
+    END IF;
+
+END //
+
+DELIMITER ;
+
+
+
+describe modeloanios;
 
 -- RELACONA LA TABLA MODELO AUTOPARTE CON EL MODELOANIO ... UTILIZADA
 DELIMITER //
