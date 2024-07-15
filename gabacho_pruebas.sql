@@ -742,7 +742,7 @@ DELIMITER ;
 -- ventas Paso 2: Agregar Producto a la Venta
 DELIMITER //
 
-CREATE PROCEDURE AgregarProductoVenta (
+CREATE OR REPLACE PROCEDURE AgregarProductoVenta (
     IN p_idVenta INT,
     IN p_idInventario INT,
     IN p_cantidad FLOAT,
@@ -756,6 +756,11 @@ BEGIN
 
     INSERT INTO ventaProductos (idVenta, idInventario, cantidad, tipoVenta, precioVenta, subtotal)
     VALUES (p_idVenta, p_idInventario, p_cantidad, p_tipoVenta, p_precioVenta, v_subtotal);
+    
+    -- Actualizar la catidad de cada producto
+    UPDATE inventarioAutoparte
+    SET cantidadActual = cantidadActual - p_cantidad
+    WHERE idInventario = p_idInventario;
 END //
 
 DELIMITER ;
@@ -806,3 +811,131 @@ FinalizarVenta (idVenta, recibioDinero, folioTicket, imprimioTicket, idTipoPago,
 SELECT * FROM ventaProductos;
 SELECT * FROM ventas;
 SELECT * FROM pagoVenta;
+
+
+-- Procedimiento Almacenado para Manejar Devoluciones
+DELIMITER //
+
+CREATE OR REPLACE PROCEDURE DevolverVenta (
+    IN p_idVenta INT
+)
+BEGIN
+    DECLARE v_idInventario INT;
+    DECLARE v_cantidad FLOAT;
+    DECLARE done INT DEFAULT FALSE;
+    -- Cursor para iterar sobre los productos en la venta
+    DECLARE cur CURSOR FOR
+    SELECT idInventario, cantidad
+    FROM ventaProductos
+    WHERE idVenta = p_idVenta;
+
+    -- Handler para el final del cursor
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    -- Abrir el cursor
+    OPEN cur;
+    
+    read_loop: LOOP
+        FETCH cur INTO v_idInventario, v_cantidad;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Actualizar la cantidad en el inventario
+        UPDATE inventarioAutoparte
+        SET cantidadActual = cantidadActual + v_cantidad
+        WHERE idInventario = v_idInventario;
+
+        -- Cambiar el estado de los productos devueltos a FALSE
+        UPDATE ventaProductos
+        SET estado = FALSE
+        WHERE idVenta = p_idVenta AND idInventario = v_idInventario;
+    END LOOP;
+    
+     -- Cerrar el cursor
+    CLOSE cur;
+
+    -- Cambiar el estado de la venta a FALSE
+    UPDATE ventas
+    SET estado = FALSE
+    WHERE idVenta = p_idVenta;
+    
+    -- Actualizar el estado del pagoVenta a FALSE
+    UPDATE pagoVenta
+    SET estado = FALSE
+    WHERE idVenta = p_idVenta;
+
+END //
+
+DELIMITER ;
+
+CALL DevolverVenta(1);
+DevolverVenta (idVenta)
+
+SELECT * FROM ventaProductos;
+SELECT * FROM ventas;
+SELECT * FROM pagoVenta;
+SELECT * FROM inventarioAutoparte;
+
+-- Procedimiento Almacenado para Manejar Devoluciones Parciales
+DELIMITER //
+
+CREATE OR REPLACE PROCEDURE DevolverProducto (
+    IN p_idVenta INT,
+    IN p_idInventario INT,
+    IN p_cantidadDevuelta FLOAT
+)
+BEGIN
+    DECLARE v_cantidadOriginal FLOAT;
+
+    -- Obtener la cantidad original del producto en la venta
+    SELECT cantidad INTO v_cantidadOriginal
+    FROM ventaProductos
+    WHERE idVenta = p_idVenta AND idInventario = p_idInventario AND estado = TRUE;
+
+    -- Validar que la cantidad devuelta no sea mayor que la cantidad original
+    IF p_cantidadDevuelta > v_cantidadOriginal THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cantidad devuelta no puede ser mayor que la cantidad vendida';
+    END IF;
+
+    -- Actualizar la cantidad en ventaProductos
+    UPDATE ventaProductos
+    SET cantidad = cantidad - p_cantidadDevuelta, 
+        subtotal = cantidad * precioVenta
+    WHERE idVenta = p_idVenta AND idInventario = p_idInventario AND estado = TRUE;
+
+    -- Si toda la cantidad del producto ha sido devuelta, cambiar su estado a FALSE
+    IF p_cantidadDevuelta = v_cantidadOriginal THEN
+        UPDATE ventaProductos
+        SET estado = FALSE
+        WHERE idVenta = p_idVenta AND idInventario = p_idInventario;
+    END IF;
+
+    -- Actualizar la cantidad en el inventario
+    UPDATE inventarioAutoparte
+    SET cantidadActual = cantidadActual + p_cantidadDevuelta
+    WHERE idInventario = p_idInventario;
+
+    -- Actualizar el montoTotal de la venta
+    UPDATE ventas v
+    JOIN (
+        SELECT idVenta, SUM(subtotal) AS nuevoMontoTotal
+        FROM ventaProductos
+        WHERE idVenta = p_idVenta AND estado = TRUE
+        GROUP BY idVenta
+    ) vp ON v.idVenta = vp.idVenta
+    SET v.montoTotal = vp.nuevoMontoTotal
+    WHERE v.idVenta = p_idVenta;
+    
+END //
+
+DELIMITER ;
+
+CALL DevolverProducto(1,1,1);
+CALL DevolverProducto(1,2,1);
+DevolverProducto (idVenta, idInventario, cantidadDevuelta)
+
+SELECT * FROM ventaProductos;
+SELECT * FROM ventas;
+SELECT * FROM pagoVenta;
+SELECT * FROM inventarioAutoparte;
