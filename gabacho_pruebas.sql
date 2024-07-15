@@ -174,6 +174,65 @@ CREATE TABLE registroProductos (
   FOREIGN KEY (idUsuarioRegistro) REFERENCES usuarios(idUsuario)
   );
   
+  -- CREACION DE LA TABLA CLIENTES = PUBLICO GENERAL
+
+CREATE TABLE clientes (
+	idCliente INT AUTO_INCREMENT PRIMARY KEY,
+	nombreCliente VARCHAR(30) NOT NULL
+);
+
+-- CREACION DE LA TABLA TIPO PAGOS ** OCULTO ** = EFECTIVO, CARJETA, TRANSFERENCIA, DEPOSITO
+
+CREATE TABLE tipoPagos (
+	idTipoPago INT AUTO_INCREMENT PRIMARY KEY,
+   tipoPago VARCHAR(20) NOT NULL,
+   descripcion VARCHAR(100)
+);
+
+  -- CREACION DE LA TABLA RELACION VENTAS "RELACION TABLA USUARIO Y CLIENTE" 
+
+CREATE TABLE ventas (
+  idVenta INT AUTO_INCREMENT PRIMARY KEY,
+  idUsuario INT NOT NULL,
+  idCliente INT NOT NULL,
+  montoTotal FLOAT UNSIGNED NOT NULL,
+  recibioDinero FLOAT UNSIGNED NOT NULL,
+  folioTicket VARCHAR(50) NOT NULL,
+  imprimioTicket BOOL NOT NULL,
+  fechaVenta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  estado BOOL DEFAULT TRUE,
+  FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuario),
+  FOREIGN KEY (idCliente) REFERENCES clientes(idCliente)
+);
+
+-- CREACION DE LA TABLA RELACION PAGO VENTAS "RELACION TABLA VENTAS Y TIPO PAGOS"
+
+CREATE TABLE pagoVenta (
+  idPagoVenta INT AUTO_INCREMENT PRIMARY KEY,
+  idVenta INT NOT NULL,
+  idTipoPago INT NOT NULL,
+  referenciaUnica VARCHAR(50),
+  descripcionPago VARCHAR(50),
+  estado BOOL DEFAULT TRUE,
+  FOREIGN KEY (idVenta) REFERENCES ventas(idVenta),
+  FOREIGN KEY (idTipoPago) REFERENCES tipoPagos(idTipoPago)
+);
+
+-- CREACION DE LA TABLA RELACION VENTA PRODUCTOS "RELACION TABLA INVENTARIO AUTOPARTES Y VENTAS"
+
+CREATE TABLE ventaProductos (
+  idVentaProductos INT AUTO_INCREMENT PRIMARY KEY,
+  idVenta INT NOT NULL,
+  idInventario INT NOT NULL,
+  cantidad FLOAT UNSIGNED NOT NULL,
+  tipoVenta VARCHAR(50) NOT NULL,
+  precioVenta FLOAT UNSIGNED NOT NULL,
+  subtotal FLOAT UNSIGNED NOT NULL,
+  estado BOOL DEFAULT TRUE,
+  FOREIGN KEY (idVenta) REFERENCES ventas(idVenta),
+  FOREIGN KEY (idInventario) REFERENCES inventarioAutoparte(idInventario)
+);
+
 -- ----------------------------------------------------------------------------------------------------------------------------
 
 -- INSERTAR MARCAS (nombreMarca y LogoURL)
@@ -215,6 +274,16 @@ INSERT INTO proveedores (empresa) VALUES
 INSERT INTO categorias (nombreCategoria) VALUES ('ABRAZADERAS SUSPENSION');
 INSERT INTO categorias (nombreCategoria) VALUES ('AJUSTADORES DE SUSPENSION');
 INSERT INTO categorias (nombreCategoria) VALUES ('AJUSTE DE UNIDAD');
+
+-- INSERCIONES A LA TABLA CLIENTES
+INSERT INTO clientes (nombreCliente) VALUES ('PUBLICO GENERAL');
+
+-- INSERCIONES A LA TABLA TIPO PAGO (SOLO 4 TIPOS)
+
+INSERT INTO tipopagos (tipoPago, descripcion) VALUES ("EFECTIVO","Pago hecho en el local");
+INSERT INTO tipopagos (tipoPago, descripcion) VALUES ("TARJETA","Pago hecho en el local");
+INSERT INTO tipopagos (tipoPago, descripcion) VALUES ("TRANSFERENCIA","Recibe foto de la tranferencia hecha");
+INSERT INTO tipopagos (tipoPago, descripcion) VALUES ("DEPOSITO","Recibe foto del ticket del deposito hecha");
 
 -- Relacionar modelo con un año
 -- Parametros (idModelo, anioInicio, anioFin, todoAnio )
@@ -621,8 +690,9 @@ END //
 DELIMITER ;
 
 CALL InsertarProducto(1, 1, '141f1fvffv1','MANIJA INTERIOR','DELANTERO DERECHO NEGRO',20,5,90,100.0,150.0,250.0,'',1,3);
-CALL InsertarProducto(idCategoria,idUnidadMedida, codigoBarras, p_nombreParte, descripcionParte, p_cantidadActual, p_cantidadMinima, precioCompra, p_mayoreo, p_menudeo,
-   p_colocado, urlImagen, idProveedor, idUsuario);
+CALL InsertarProducto(2, 1, '5454f5f45g5','MOTOR LIMPIAPARABRISA','12V',10,2,50.0,70.0,100.0,200.0,'http.hcf',2,3);
+CALL InsertarProducto(idCategoria,idUnidadMedida, codigoBarras, p_nombreParte, descripcionParte, p_cantidadActual, p_cantidadMinima, precioCompra, 
+	p_mayoreo, p_menudeo, p_colocado, urlImagen, idProveedor, idUsuario);
    
 SELECT * FROM inventarioautoparte;
 SELECT * FROM registroproductos;
@@ -653,3 +723,86 @@ DELIMITER ;
 
 CALL EliminarProducto(1,3)
 EliminarProducto(idInventario, idUsuario)
+
+
+-- ventas Paso 1: Crear una Venta
+DELIMITER //
+
+CREATE PROCEDURE CrearVenta (
+    IN p_idUsuario INT,
+    IN p_idCliente INT
+)
+BEGIN
+    INSERT INTO ventas (idUsuario, idCliente, montoTotal, recibioDinero, folioTicket, imprimioTicket)
+    VALUES (p_idUsuario, p_idCliente, 0, 0, '', FALSE);
+END //
+
+DELIMITER ;
+
+-- ventas Paso 2: Agregar Producto a la Venta
+DELIMITER //
+
+CREATE PROCEDURE AgregarProductoVenta (
+    IN p_idVenta INT,
+    IN p_idInventario INT,
+    IN p_cantidad FLOAT,
+    IN p_tipoVenta VARCHAR(50),
+    IN p_precioVenta FLOAT
+)
+BEGIN
+    DECLARE v_subtotal FLOAT;
+    
+    SET v_subtotal = p_cantidad * p_precioVenta;
+
+    INSERT INTO ventaProductos (idVenta, idInventario, cantidad, tipoVenta, precioVenta, subtotal)
+    VALUES (p_idVenta, p_idInventario, p_cantidad, p_tipoVenta, p_precioVenta, v_subtotal);
+END //
+
+DELIMITER ;
+
+-- ventas Paso 3: Finalizar la Venta
+DELIMITER //
+
+CREATE PROCEDURE FinalizarVenta (
+    IN p_idVenta INT,
+    IN p_recibioDinero FLOAT,
+    IN p_folioTicket VARCHAR(50),
+    IN p_imprimioTicket BOOL,
+    IN p_idTipoPago INT,
+    IN p_referenciaUnica VARCHAR(50),
+    IN p_descripcionPago VARCHAR(50)
+)
+BEGIN
+    DECLARE v_montoTotal FLOAT;
+
+    -- Calcular el monto total sumando los subtotales de los productos en la venta
+    SELECT SUM(subtotal) INTO v_montoTotal
+    FROM ventaProductos
+    WHERE idVenta = p_idVenta AND estado = TRUE;
+
+    -- Actualizar el registro de la venta con el monto total y otros detalles
+    UPDATE ventas
+    SET montoTotal = v_montoTotal,
+        recibioDinero = p_recibioDinero,
+        folioTicket = p_folioTicket,
+        imprimioTicket = p_imprimioTicket
+    WHERE idVenta = p_idVenta;
+
+    -- Registrar el pago en la tabla pagoVenta
+    INSERT INTO pagoVenta (idVenta, idTipoPago, referenciaUnica, descripcionPago)
+    VALUES (p_idVenta, p_idTipoPago, p_referenciaUnica, p_descripcionPago);
+END //
+
+DELIMITER ;
+
+CALL CrearVenta(3,1);
+CALL AgregarProductoVenta(1,1,2,'colocado',250);
+CALL AgregarProductoVenta(1,2,3,'MENUDEO',100);
+CALL FinalizarVenta(1,1000,'48f484c8f4c8f',TRUE,1,'NO APLICA','PAGADO');
+CrearVenta (idUsuario, idCliente)
+AgregarProductoVenta (idVenta, idInventario, cantidad, tipoVenta, precioVenta)
+FinalizarVenta (idVenta, recibioDinero, folioTicket, imprimioTicket, idTipoPago, referenciaUnica, descripcionPago)
+
+SELECT * FROM ventaProductos;
+SELECT * FROM ventas;
+SELECT * FROM pagoVenta;
