@@ -549,72 +549,73 @@ DELIMITER ;
 -- procedimiento almacenado que inserta un nuevo producto en la tabla inventarioAutoparte, registra la relación en proveedorProductos, y también en registroProductos,
 DELIMITER //
 
-CREATE PROCEDURE InsertarProducto (
+CREATE OR REPLACE PROCEDURE InsertarProducto (
     IN p_idCategoria INT,
     IN p_idUnidadMedida INT,
     IN p_codigoBarras VARCHAR(50),
     IN p_nombreParte VARCHAR(100),
     IN p_descripcionParte VARCHAR(150),
-    IN p_cantidadActual FLOAT UNSIGNED,
-    IN p_cantidadMinima FLOAT UNSIGNED,
-    IN p_precioCompra FLOAT UNSIGNED,
-    IN p_mayoreo FLOAT UNSIGNED,
-    IN p_menudeo FLOAT UNSIGNED,
-    IN p_colocado FLOAT UNSIGNED,
+    IN p_cantidadActual FLOAT,
+    IN p_cantidadMinima FLOAT,
+    IN p_precioCompra FLOAT,
+    IN p_mayoreo FLOAT,
+    IN p_menudeo FLOAT,
+    IN p_colocado FLOAT,
     IN p_urlImagen VARCHAR(300),
     IN p_idProveedor INT,
     IN p_idUsuario INT
 )
 BEGIN
-    -- Insertar el nuevo producto en inventarioAutoparte
-    INSERT INTO inventarioAutoparte (
-        idCategoria,
-        idUnidadMedida,
-        codigoBarras,
-        nombreParte,
-        descripcionParte,
-        cantidadActual,
-        cantidadMinima,
-        precioCompra,
-        mayoreo,
-        menudeo,
-        colocado,
-        urlImagen
-    ) VALUES (
-        p_idCategoria,
-        p_idUnidadMedida,
-        p_codigoBarras,
-        p_nombreParte,
-        p_descripcionParte,
-        p_cantidadActual,
-        p_cantidadMinima,
-        p_precioCompra,
-        p_mayoreo,
-        p_menudeo,
-        p_colocado,
-        p_urlImagen
-    );
+    DECLARE v_idInventario INT;
+
+    -- Verificar si el codigoBarras ya existe y tiene estado FALSE
+    SELECT idInventario INTO v_idInventario
+    FROM inventarioAutoparte
+    WHERE codigoBarras = p_codigoBarras AND estado = FALSE;
+
+    -- Si el codigoBarras existe y tiene estado FALSE, actualizar el registro
+    IF v_idInventario IS NOT NULL THEN
+        UPDATE inventarioAutoparte
+        SET idCategoria = p_idCategoria,
+            idUnidadMedida = p_idUnidadMedida,
+            nombreParte = p_nombreParte,
+            descripcionParte = p_descripcionParte,
+            cantidadActual = p_cantidadActual,
+            cantidadMinima = p_cantidadMinima,
+            precioCompra = p_precioCompra,
+            mayoreo = p_mayoreo,
+            menudeo = p_menudeo,
+            colocado = p_colocado,
+            urlImagen = p_urlImagen,
+            estado = TRUE
+        WHERE idInventario = v_idInventario;
+			
+			UPDATE registroProductos
+			SET idUsuarioRegistro = p_idUsuario,
+				fechaCreacion = NOW()
+			WHERE idInventario = v_idInventario;
+    -- Insertar un nuevo registro si el codigoBarras no existe
+    ELSE
+        INSERT INTO inventarioAutoparte (
+            idCategoria, idUnidadMedida, codigoBarras, nombreParte, descripcionParte,
+            cantidadActual, cantidadMinima, precioCompra, mayoreo, menudeo, colocado, urlImagen
+        ) VALUES (
+            p_idCategoria, p_idUnidadMedida, p_codigoBarras, p_nombreParte, p_descripcionParte,
+            p_cantidadActual, p_cantidadMinima, p_precioCompra, p_mayoreo, p_menudeo, p_colocado, p_urlImagen
+        );
+
+        SET v_idInventario = LAST_INSERT_ID();
+        	
+			-- Registrar en proveedorProductos
+    		INSERT INTO proveedorProductos (idProveedor, idInventario)
+    		VALUES (p_idProveedor, v_idInventario);
+
+    		-- Registrar en registroProductos
+    		INSERT INTO registroProductos (idInventario, idUsuarioRegistro)
+    		VALUES (v_idInventario, p_idUsuario);
+    END IF;
+
     
-    -- Obtener el idInventario recién insertado
-    SET @nuevo_idInventario = LAST_INSERT_ID();
-
-    -- Insertar en proveedorProductos
-    INSERT INTO proveedorProductos (
-        idProveedor,
-        idInventario
-    ) VALUES (
-        p_idProveedor,
-        @nuevo_idInventario
-    );
-
-    -- Insertar en registroProductos
-    INSERT INTO registroProductos (
-        idInventario,
-        idUsuarioRegistro
-    ) VALUES (
-        @nuevo_idInventario,
-        p_idUsuario
-    );
 END //
 
 DELIMITER ;
@@ -626,3 +627,29 @@ CALL InsertarProducto(idCategoria,idUnidadMedida, codigoBarras, p_nombreParte, d
 SELECT * FROM inventarioautoparte;
 SELECT * FROM registroproductos;
 SELECT * FROM proveedorproductos;
+
+-- procedimiento almacenado que actualice el estado de un producto a FALSE en la tabla inventarioAutoparte 
+-- y actualice el idUsuarioElimino y fechaElimino en la tabla registroProductos
+DELIMITER //
+
+CREATE PROCEDURE EliminarProducto (
+    IN p_idInventario INT,
+    IN p_idUsuario INT
+)
+BEGIN
+    -- Actualizar el estado del producto a FALSE en inventarioAutoparte
+    UPDATE inventarioAutoparte
+    SET estado = FALSE
+    WHERE idInventario = p_idInventario;
+
+    -- Actualizar el idUsuarioElimino y fechaElimino en registroProductos
+    UPDATE registroProductos
+    SET idUsuarioElimino = p_idUsuario,
+        fechaElimino = NOW()
+    WHERE idInventario = p_idInventario;
+END //
+
+DELIMITER ;
+
+CALL EliminarProducto(1,3)
+EliminarProducto(idInventario, idUsuario)
