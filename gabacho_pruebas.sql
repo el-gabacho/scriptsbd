@@ -63,8 +63,8 @@ CREATE TABLE modeloAnios (
 
 CREATE TABLE inventarioAutoparte (
     idInventario INT AUTO_INCREMENT PRIMARY KEY,
-    -- idCategoria INT,
-    -- idUnidadMedida INT NOT NULL,
+    idCategoria INT,
+    idUnidadMedida INT NOT NULL,
     codigoBarras VARCHAR(50) NOT NULL UNIQUE,
     nombreParte VARCHAR(100) NOT NULL,
     descripcionParte VARCHAR(150) NOT NULL,
@@ -75,9 +75,9 @@ CREATE TABLE inventarioAutoparte (
     menudeo FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
     colocado FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
     urlImagen VARCHAR(300),
-    estado BOOL DEFAULT TRUE
-    -- FOREIGN KEY (idCategoria) REFERENCES categorias(idCategoria),
-    -- FOREIGN KEY (idUnidadMedida) REFERENCES unidadMedidas(idUnidadMedida)
+    estado BOOL DEFAULT TRUE,
+    FOREIGN KEY (idCategoria) REFERENCES categorias(idCategoria),
+    FOREIGN KEY (idUnidadMedida) REFERENCES unidadMedidas(idUnidadMedida)
     -- INDEX idx_codigoBarras (codigoBarras)
 );
 
@@ -93,6 +93,87 @@ CREATE TABLE modeloAutopartes (
     -- INDEX idx_idInventario (idInventario)
 );
 
+  -- CREACION DE LA TABLA CATEGORIAS
+
+CREATE TABLE categorias (
+  idCategoria INT AUTO_INCREMENT PRIMARY KEY,
+  nombreCategoria VARCHAR(50) NOT NULL
+);
+
+-- CREACION DE LA TABLA UNIDAD MEDIDAS ** OCULTO ** = M/CM ó PQ/PZ
+
+CREATE TABLE unidadMedidas (
+  idUnidadMedida INT AUTO_INCREMENT PRIMARY KEY,
+  tipoMedida VARCHAR(8) NOT NULL,
+  descripcionMedida VARCHAR(100)
+);
+
+ -- CREACION DE LA TABLA ROLES ** OCULTO **
+ 
+CREATE TABLE roles (
+	idRol INT AUTO_INCREMENT PRIMARY KEY,
+   nombre VARCHAR(50) NOT NULL,
+   descripcion VARCHAR(100)
+);
+
+ -- CREACION DE LA TABLA USUARIOS **
+ 
+ CREATE TABLE usuarios (
+  idUsuario INT AUTO_INCREMENT PRIMARY KEY,
+  idRol INT NOT NULL,
+  nombreCompleto VARCHAR(50) NOT NULL,
+  usuario VARCHAR(15) NOT NULL,
+  contrasenia VARCHAR(15) NOT NULL,
+  fechaCreacion TIMESTAMP default CURRENT_TIMESTAMP,
+  estado BOOL DEFAULT TRUE,
+  FOREIGN KEY (idRol) REFERENCES roles(idRol)
+);
+
+-- CREACION DE LA TABLA PROVEEDORES
+
+CREATE TABLE proveedores (
+  idProveedor INT AUTO_INCREMENT PRIMARY KEY,
+  empresa VARCHAR(50) NOT NULL,
+  nombreEncargado VARCHAR(50),
+  telefono VARCHAR(10),
+  correo VARCHAR(50)
+);
+
+-- CREACION DE LA TABLA RELACION PROVEEDOR PRODUCTOS "RELACION TABLA PROVEEDORES Y INVENTARIO AUTOPARTES"
+
+CREATE TABLE proveedorProductos (
+  idProveedorProducto INT AUTO_INCREMENT PRIMARY KEY,
+  idProveedor INT NOT NULL,
+  idInventario INT NOT NULL,
+  FOREIGN KEY (idProveedor) REFERENCES proveedores(idProveedor)
+);
+
+-- CREACION DE LA TABLA RELACION ENTRADA PRODUCTOS "RELACION TABLA USUARIOS Y INVENTARIO AUTOPARTES"
+
+CREATE TABLE entradaProductos (
+  idEntradaProducto INT AUTO_INCREMENT PRIMARY KEY,
+  idUsuario INT NOT NULL,
+  idInventario INT NOT NULL,
+  cantidadNueva FLOAT UNSIGNED NOT NULL,
+  precioCompra FLOAT UNSIGNED NOT NULL,
+  fechaEntrada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuario),
+  FOREIGN KEY (idInventario) REFERENCES inventarioAutoparte(idInventario)
+);
+
+-- CREACION DE LA TABLA RELACION REGISTRO PRODUCTOS "RELACION TABLA USUARIOS Y INVENTARIO AUTOPARTES"
+
+CREATE TABLE registroProductos (
+  idRegistroProducto INT AUTO_INCREMENT PRIMARY KEY,
+  idInventario INT NOT NULL,
+  idUsuarioRegistro INT NOT NULL,
+  fechaCreacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  idUsuarioElimino INT DEFAULT NULL,
+  fechaElimino TIMESTAMP DEFAULT NULL,
+  FOREIGN KEY (idInventario) REFERENCES inventarioAutoparte(idInventario),
+  FOREIGN KEY (idUsuarioRegistro) REFERENCES usuarios(idUsuario)
+  );
+  
 -- ----------------------------------------------------------------------------------------------------------------------------
 
 -- INSERTAR MARCAS (nombreMarca y LogoURL)
@@ -105,6 +186,35 @@ INSERT INTO marcas (nombreMarca, urlLogo) VALUES
 INSERT INTO modelos (idMarca, nombre) VALUES (1, 'CL');
 INSERT INTO modelos (idMarca, nombre) VALUES (1, 'CSX');
 INSERT INTO modelos (idMarca, nombre) VALUES (2, '1500');
+
+-- INSERCIONES A LA TABLA UNIDAD MEDIDAS (SOLO 2 TIPOS)
+
+INSERT INTO unidadmedidas (tipoMedida, descripcionMedida) VALUES ("PQ / PZ","Conteo por unidad");
+INSERT INTO unidadmedidas (tipoMedida, descripcionMedida) VALUES ("M / CM","Usa enteros y 2 decimales para agranel");
+
+
+-- INSERCIONES A LA TABLA ROLES (SOLO 3 ROLES)
+
+INSERT INTO roles (nombre, descripcion) VALUES ("ADMINISTRADOR","Usuario que tendra todos los privilegios");
+INSERT INTO roles (nombre, descripcion) VALUES ("ALMACEN","Encargado y acceso a ciertas vistas que el admin");
+INSERT INTO roles (nombre, descripcion) VALUES ("CAJERO","Solo es atender y realizar una venta");
+
+-- INSERCIONES A LA TABLA USUARIOS CON LOS ROLES
+
+INSERT INTO usuarios (idRol, nombreCompleto, usuario, contrasenia) VALUES (1, "Juan", "Juan123", "Juan123@");
+INSERT INTO usuarios (idRol, nombreCompleto, usuario, contrasenia) VALUES (2, "Francisco", "Francisco123", "Francisco123@");
+INSERT INTO usuarios (idRol, nombreCompleto, usuario, contrasenia) VALUES (3, "Alma", "Alma123", "Alma123@");
+
+-- INSERCIONES A LA TABLA PROVEEDORES
+INSERT INTO proveedores (empresa) VALUES
+('CITSA'),
+('EUROGLAS');
+
+-- INSERCIONES A LA TABLA CATEGORIAS
+
+INSERT INTO categorias (nombreCategoria) VALUES ('ABRAZADERAS SUSPENSION');
+INSERT INTO categorias (nombreCategoria) VALUES ('AJUSTADORES DE SUSPENSION');
+INSERT INTO categorias (nombreCategoria) VALUES ('AJUSTE DE UNIDAD');
 
 -- Relacionar modelo con un año
 -- Parametros (idModelo, anioInicio, anioFin, todoAnio )
@@ -436,4 +546,83 @@ END //
 
 DELIMITER ;
 
+-- procedimiento almacenado que inserta un nuevo producto en la tabla inventarioAutoparte, registra la relación en proveedorProductos, y también en registroProductos,
+DELIMITER //
 
+CREATE PROCEDURE InsertarProducto (
+    IN p_idCategoria INT,
+    IN p_idUnidadMedida INT,
+    IN p_codigoBarras VARCHAR(50),
+    IN p_nombreParte VARCHAR(100),
+    IN p_descripcionParte VARCHAR(150),
+    IN p_cantidadActual FLOAT UNSIGNED,
+    IN p_cantidadMinima FLOAT UNSIGNED,
+    IN p_precioCompra FLOAT UNSIGNED,
+    IN p_mayoreo FLOAT UNSIGNED,
+    IN p_menudeo FLOAT UNSIGNED,
+    IN p_colocado FLOAT UNSIGNED,
+    IN p_urlImagen VARCHAR(300),
+    IN p_idProveedor INT,
+    IN p_idUsuario INT
+)
+BEGIN
+    -- Insertar el nuevo producto en inventarioAutoparte
+    INSERT INTO inventarioAutoparte (
+        idCategoria,
+        idUnidadMedida,
+        codigoBarras,
+        nombreParte,
+        descripcionParte,
+        cantidadActual,
+        cantidadMinima,
+        precioCompra,
+        mayoreo,
+        menudeo,
+        colocado,
+        urlImagen
+    ) VALUES (
+        p_idCategoria,
+        p_idUnidadMedida,
+        p_codigoBarras,
+        p_nombreParte,
+        p_descripcionParte,
+        p_cantidadActual,
+        p_cantidadMinima,
+        p_precioCompra,
+        p_mayoreo,
+        p_menudeo,
+        p_colocado,
+        p_urlImagen
+    );
+    
+    -- Obtener el idInventario recién insertado
+    SET @nuevo_idInventario = LAST_INSERT_ID();
+
+    -- Insertar en proveedorProductos
+    INSERT INTO proveedorProductos (
+        idProveedor,
+        idInventario
+    ) VALUES (
+        p_idProveedor,
+        @nuevo_idInventario
+    );
+
+    -- Insertar en registroProductos
+    INSERT INTO registroProductos (
+        idInventario,
+        idUsuarioRegistro
+    ) VALUES (
+        @nuevo_idInventario,
+        p_idUsuario
+    );
+END //
+
+DELIMITER ;
+
+CALL InsertarProducto(1, 1, '141f1fvffv1','MANIJA INTERIOR','DELANTERO DERECHO NEGRO',20,5,90,100.0,150.0,250.0,'',1,3);
+CALL InsertarProducto(idCategoria,idUnidadMedida, codigoBarras, p_nombreParte, descripcionParte, p_cantidadActual, p_cantidadMinima, precioCompra, p_mayoreo, p_menudeo,
+   p_colocado, urlImagen, idProveedor, idUsuario);
+   
+SELECT * FROM inventarioautoparte;
+SELECT * FROM registroproductos;
+SELECT * FROM proveedorproductos;
