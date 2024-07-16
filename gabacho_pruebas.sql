@@ -203,7 +203,7 @@ CREATE TABLE pagoVenta (
   idVenta INT NOT NULL,
   idTipoPago INT NOT NULL,
   referenciaUnica VARCHAR(50),
-  descripcionPago VARCHAR(50),
+  descripcion VARCHAR(50),
   estado BOOL DEFAULT TRUE,
   FOREIGN KEY (idVenta) REFERENCES ventas(idVenta),
   FOREIGN KEY (idTipoPago) REFERENCES tipoPagos(idTipoPago)
@@ -828,7 +828,7 @@ CREATE PROCEDURE FinalizarVenta (
     IN p_imprimioTicket BOOL,
     IN p_idTipoPago INT,
     IN p_referenciaUnica VARCHAR(50),
-    IN p_descripcionPago VARCHAR(50)
+    IN p_descripcion VARCHAR(50)
 )
 BEGIN
     DECLARE v_montoTotal FLOAT;
@@ -847,8 +847,8 @@ BEGIN
     WHERE idVenta = p_idVenta;
 
     -- Registrar el pago en la tabla pagoVenta
-    INSERT INTO pagoVenta (idVenta, idTipoPago, referenciaUnica, descripcionPago)
-    VALUES (p_idVenta, p_idTipoPago, p_referenciaUnica, p_descripcionPago);
+    INSERT INTO pagoVenta (idVenta, idTipoPago, referenciaUnica, descripcion)
+    VALUES (p_idVenta, p_idTipoPago, p_referenciaUnica, p_descripcion);
 END //
 
 DELIMITER ;
@@ -859,7 +859,7 @@ CALL AgregarProductoVenta(1,2,3,'MENUDEO',100);
 CALL FinalizarVenta(1,1000,'48f484c8f4c8f',TRUE,1,'NO APLICA','PAGADO');
 CrearVenta (idUsuario, idCliente)
 AgregarProductoVenta (idVenta, idInventario, cantidad, tipoVenta, precioVenta)
-FinalizarVenta (idVenta, recibioDinero, folioTicket, imprimioTicket, idTipoPago, referenciaUnica, descripcionPago)
+FinalizarVenta (idVenta, recibioDinero, folioTicket, imprimioTicket, idTipoPago, referenciaUnica, descripcion)
 
 SELECT * FROM ventaProductos;
 SELECT * FROM ventas;
