@@ -13,13 +13,28 @@ CREATE OR REPLACE DATABASE el_gabacho;
 -- USAR LA BASE DE DATOS
 
 USE el_gabacho;
- 
+
+-- CREACION DE LA TABLA CATEGORIAS
+
+CREATE TABLE categorias (
+  idCategoria INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- CREACION DE LA TABLA UNIDAD MEDIDAS ** OCULTO ** = M/CM ó PQ/PZ
+
+CREATE TABLE unidadMedidas (
+  idUnidadMedida INT AUTO_INCREMENT PRIMARY KEY,
+  tipoMedida VARCHAR(8) NOT NULL UNIQUE,
+  descripcion VARCHAR(100)
+);
+
  -- CREACION DE LA TABLA ROLES ** OCULTO **
  
 CREATE TABLE roles (
 	idRol INT AUTO_INCREMENT PRIMARY KEY,
-   nombreRol VARCHAR(50) NOT NULL,
-   descripcion VARCHAR(100)
+  nombreRol VARCHAR(50) NOT NULL,
+  descripcion VARCHAR(100)
 );
 
  -- CREACION DE LA TABLA USUARIOS **
@@ -28,8 +43,8 @@ CREATE TABLE roles (
   idUsuario INT AUTO_INCREMENT PRIMARY KEY,
   idRol INT NOT NULL,
   nombreCompleto VARCHAR(50) NOT NULL,
-  nombreUsuario VARCHAR(15) NOT NULL,
-  contrasenia VARCHAR(15) NOT NULL,
+  usuario VARCHAR(15) NOT NULL,
+  contrasenia VARCHAR(100) NOT NULL,
   fechaCreacion TIMESTAMP default CURRENT_TIMESTAMP,
   estado BOOL DEFAULT TRUE,
   FOREIGN KEY (idRol) REFERENCES roles(idRol)
@@ -45,34 +60,19 @@ CREATE TABLE proveedores (
   correo VARCHAR(50)
 );
 
--- CREACION DE LA TABLA CATEGORIAS
-
-CREATE TABLE categorias (
-  idCategoria INT AUTO_INCREMENT PRIMARY KEY,
-  nombreCategoria VARCHAR(50) NOT NULL
-);
-
--- CREACION DE LA TABLA UNIDAD MEDIDAS ** OCULTO ** = M/CM ó PQ/PZ
-
-CREATE TABLE unidadMedidas (
-  idUnidadMedida INT AUTO_INCREMENT PRIMARY KEY,
-  tipoMedida VARCHAR(8) NOT NULL,
-  descripcionMedida VARCHAR(100)
-);
-
 -- CREACION DE LA TABLA TIPO PAGOS ** OCULTO ** = EFECTIVO, CARJETA, TRANSFERENCIA, DEPOSITO
 
 CREATE TABLE tipoPagos (
 	idTipoPago INT AUTO_INCREMENT PRIMARY KEY,
-   tipoPago VARCHAR(20) NOT NULL,
-   descripcion VARCHAR(100)
+  tipoPago VARCHAR(20) NOT NULL,
+  descripcion VARCHAR(100)
 );
 
 -- CREACION DE LA TABLA CLIENTES = PUBLICO GENERAL
 
 CREATE TABLE clientes (
 	idCliente INT AUTO_INCREMENT PRIMARY KEY,
-	nombreCliente VARCHAR(30) NOT NULL
+	nombre VARCHAR(30) NOT NULL
 );
 
 -- CREACION DE LA TABLA MARCAS MODELOS Y AÑOS
@@ -81,27 +81,27 @@ CREATE TABLE clientes (
 
 CREATE TABLE marcas (
 	idMarca INT AUTO_INCREMENT PRIMARY KEY,
-   nombre VARCHAR(40) NOT NULL UNIQUE,
-   urlLogo VARCHAR(300)
+  nombre VARCHAR(45) NOT NULL UNIQUE,
+  urlLogo VARCHAR(300)
 );
 
 -- CREACION DE LA TABLA MODELOS
 
 CREATE TABLE modelos (
 	idModelo INT AUTO_INCREMENT PRIMARY KEY,
-   idMarca INT NOT NULL,
-   nombre VARCHAR(50) NOT NULL,
-   FOREIGN KEY (idMarca) REFERENCES marcas(idMarca)
+  idMarca INT NOT NULL,
+  nombre VARCHAR(50) NOT NULL UNIQUE,
+  FOREIGN KEY (idMarca) REFERENCES marcas(idMarca) ON DELETE CASCADE
 );
 
--- CREACION DE LA TABLA AÑO MODELOS
+-- CREACION DE LA TABLA AÑOS
 
-CREATE TABLE anioModelos (
-	idAnioModelo INT AUTO_INCREMENT PRIMARY KEY,
-   anioModeloInicio INT UNSIGNED NOT NULL,
-   anioModeloFin INT UNSIGNED NOT NULL,
-   todoAnio BOOL DEFAULT FALSE,
-   UNIQUE (anioModeloInicio, anioModeloFin)
+CREATE TABLE anios (
+	idAnio INT AUTO_INCREMENT PRIMARY KEY,
+  anioInicio INT UNSIGNED NOT NULL,
+  anioFin INT UNSIGNED NOT NULL,
+  anioTodo BOOL DEFAULT FALSE NOT NULL,
+  UNIQUE (anioInicio, anioFin)
 );
 
 -- CREACION DE LA TABLA RELACION MODELO AÑOS "RELACION TABLA MODELOS Y AÑO MODELOS"
@@ -109,20 +109,19 @@ CREATE TABLE anioModelos (
 CREATE TABLE modeloAnios (
 	idModeloAnio INT AUTO_INCREMENT PRIMARY KEY,
 	idModelo INT NOT NULL,
-	idAnioModelo INT NOT NULL,
-	FOREIGN KEY (idModelo) REFERENCES modelos(idModelo),
-	FOREIGN KEY (idAnioModelo) REFERENCES anioModelos(idAnioModelo)
+	idAnio INT NOT NULL,
+	FOREIGN KEY (idModelo) REFERENCES modelos(idModelo) ON DELETE CASCADE,
+	FOREIGN KEY (idAnio) REFERENCES anios(idAnio)
 );
 
 -- CREACION DE LA TABLA INVENTARIO AUTOPARTES
-
-CREATE TABLE inventarioAutoparte (
+CREATE OR REPLACE TABLE inventario (
 	idInventario INT AUTO_INCREMENT PRIMARY KEY,
-   idCategoria INT,
-   idUnidadMedida INT NOT NULL,
+	idCategoria INT DEFAULT NULL,
+	idUnidadMedida INT NOT NULL,
    codigoBarras VARCHAR(50) NOT NULL UNIQUE,
-   nombreParte VARCHAR(100) NOT NULL,
-   descripcionParte VARCHAR(150) NOT NULL,
+   nombre VARCHAR(100) NOT NULL,
+   descripcion VARCHAR(150) NOT NULL,
    cantidadActual FLOAT UNSIGNED DEFAULT 0 NOT NULL,
    cantidadMinima FLOAT UNSIGNED DEFAULT 1 NOT NULL,
    precioCompra FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
@@ -131,8 +130,10 @@ CREATE TABLE inventarioAutoparte (
    colocado FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
    urlImagen VARCHAR(300),
    estado BOOL DEFAULT TRUE,
-   FOREIGN KEY (idCategoria) REFERENCES categorias(idCategoria),
+   FOREIGN KEY (idCategoria) REFERENCES categorias(idCategoria) ON DELETE SET NULL,
    FOREIGN KEY (idUnidadMedida) REFERENCES unidadMedidas(idUnidadMedida)
+   -- ON UPDATE CASCADE  -- Permite el UPDATE en idUnidadMedida en inventario
+   --   ON DELETE RESTRICT -- No permite DELETE en unidadMedidas involuntariamente
 );
 
 -- CREACION DE LA TABLA RELACION MODELO AUTOPARTES "RELACION TABLA MODELO AÑO Y INVENTARIO AUTOPARTE"
@@ -141,7 +142,8 @@ CREATE TABLE modeloAutopartes (
 	idModeloAutoparte INT AUTO_INCREMENT PRIMARY KEY,
 	idModeloAnio INT NOT NULL,
 	idInventario INT NOT NULL,
-	estado BOOL DEFAULT TRUE
+	FOREIGN KEY (idModeloAnio) REFERENCES modeloanios(idModeloAnio) ON DELETE CASCADE,
+	FOREIGN KEY (idInventario) REFERENCES inventario(idInventario) ON DELETE CASCADE
 );
 
 -- CREACION DE LA TABLA RELACION PROVEEDOR PRODUCTOS "RELACION TABLA PROVEEDORES Y INVENTARIO AUTOPARTES"
@@ -163,7 +165,7 @@ CREATE TABLE entradaProductos (
   precioCompra FLOAT UNSIGNED NOT NULL,
   fechaEntrada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuario),
-  FOREIGN KEY (idInventario) REFERENCES inventarioAutoparte(idInventario)
+  FOREIGN KEY (idInventario) REFERENCES inventario(idInventario)
 );
 
 -- CREACION DE LA TABLA RELACION REGISTRO PRODUCTOS "RELACION TABLA USUARIOS Y INVENTARIO AUTOPARTES"
@@ -175,7 +177,7 @@ CREATE TABLE registroProductos (
   fechaCreacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   idUsuarioElimino INT DEFAULT NULL,
   fechaElimino TIMESTAMP DEFAULT NULL,
-  FOREIGN KEY (idInventario) REFERENCES inventarioAutoparte(idInventario),
+  FOREIGN KEY (idInventario) REFERENCES inventario(idInventario),
   FOREIGN KEY (idUsuarioRegistro) REFERENCES usuarios(idUsuario)
   );
 
@@ -220,6 +222,6 @@ CREATE TABLE ventaProductos (
   subtotal FLOAT UNSIGNED NOT NULL,
   estado BOOL DEFAULT TRUE,
   FOREIGN KEY (idVenta) REFERENCES ventas(idVenta),
-  FOREIGN KEY (idInventario) REFERENCES inventarioAutoparte(idInventario)
+  FOREIGN KEY (idInventario) REFERENCES inventario(idInventario)
 );
 

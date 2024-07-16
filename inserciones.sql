@@ -2,18 +2,18 @@ USE el_gabacho;
 
 -- INSERCIONES A LA TABLA ROLES (SOLO 3 ROLES)
 
-INSERT INTO roles (nombreRol, descripcion) VALUES ("ADMINISTRADOR","Usuario que tendra todos los privilegios");
-INSERT INTO roles (nombreRol, descripcion) VALUES ("ALMACEN","Encargado y acceso a ciertas vistas que el admin");
-INSERT INTO roles (nombreRol, descripcion) VALUES ("CAJERO","Solo es atender y realizar una venta");
+INSERT INTO roles (nombre, descripcion) VALUES ("ADMINISTRADOR","Usuario que tendra todos los privilegios");
+INSERT INTO roles (nombre, descripcion) VALUES ("ALMACEN","Encargado y acceso a ciertas vistas que el admin");
+INSERT INTO roles (nombre, descripcion) VALUES ("CAJERO","Solo es atender y realizar una venta");
 
 -- INSERCIONES A LA TABLA USUARIOS CON LOS ROLES
 
-INSERT INTO usuarios (idRol, nombreCompleto, nombreUsuario, contrasenia) VALUES (1, "Juan", "Juan123", "Juan123@");
-INSERT INTO usuarios (idRol, nombreCompleto, nombreUsuario, contrasenia) VALUES (2, "Francisco", "Francisco123", "Francisco123@");
-INSERT INTO usuarios (idRol, nombreCompleto, nombreUsuario, contrasenia) VALUES (3, "Alma", "Alma123", "Alma123@");
+INSERT INTO usuarios (idRol, nombreCompleto, usuario, contrasenia) VALUES (1, "Juan", "Juan123", "Juan123@");
+INSERT INTO usuarios (idRol, nombreCompleto, usuario, contrasenia) VALUES (2, "Francisco", "Francisco123", "Francisco123@");
+INSERT INTO usuarios (idRol, nombreCompleto, usuario, contrasenia) VALUES (3, "Alma", "Alma123", "Alma123@");
 
 -- INSERCIONES A LA TABLA CLIENTES
-INSERT INTO clientes (nombreCliente) VALUES ('PUBLICO GENERAL');
+INSERT INTO clientes (nombre) VALUES ('PUBLICO GENERAL');
 
 -- INSERCIONES A LA TABLA PROVEEDORES
 INSERT INTO proveedores (empresa) VALUES
@@ -51,8 +51,8 @@ INSERT INTO proveedores (empresa) VALUES
 
 -- INSERCIONES A LA TABLA UNIDAD MEDIDAS (SOLO 2 TIPOS)
 
-INSERT INTO unidadmedidas (tipoMedida, descripcionMedida) VALUES ("PQ / PZ","Conteo por unidad");
-INSERT INTO unidadmedidas (tipoMedida, descripcionMedida) VALUES ("M / CM","Usa enteros y 2 decimales para agranel");
+INSERT INTO unidadmedidas (tipoMedida, descripcion) VALUES ("PQ / PZ","Conteo por unidad");
+INSERT INTO unidadmedidas (tipoMedida, descripcion) VALUES ("M / CM","Usa enteros y 2 decimales para agranel");
 
 -- INSERCIONES A LA TABLA TIPO PAGO (SOLO 4 TIPOS)
 
@@ -63,149 +63,149 @@ INSERT INTO tipopagos (tipoPago, descripcion) VALUES ("DEPOSITO","Recibe foto de
 
 -- INSERCIONES A LA TABLA CATEGORIAS
 
-INSERT INTO categorias (nombreCategoria) VALUES ('ABRAZADERAS SUSPENSION');
-INSERT INTO categorias (nombreCategoria) VALUES ('AJUSTADORES DE SUSPENSION');
-INSERT INTO categorias (nombreCategoria) VALUES ('AJUSTE DE UNIDAD');
-INSERT INTO categorias (nombreCategoria) VALUES ('ALERONES');
-INSERT INTO categorias (nombreCategoria) VALUES ('ALMA FASCIAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('AMORTIGUADOR SUSPENSION');
-INSERT INTO categorias (nombreCategoria) VALUES ('AMORTIGUADORES');
-INSERT INTO categorias (nombreCategoria) VALUES ('ANTI-IMPACTOS');
-INSERT INTO categorias (nombreCategoria) VALUES ('ARMOR ALL');
-INSERT INTO categorias (nombreCategoria) VALUES ('BALERO BASE AMORTIGUADOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('BALERO DOBLE');
-INSERT INTO categorias (nombreCategoria) VALUES ('BANDA POLY-V');
-INSERT INTO categorias (nombreCategoria) VALUES ('BANDA TIEMPO');
-INSERT INTO categorias (nombreCategoria) VALUES ('BARRA TENSORA');
-INSERT INTO categorias (nombreCategoria) VALUES ('BASE AMORTIGUADOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('BASE Y BALERO DE AMORTIGUADOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('BASES');
-INSERT INTO categorias (nombreCategoria) VALUES ('BIGOTERAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('BISAGRAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('BISELES');
-INSERT INTO categorias (nombreCategoria) VALUES ('BOMBA DE AGUA');
-INSERT INTO categorias (nombreCategoria) VALUES ('BOMBA DE DIRECCION HIDRAULICA');
-INSERT INTO categorias (nombreCategoria) VALUES ('BRAZO AUXILIAR');
-INSERT INTO categorias (nombreCategoria) VALUES ('BRAZO COMPENSADOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('BRAZO CONTROL');
-INSERT INTO categorias (nombreCategoria) VALUES ('BRAZO FASCIA');
-INSERT INTO categorias (nombreCategoria) VALUES ('BRAZO PITMAN');
-INSERT INTO categorias (nombreCategoria) VALUES ('BRAZO PUENTE');
-INSERT INTO categorias (nombreCategoria) VALUES ('BRAZOS DEFENSA');
-INSERT INTO categorias (nombreCategoria) VALUES ('BUJE BRAZO');
-INSERT INTO categorias (nombreCategoria) VALUES ('BUJE CREMALLERA');
-INSERT INTO categorias (nombreCategoria) VALUES ('BUJE DE HORQUILLA');
-INSERT INTO categorias (nombreCategoria) VALUES ('BUJE DE PUENTE');
-INSERT INTO categorias (nombreCategoria) VALUES ('BUJE DE PUNTA');
-INSERT INTO categorias (nombreCategoria) VALUES ('BUJE DIRECCION');
-INSERT INTO categorias (nombreCategoria) VALUES ('BUJE EJE');
-INSERT INTO categorias (nombreCategoria) VALUES ('BUJE INFERIOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('BUJE SUPERIOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('BUJE TIRANTE');
-INSERT INTO categorias (nombreCategoria) VALUES ('BUJE TRANSMISION');
-INSERT INTO categorias (nombreCategoria) VALUES ('BUJE TRASERO');
-INSERT INTO categorias (nombreCategoria) VALUES ('BUJES DE SUSPENSION');
-INSERT INTO categorias (nombreCategoria) VALUES ('BUJES Y PERNOS');
-INSERT INTO categorias (nombreCategoria) VALUES ('CAJA DE DIRECCION');
-INSERT INTO categorias (nombreCategoria) VALUES ('CALAVERAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('CAMARAS Y SENSORES');
-INSERT INTO categorias (nombreCategoria) VALUES ('CHAPAS Y CILINDROS');
-INSERT INTO categorias (nombreCategoria) VALUES ('CILINDROS DE IGNICION');
-INSERT INTO categorias (nombreCategoria) VALUES ('CILINDROS DE PUERTA');
-INSERT INTO categorias (nombreCategoria) VALUES ('CINCHOS Y SUJETADORES DE CABLE');
-INSERT INTO categorias (nombreCategoria) VALUES ('COFRE');
-INSERT INTO categorias (nombreCategoria) VALUES ('COMPLEMENTOS RADIADORES');
-INSERT INTO categorias (nombreCategoria) VALUES ('CONDENSADOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('CONECTORES');
-INSERT INTO categorias (nombreCategoria) VALUES ('CONTROLES');
-INSERT INTO categorias (nombreCategoria) VALUES ('COPLE DE DIRECCION');
-INSERT INTO categorias (nombreCategoria) VALUES ('CREMALLERAS DE DIRECCION');
-INSERT INTO categorias (nombreCategoria) VALUES ('CUARTOS');
-INSERT INTO categorias (nombreCategoria) VALUES ('CUBRE POLVO');
-INSERT INTO categorias (nombreCategoria) VALUES ('DEFENSAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('DEPOSITO LIMPIABRISAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('DEPOSITO RECUPERADOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('ELEVADORES');
-INSERT INTO categorias (nombreCategoria) VALUES ('ESPEJOS');
-INSERT INTO categorias (nombreCategoria) VALUES ('ESTRIBOS');
-INSERT INTO categorias (nombreCategoria) VALUES ('EXCENTRICOS');
-INSERT INTO categorias (nombreCategoria) VALUES ('FAN CLUTCH');
-INSERT INTO categorias (nombreCategoria) VALUES ('FAROS');
-INSERT INTO categorias (nombreCategoria) VALUES ('FAROS NIEBLA');
-INSERT INTO categorias (nombreCategoria) VALUES ('FASCIAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('FILTRO ACEITE');
-INSERT INTO categorias (nombreCategoria) VALUES ('FLECHA HOMOCINETICA');
-INSERT INTO categorias (nombreCategoria) VALUES ('FOCO UNIVERSAL');
-INSERT INTO categorias (nombreCategoria) VALUES ('GOMA TORNILLO ESTABILIZADOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('GOMAS DE BARRA ESTABILIZADORA');
-INSERT INTO categorias (nombreCategoria) VALUES ('GOMAS VARILLAS ESTABILIZADORAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('GRAPA DE PRESION');
-INSERT INTO categorias (nombreCategoria) VALUES ('GRAPA DE TAPICERIA');
-INSERT INTO categorias (nombreCategoria) VALUES ('GRAPA DOBLE P/PIJA Y TORNILLO');
-INSERT INTO categorias (nombreCategoria) VALUES ('GRAPA MOLDURA');
-INSERT INTO categorias (nombreCategoria) VALUES ('GRAPA PARABRISAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('GUIA FASCIA');
-INSERT INTO categorias (nombreCategoria) VALUES ('HORQUILLAS INFERIORES DE SUSPENSIÓN');
-INSERT INTO categorias (nombreCategoria) VALUES ('HORQUILLAS SUPERIORES DE SUSPENSION');
-INSERT INTO categorias (nombreCategoria) VALUES ('HULES');
-INSERT INTO categorias (nombreCategoria) VALUES ('INTERRUPTORES');
-INSERT INTO categorias (nombreCategoria) VALUES ('JUEGOS');
-INSERT INTO categorias (nombreCategoria) VALUES ('JUNTA FLECHA LADO RUEDA');
-INSERT INTO categorias (nombreCategoria) VALUES ('KIT DE REBOTE Y CUBRE POLVO');
-INSERT INTO categorias (nombreCategoria) VALUES ('KITS DE DISTRIBUCION');
-INSERT INTO categorias (nombreCategoria) VALUES ('LIENZOS Y COSTADOS');
-INSERT INTO categorias (nombreCategoria) VALUES ('MANGO');
-INSERT INTO categorias (nombreCategoria) VALUES ('MANIJAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('MARCO PARRILLA');
-INSERT INTO categorias (nombreCategoria) VALUES ('MARCO RADIADOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('MAZA DE RUEDA');
-INSERT INTO categorias (nombreCategoria) VALUES ('MOLDURAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('MOTO-VENTILADOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('MUELAS PARA PIJA');
-INSERT INTO categorias (nombreCategoria) VALUES ('PARABRISAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('PARRILLAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('PIJAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('PLUMA LIMPIAPARABRISAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('POLEA');
-INSERT INTO categorias (nombreCategoria) VALUES ('PORTA PLACAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('PUERTAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('RADIADORES');
-INSERT INTO categorias (nombreCategoria) VALUES ('RADIADORES MECANICOS');
-INSERT INTO categorias (nombreCategoria) VALUES ('REJILLAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('REMACHES');
-INSERT INTO categorias (nombreCategoria) VALUES ('RESORTE DE SUSPENSION');
-INSERT INTO categorias (nombreCategoria) VALUES ('RETENEDORES');
-INSERT INTO categorias (nombreCategoria) VALUES ('ROLLO MOLDURA');
-INSERT INTO categorias (nombreCategoria) VALUES ('ROTULA INFERIOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('ROTULA SUPERIOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('ROTULA TRASERA');
-INSERT INTO categorias (nombreCategoria) VALUES ('SALPICADEROS');
-INSERT INTO categorias (nombreCategoria) VALUES ('SEGUROS BARRIL');
-INSERT INTO categorias (nombreCategoria) VALUES ('SEGUROS DE PRESION');
-INSERT INTO categorias (nombreCategoria) VALUES ('SEGUROS PARA VARILLA DE PTA');
-INSERT INTO categorias (nombreCategoria) VALUES ('SOPORTE BARRA TENSORA');
-INSERT INTO categorias (nombreCategoria) VALUES ('SOPORTE MOTOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('SPOYLER');
-INSERT INTO categorias (nombreCategoria) VALUES ('SWITCH DE IGNICION');
-INSERT INTO categorias (nombreCategoria) VALUES ('TAPA CAJA');
-INSERT INTO categorias (nombreCategoria) VALUES ('TAPON DE ACEITE');
-INSERT INTO categorias (nombreCategoria) VALUES ('TAPONES INTERIORES DE TAPICERIA');
-INSERT INTO categorias (nombreCategoria) VALUES ('TENSOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('TERMINAL EXTERIOR/INTERIOR/BIELETA');
-INSERT INTO categorias (nombreCategoria) VALUES ('TIRANTE');
-INSERT INTO categorias (nombreCategoria) VALUES ('TOLVAS');
-INSERT INTO categorias (nombreCategoria) VALUES ('TOMA AGUA');
-INSERT INTO categorias (nombreCategoria) VALUES ('TOPES PARA COFRE');
-INSERT INTO categorias (nombreCategoria) VALUES ('TORNILLO ESTABILIZADOR');
-INSERT INTO categorias (nombreCategoria) VALUES ('TORNILLOS');
-INSERT INTO categorias (nombreCategoria) VALUES ('TUBO ENFRIAMIENTO');
-INSERT INTO categorias (nombreCategoria) VALUES ('TUERCA DE MARIPOSA');
-INSERT INTO categorias (nombreCategoria) VALUES ('TUERCA RAPIDA Y DE PRESION');
-INSERT INTO categorias (nombreCategoria) VALUES ('VAMPIRO PARA CRISTAL');
-INSERT INTO categorias (nombreCategoria) VALUES ('VARILLA LATERAL');
-INSERT INTO categorias (nombreCategoria) VALUES ('VARIOS');
-INSERT INTO categorias (nombreCategoria) VALUES ('VARIOS LAMINA');
-INSERT INTO categorias (nombreCategoria) VALUES ('VARIOS MICA');
+INSERT INTO categorias (nombre) VALUES ('ABRAZADERAS SUSPENSION');
+INSERT INTO categorias (nombre) VALUES ('AJUSTADORES DE SUSPENSION');
+INSERT INTO categorias (nombre) VALUES ('AJUSTE DE UNIDAD');
+INSERT INTO categorias (nombre) VALUES ('ALERONES');
+INSERT INTO categorias (nombre) VALUES ('ALMA FASCIAS');
+INSERT INTO categorias (nombre) VALUES ('AMORTIGUADOR SUSPENSION');
+INSERT INTO categorias (nombre) VALUES ('AMORTIGUADORES');
+INSERT INTO categorias (nombre) VALUES ('ANTI-IMPACTOS');
+INSERT INTO categorias (nombre) VALUES ('ARMOR ALL');
+INSERT INTO categorias (nombre) VALUES ('BALERO BASE AMORTIGUADOR');
+INSERT INTO categorias (nombre) VALUES ('BALERO DOBLE');
+INSERT INTO categorias (nombre) VALUES ('BANDA POLY-V');
+INSERT INTO categorias (nombre) VALUES ('BANDA TIEMPO');
+INSERT INTO categorias (nombre) VALUES ('BARRA TENSORA');
+INSERT INTO categorias (nombre) VALUES ('BASE AMORTIGUADOR');
+INSERT INTO categorias (nombre) VALUES ('BASE Y BALERO DE AMORTIGUADOR');
+INSERT INTO categorias (nombre) VALUES ('BASES');
+INSERT INTO categorias (nombre) VALUES ('BIGOTERAS');
+INSERT INTO categorias (nombre) VALUES ('BISAGRAS');
+INSERT INTO categorias (nombre) VALUES ('BISELES');
+INSERT INTO categorias (nombre) VALUES ('BOMBA DE AGUA');
+INSERT INTO categorias (nombre) VALUES ('BOMBA DE DIRECCION HIDRAULICA');
+INSERT INTO categorias (nombre) VALUES ('BRAZO AUXILIAR');
+INSERT INTO categorias (nombre) VALUES ('BRAZO COMPENSADOR');
+INSERT INTO categorias (nombre) VALUES ('BRAZO CONTROL');
+INSERT INTO categorias (nombre) VALUES ('BRAZO FASCIA');
+INSERT INTO categorias (nombre) VALUES ('BRAZO PITMAN');
+INSERT INTO categorias (nombre) VALUES ('BRAZO PUENTE');
+INSERT INTO categorias (nombre) VALUES ('BRAZOS DEFENSA');
+INSERT INTO categorias (nombre) VALUES ('BUJE BRAZO');
+INSERT INTO categorias (nombre) VALUES ('BUJE CREMALLERA');
+INSERT INTO categorias (nombre) VALUES ('BUJE DE HORQUILLA');
+INSERT INTO categorias (nombre) VALUES ('BUJE DE PUENTE');
+INSERT INTO categorias (nombre) VALUES ('BUJE DE PUNTA');
+INSERT INTO categorias (nombre) VALUES ('BUJE DIRECCION');
+INSERT INTO categorias (nombre) VALUES ('BUJE EJE');
+INSERT INTO categorias (nombre) VALUES ('BUJE INFERIOR');
+INSERT INTO categorias (nombre) VALUES ('BUJE SUPERIOR');
+INSERT INTO categorias (nombre) VALUES ('BUJE TIRANTE');
+INSERT INTO categorias (nombre) VALUES ('BUJE TRANSMISION');
+INSERT INTO categorias (nombre) VALUES ('BUJE TRASERO');
+INSERT INTO categorias (nombre) VALUES ('BUJES DE SUSPENSION');
+INSERT INTO categorias (nombre) VALUES ('BUJES Y PERNOS');
+INSERT INTO categorias (nombre) VALUES ('CAJA DE DIRECCION');
+INSERT INTO categorias (nombre) VALUES ('CALAVERAS');
+INSERT INTO categorias (nombre) VALUES ('CAMARAS Y SENSORES');
+INSERT INTO categorias (nombre) VALUES ('CHAPAS Y CILINDROS');
+INSERT INTO categorias (nombre) VALUES ('CILINDROS DE IGNICION');
+INSERT INTO categorias (nombre) VALUES ('CILINDROS DE PUERTA');
+INSERT INTO categorias (nombre) VALUES ('CINCHOS Y SUJETADORES DE CABLE');
+INSERT INTO categorias (nombre) VALUES ('COFRE');
+INSERT INTO categorias (nombre) VALUES ('COMPLEMENTOS RADIADORES');
+INSERT INTO categorias (nombre) VALUES ('CONDENSADOR');
+INSERT INTO categorias (nombre) VALUES ('CONECTORES');
+INSERT INTO categorias (nombre) VALUES ('CONTROLES');
+INSERT INTO categorias (nombre) VALUES ('COPLE DE DIRECCION');
+INSERT INTO categorias (nombre) VALUES ('CREMALLERAS DE DIRECCION');
+INSERT INTO categorias (nombre) VALUES ('CUARTOS');
+INSERT INTO categorias (nombre) VALUES ('CUBRE POLVO');
+INSERT INTO categorias (nombre) VALUES ('DEFENSAS');
+INSERT INTO categorias (nombre) VALUES ('DEPOSITO LIMPIABRISAS');
+INSERT INTO categorias (nombre) VALUES ('DEPOSITO RECUPERADOR');
+INSERT INTO categorias (nombre) VALUES ('ELEVADORES');
+INSERT INTO categorias (nombre) VALUES ('ESPEJOS');
+INSERT INTO categorias (nombre) VALUES ('ESTRIBOS');
+INSERT INTO categorias (nombre) VALUES ('EXCENTRICOS');
+INSERT INTO categorias (nombre) VALUES ('FAN CLUTCH');
+INSERT INTO categorias (nombre) VALUES ('FAROS');
+INSERT INTO categorias (nombre) VALUES ('FAROS NIEBLA');
+INSERT INTO categorias (nombre) VALUES ('FASCIAS');
+INSERT INTO categorias (nombre) VALUES ('FILTRO ACEITE');
+INSERT INTO categorias (nombre) VALUES ('FLECHA HOMOCINETICA');
+INSERT INTO categorias (nombre) VALUES ('FOCO UNIVERSAL');
+INSERT INTO categorias (nombre) VALUES ('GOMA TORNILLO ESTABILIZADOR');
+INSERT INTO categorias (nombre) VALUES ('GOMAS DE BARRA ESTABILIZADORA');
+INSERT INTO categorias (nombre) VALUES ('GOMAS VARILLAS ESTABILIZADORAS');
+INSERT INTO categorias (nombre) VALUES ('GRAPA DE PRESION');
+INSERT INTO categorias (nombre) VALUES ('GRAPA DE TAPICERIA');
+INSERT INTO categorias (nombre) VALUES ('GRAPA DOBLE P/PIJA Y TORNILLO');
+INSERT INTO categorias (nombre) VALUES ('GRAPA MOLDURA');
+INSERT INTO categorias (nombre) VALUES ('GRAPA PARABRISAS');
+INSERT INTO categorias (nombre) VALUES ('GUIA FASCIA');
+INSERT INTO categorias (nombre) VALUES ('HORQUILLAS INFERIORES DE SUSPENSIÓN');
+INSERT INTO categorias (nombre) VALUES ('HORQUILLAS SUPERIORES DE SUSPENSION');
+INSERT INTO categorias (nombre) VALUES ('HULES');
+INSERT INTO categorias (nombre) VALUES ('INTERRUPTORES');
+INSERT INTO categorias (nombre) VALUES ('JUEGOS');
+INSERT INTO categorias (nombre) VALUES ('JUNTA FLECHA LADO RUEDA');
+INSERT INTO categorias (nombre) VALUES ('KIT DE REBOTE Y CUBRE POLVO');
+INSERT INTO categorias (nombre) VALUES ('KITS DE DISTRIBUCION');
+INSERT INTO categorias (nombre) VALUES ('LIENZOS Y COSTADOS');
+INSERT INTO categorias (nombre) VALUES ('MANGO');
+INSERT INTO categorias (nombre) VALUES ('MANIJAS');
+INSERT INTO categorias (nombre) VALUES ('MARCO PARRILLA');
+INSERT INTO categorias (nombre) VALUES ('MARCO RADIADOR');
+INSERT INTO categorias (nombre) VALUES ('MAZA DE RUEDA');
+INSERT INTO categorias (nombre) VALUES ('MOLDURAS');
+INSERT INTO categorias (nombre) VALUES ('MOTO-VENTILADOR');
+INSERT INTO categorias (nombre) VALUES ('MUELAS PARA PIJA');
+INSERT INTO categorias (nombre) VALUES ('PARABRISAS');
+INSERT INTO categorias (nombre) VALUES ('PARRILLAS');
+INSERT INTO categorias (nombre) VALUES ('PIJAS');
+INSERT INTO categorias (nombre) VALUES ('PLUMA LIMPIAPARABRISAS');
+INSERT INTO categorias (nombre) VALUES ('POLEA');
+INSERT INTO categorias (nombre) VALUES ('PORTA PLACAS');
+INSERT INTO categorias (nombre) VALUES ('PUERTAS');
+INSERT INTO categorias (nombre) VALUES ('RADIADORES');
+INSERT INTO categorias (nombre) VALUES ('RADIADORES MECANICOS');
+INSERT INTO categorias (nombre) VALUES ('REJILLAS');
+INSERT INTO categorias (nombre) VALUES ('REMACHES');
+INSERT INTO categorias (nombre) VALUES ('RESORTE DE SUSPENSION');
+INSERT INTO categorias (nombre) VALUES ('RETENEDORES');
+INSERT INTO categorias (nombre) VALUES ('ROLLO MOLDURA');
+INSERT INTO categorias (nombre) VALUES ('ROTULA INFERIOR');
+INSERT INTO categorias (nombre) VALUES ('ROTULA SUPERIOR');
+INSERT INTO categorias (nombre) VALUES ('ROTULA TRASERA');
+INSERT INTO categorias (nombre) VALUES ('SALPICADEROS');
+INSERT INTO categorias (nombre) VALUES ('SEGUROS BARRIL');
+INSERT INTO categorias (nombre) VALUES ('SEGUROS DE PRESION');
+INSERT INTO categorias (nombre) VALUES ('SEGUROS PARA VARILLA DE PTA');
+INSERT INTO categorias (nombre) VALUES ('SOPORTE BARRA TENSORA');
+INSERT INTO categorias (nombre) VALUES ('SOPORTE MOTOR');
+INSERT INTO categorias (nombre) VALUES ('SPOYLER');
+INSERT INTO categorias (nombre) VALUES ('SWITCH DE IGNICION');
+INSERT INTO categorias (nombre) VALUES ('TAPA CAJA');
+INSERT INTO categorias (nombre) VALUES ('TAPON DE ACEITE');
+INSERT INTO categorias (nombre) VALUES ('TAPONES INTERIORES DE TAPICERIA');
+INSERT INTO categorias (nombre) VALUES ('TENSOR');
+INSERT INTO categorias (nombre) VALUES ('TERMINAL EXTERIOR/INTERIOR/BIELETA');
+INSERT INTO categorias (nombre) VALUES ('TIRANTE');
+INSERT INTO categorias (nombre) VALUES ('TOLVAS');
+INSERT INTO categorias (nombre) VALUES ('TOMA AGUA');
+INSERT INTO categorias (nombre) VALUES ('TOPES PARA COFRE');
+INSERT INTO categorias (nombre) VALUES ('TORNILLO ESTABILIZADOR');
+INSERT INTO categorias (nombre) VALUES ('TORNILLOS');
+INSERT INTO categorias (nombre) VALUES ('TUBO ENFRIAMIENTO');
+INSERT INTO categorias (nombre) VALUES ('TUERCA DE MARIPOSA');
+INSERT INTO categorias (nombre) VALUES ('TUERCA RAPIDA Y DE PRESION');
+INSERT INTO categorias (nombre) VALUES ('VAMPIRO PARA CRISTAL');
+INSERT INTO categorias (nombre) VALUES ('VARILLA LATERAL');
+INSERT INTO categorias (nombre) VALUES ('VARIOS');
+INSERT INTO categorias (nombre) VALUES ('VARIOS LAMINA');
+INSERT INTO categorias (nombre) VALUES ('VARIOS MICA');
 
 -- INSERCIONES A LA TABLA MARCA
 INSERT INTO marcas (nombre, urlLogo) VALUES
@@ -2281,7 +2281,7 @@ VALUES (80, 'SEMICHATO CAPRE'),
        (80, 'IRIZAR'),
        (80, 'INTERCENTURY');
 
-INSERT INTO aniomodelos (anioModeloInicio, anioModeloFin, todoAnio) VALUES
+INSERT INTO anios (anioInicio, anioFin, anioTodo) VALUES
 (1957,1986,FALSE),
 (1960,1965,FALSE),
 (1961,1966,FALSE),
