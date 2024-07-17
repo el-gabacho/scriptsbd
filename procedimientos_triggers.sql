@@ -480,18 +480,32 @@ END //
 DELIMITER ;
 
 
--- trigger de entradaProducto
+-- procedimiento almacenado que inserte datos en la tabla entradaProductos y actualice la tabla inventario con los precios de compra, mayoreo, menudeo y colocado
 DELIMITER //
 
-CREATE TRIGGER actualizar_inventario
-AFTER INSERT ON entradaProductos
-FOR EACH ROW
+CREATE PROCEDURE InsertarEntradaProducto(
+    IN p_idUsuario INT,
+    IN p_idInventario INT,
+    IN p_cantidadNueva FLOAT,
+    IN p_precioCompra FLOAT,
+    IN p_mayoreo FLOAT,
+    IN p_menudeo FLOAT,
+    IN p_colocado FLOAT
+)
 BEGIN
+    -- Insertar el nuevo registro en entradaProductos
+    INSERT INTO entradaProductos (idUsuario, idInventario, cantidadNueva, precioCompra)
+    VALUES (p_idUsuario, p_idInventario, p_cantidadNueva, p_precioCompra);
+    
+    -- Actualizar la tabla inventario con los nuevos precios y cantidad actual
     UPDATE inventario
     SET 
-        cantidadActual = cantidadActual + NEW.cantidadNueva,
-        precioCompra = NEW.precioCompra
-    WHERE idInventario = NEW.idInventario;
+        cantidadActual = cantidadActual + p_cantidadNueva,
+        precioCompra = p_precioCompra,
+        mayoreo = p_mayoreo,
+        menudeo = p_menudeo,
+        colocado = p_colocado
+    WHERE idInventario = p_idInventario;
 END //
 
 DELIMITER ;
