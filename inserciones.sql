@@ -2531,5 +2531,4 @@ INSERT INTO anios (anioInicio, anioFin, anioTodo) VALUES
 (2019,2020,FALSE),
 (2020,2021,FALSE);
 
-INSERT INTO modeloanios (idModelo, idAnioModelo) VALUES
-();
+-- INSERT INTO modeloanios (idModelo, idAnioModelo) VALUES ();

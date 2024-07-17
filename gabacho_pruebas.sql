@@ -27,7 +27,7 @@ urlLogo VARCHAR(300)
 CREATE TABLE modelos (
     idModelo INT AUTO_INCREMENT PRIMARY KEY,
     idMarca INT NOT NULL,
-    nombre VARCHAR(50) NOT NULL UNIQUE,
+    nombre VARCHAR(50) NOT NULL,
     FOREIGN KEY (idMarca) REFERENCES marcas(idMarca) ON DELETE CASCADE
 );
 
@@ -49,29 +49,6 @@ CREATE TABLE modeloAnios (
     idAnio INT NOT NULL,
     FOREIGN KEY (idModelo) REFERENCES modelos(idModelo) ON DELETE CASCADE,
     FOREIGN KEY (idAnio) REFERENCES anios(idAnio)
-);
-
--- CREACION DE LA TABLA INVENTARIO AUTOPARTE
-
-CREATE OR REPLACE TABLE inventario (
-	idInventario INT AUTO_INCREMENT PRIMARY KEY,
-	idCategoria INT DEFAULT NULL,
-	idUnidadMedida INT NOT NULL,
-   codigoBarras VARCHAR(50) NOT NULL UNIQUE,
-   nombre VARCHAR(100) NOT NULL,
-   descripcion VARCHAR(150) NOT NULL,
-   cantidadActual FLOAT UNSIGNED DEFAULT 0 NOT NULL,
-   cantidadMinima FLOAT UNSIGNED DEFAULT 1 NOT NULL,
-   precioCompra FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
-   mayoreo FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
-   menudeo FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
-   colocado FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
-   urlImagen VARCHAR(300),
-   estado BOOL DEFAULT TRUE,
-   FOREIGN KEY (idCategoria) REFERENCES categorias(idCategoria) ON DELETE SET NULL,
-   FOREIGN KEY (idUnidadMedida) REFERENCES unidadMedidas(idUnidadMedida)
-   -- ON UPDATE CASCADE  -- Permite el UPDATE en idUnidadMedida en inventario
-   --   ON DELETE RESTRICT -- No permite DELETE en unidadMedidas involuntariamente
 );
 
 -- CREACION DE LA TABLA RELACION MODELO AUTOPARTES "RELACION TABLA MODELO AÑO Y INVENTARIO AUTOPARTE"
@@ -99,6 +76,28 @@ CREATE OR REPLACE TABLE unidadMedidas (
   descripcion VARCHAR(100)
 );
 
+-- CREACION DE LA TABLA INVENTARIO AUTOPARTE
+
+CREATE OR REPLACE TABLE inventario (
+	idInventario INT AUTO_INCREMENT PRIMARY KEY,
+	idCategoria INT DEFAULT NULL,
+	idUnidadMedida INT NOT NULL,
+   codigoBarras VARCHAR(50) NOT NULL UNIQUE,
+   nombre VARCHAR(100) NOT NULL,
+   descripcion VARCHAR(150) NOT NULL,
+   cantidadActual FLOAT UNSIGNED DEFAULT 0 NOT NULL,
+   cantidadMinima FLOAT UNSIGNED DEFAULT 1 NOT NULL,
+   precioCompra FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
+   mayoreo FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
+   menudeo FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
+   colocado FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
+   urlImagen VARCHAR(300),
+   estado BOOL DEFAULT TRUE,
+   FOREIGN KEY (idCategoria) REFERENCES categorias(idCategoria) ON DELETE SET NULL,
+   FOREIGN KEY (idUnidadMedida) REFERENCES unidadMedidas(idUnidadMedida)
+   -- ON UPDATE CASCADE  -- Permite el UPDATE en idUnidadMedida en inventario
+   --   ON DELETE RESTRICT -- No permite DELETE en unidadMedidas involuntariamente
+);
 
  -- CREACION DE LA TABLA ROLES ** OCULTO **
  
@@ -993,3 +992,23 @@ SELECT * FROM ventaProductos;
 SELECT * FROM ventas;
 SELECT * FROM pagoVenta;
 SELECT * FROM inventario;
+
+
+-- trigger de entradaProducto
+DELIMITER //
+
+CREATE TRIGGER actualizar_inventario
+AFTER INSERT ON entradaProductos
+FOR EACH ROW
+BEGIN
+    UPDATE inventario
+    SET 
+        cantidadActual = cantidadActual + NEW.cantidadNueva,
+        precioCompra = NEW.precioCompra
+    WHERE idInventario = NEW.idInventario;
+END //
+
+DELIMITER ;
+
+SELECT * FROM inventarioAutoparte;
+INSERT INTO entradaproductos(idUsuario,idInventario,cantidadNueva,precioCompra) VALUES ();

@@ -33,7 +33,7 @@ CREATE TABLE unidadMedidas (
  
 CREATE TABLE roles (
 	idRol INT AUTO_INCREMENT PRIMARY KEY,
-  nombreRol VARCHAR(50) NOT NULL,
+  nombre VARCHAR(50) NOT NULL,
   descripcion VARCHAR(100)
 );
 
@@ -90,7 +90,7 @@ CREATE TABLE marcas (
 CREATE TABLE modelos (
 	idModelo INT AUTO_INCREMENT PRIMARY KEY,
   idMarca INT NOT NULL,
-  nombre VARCHAR(50) NOT NULL UNIQUE,
+  nombre VARCHAR(50) NOT NULL,
   FOREIGN KEY (idMarca) REFERENCES marcas(idMarca) ON DELETE CASCADE
 );
 
