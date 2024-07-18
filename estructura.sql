@@ -143,7 +143,7 @@ CREATE TABLE modeloAutopartes (
 	idModeloAnio INT NOT NULL,
 	idInventario INT NOT NULL,
 	FOREIGN KEY (idModeloAnio) REFERENCES modeloanios(idModeloAnio) ON DELETE CASCADE,
-	FOREIGN KEY (idInventario) REFERENCES inventario(idInventario) ON DELETE CASCADE
+	FOREIGN KEY (idInventario) REFERENCES inventario(idInventario)
 );
 
 -- CREACION DE LA TABLA RELACION PROVEEDOR PRODUCTOS "RELACION TABLA PROVEEDORES Y INVENTARIO AUTOPARTES"
@@ -152,7 +152,8 @@ CREATE TABLE proveedorProductos (
   idProveedorProducto INT AUTO_INCREMENT PRIMARY KEY,
   idProveedor INT NOT NULL,
   idInventario INT NOT NULL,
-  FOREIGN KEY (idProveedor) REFERENCES proveedores(idProveedor)
+  FOREIGN KEY (idProveedor) REFERENCES proveedores(idProveedor) ON DELETE CASCADE,
+  FOREIGN KEY (idInventario) REFERENCES inventario(idInventario)
 );
 
 -- CREACION DE LA TABLA RELACION ENTRADA PRODUCTOS "RELACION TABLA USUARIOS Y INVENTARIO AUTOPARTES"
@@ -192,7 +193,6 @@ CREATE TABLE ventas (
   folioTicket VARCHAR(50) NOT NULL,
   imprimioTicket BOOL NOT NULL,
   fechaVenta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  estado BOOL DEFAULT TRUE,
   FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuario),
   FOREIGN KEY (idCliente) REFERENCES clientes(idCliente)
 );
@@ -205,7 +205,6 @@ CREATE TABLE pagoVenta (
   idTipoPago INT NOT NULL,
   referenciaUnica VARCHAR(50),
   descripcionPago VARCHAR(50),
-  estado BOOL DEFAULT TRUE,
   FOREIGN KEY (idVenta) REFERENCES ventas(idVenta),
   FOREIGN KEY (idTipoPago) REFERENCES tipoPagos(idTipoPago)
 );
@@ -220,7 +219,6 @@ CREATE TABLE ventaProductos (
   tipoVenta VARCHAR(50) NOT NULL,
   precioVenta FLOAT UNSIGNED NOT NULL,
   subtotal FLOAT UNSIGNED NOT NULL,
-  estado BOOL DEFAULT TRUE,
   FOREIGN KEY (idVenta) REFERENCES ventas(idVenta),
   FOREIGN KEY (idInventario) REFERENCES inventario(idInventario)
 );

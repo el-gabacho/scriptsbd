@@ -58,7 +58,7 @@ CREATE TABLE modeloAutopartes (
 	idModeloAnio INT NOT NULL,
 	idInventario INT NOT NULL,
 	FOREIGN KEY (idModeloAnio) REFERENCES modeloanios(idModeloAnio) ON DELETE CASCADE,
-	FOREIGN KEY (idInventario) REFERENCES inventario(idInventario) ON DELETE CASCADE
+	FOREIGN KEY (idInventario) REFERENCES inventario(idInventario)
 );
 
 -- CREACION DE LA TABLA CATEGORIAS
@@ -136,7 +136,8 @@ CREATE TABLE proveedorProductos (
   idProveedorProducto INT AUTO_INCREMENT PRIMARY KEY,
   idProveedor INT NOT NULL,
   idInventario INT NOT NULL,
-  FOREIGN KEY (idProveedor) REFERENCES proveedores(idProveedor)
+  FOREIGN KEY (idProveedor) REFERENCES proveedores(idProveedor) ON DELETE CASCADE,
+  FOREIGN KEY (idInventario) REFERENCES inventario(idInventario)
 );
 
 -- CREACION DE LA TABLA RELACION ENTRADA PRODUCTOS "RELACION TABLA USUARIOS Y INVENTARIO AUTOPARTES"
@@ -180,7 +181,7 @@ CREATE TABLE tipoPagos (
    descripcion VARCHAR(100)
 );
 
-  -- CREACION DE LA TABLA RELACION VENTAS "RELACION TABLA USUARIO Y CLIENTE" 
+-- CREACION DE LA TABLA RELACION VENTAS "RELACION TABLA USUARIO Y CLIENTE" 
 
 CREATE TABLE ventas (
   idVenta INT AUTO_INCREMENT PRIMARY KEY,
@@ -191,7 +192,6 @@ CREATE TABLE ventas (
   folioTicket VARCHAR(50) NOT NULL,
   imprimioTicket BOOL NOT NULL,
   fechaVenta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  estado BOOL DEFAULT TRUE,
   FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuario),
   FOREIGN KEY (idCliente) REFERENCES clientes(idCliente)
 );
@@ -203,8 +203,7 @@ CREATE TABLE pagoVenta (
   idVenta INT NOT NULL,
   idTipoPago INT NOT NULL,
   referenciaUnica VARCHAR(50),
-  descripcion VARCHAR(50),
-  estado BOOL DEFAULT TRUE,
+  descripcionPago VARCHAR(50),
   FOREIGN KEY (idVenta) REFERENCES ventas(idVenta),
   FOREIGN KEY (idTipoPago) REFERENCES tipoPagos(idTipoPago)
 );
@@ -219,7 +218,6 @@ CREATE TABLE ventaProductos (
   tipoVenta VARCHAR(50) NOT NULL,
   precioVenta FLOAT UNSIGNED NOT NULL,
   subtotal FLOAT UNSIGNED NOT NULL,
-  estado BOOL DEFAULT TRUE,
   FOREIGN KEY (idVenta) REFERENCES ventas(idVenta),
   FOREIGN KEY (idInventario) REFERENCES inventario(idInventario)
 );
