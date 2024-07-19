@@ -854,6 +854,7 @@ DELIMITER ;
 CALL CrearVenta(3,1);
 CALL AgregarProductoVenta(1,1,2,'colocado',250);
 CALL AgregarProductoVenta(1,2,3,'MENUDEO',100);
+CALL AgregarProductoVenta(1,2,3,'MENUDEO',100);
 CALL FinalizarVenta(1,1000,'48f484c8f4c8f',TRUE,1,'NO APLICA','PAGADO');
 CrearVenta (idUsuario, idCliente)
 AgregarProductoVenta (idVenta, idInventario, cantidad, tipoVenta, precioVenta)

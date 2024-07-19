@@ -196,7 +196,7 @@ DELIMITER ;
 -- procedimiento almacenado que inserta un nuevo producto en la tabla inventario, registra la relación en proveedorProductos, y también en registroProductos,
 DELIMITER //
 
-CREATE OR REPLACE PROCEDURE InsertarProducto (
+CREATE OR REPLACE PROCEDURE proc_insertar_producto (
     IN p_idCategoria INT,
     IN p_idUnidadMedida INT,
     IN p_codigoBarras VARCHAR(50),
@@ -267,35 +267,47 @@ END //
 
 DELIMITER ;
 
-
--- procedimiento almacenado que actualice el estado de un producto a FALSE en la tabla inventario 
--- y actualice el idUsuarioElimino y fechaElimino en la tabla registroProductos
+-- Trigger para actualizar registroProductos despues de eliminar un producto del inventario
 DELIMITER //
 
-CREATE PROCEDURE EliminarProducto (
+CREATE TRIGGER trigg_after_inventario_delete
+AFTER DELETE ON inventario
+FOR EACH ROW
+BEGIN
+    UPDATE registroProductos
+    SET idUsuarioElimino = @current_user_id,
+        fechaElimino = NOW()
+    WHERE idInventario = OLD.idInventario;
+END //
+
+DELIMITER ;
+
+-- rocedimiento para eliminar un producto
+DELIMITER //
+
+CREATE PROCEDURE proc_eliminar_producto (
     IN p_idInventario INT,
     IN p_idUsuario INT
 )
 BEGIN
-    -- Actualizar el estado del producto a FALSE en inventario
-    UPDATE inventario
-    SET estado = FALSE
-    WHERE idInventario = p_idInventario;
-
-    -- Actualizar el idUsuarioElimino y fechaElimino en registroProductos
-    UPDATE registroProductos
-    SET idUsuarioElimino = p_idUsuario,
-        fechaElimino = NOW()
+    -- Configurar la variable de sesión con el id del usuario
+    SET @current_user_id = p_idUsuario;
+    
+    -- Eliminar el producto de la tabla inventario
+    DELETE FROM inventario
     WHERE idInventario = p_idInventario;
 END //
 
 DELIMITER ;
 
+-- procedimiento almacenado que actualice el estado de un producto a FALSE en la tabla inventario 
+-- y actualice el idUsuarioElimino y fechaElimino en la tabla registroProductos
+
 
 -- ventas Paso 1: Crear una Venta
 DELIMITER //
 
-CREATE PROCEDURE CrearVenta (
+CREATE PROCEDURE proc_crear_venta (
     IN p_idUsuario INT,
     IN p_idCliente INT
 )
@@ -309,7 +321,7 @@ DELIMITER ;
 -- ventas Paso 2: Agregar Producto a la Venta
 DELIMITER //
 
-CREATE OR REPLACE PROCEDURE AgregarProductoVenta (
+CREATE OR REPLACE PROCEDURE proc_agregar_producto_venta (
     IN p_idVenta INT,
     IN p_idInventario INT,
     IN p_cantidad FLOAT,
@@ -329,13 +341,13 @@ BEGIN
     SET cantidadActual = cantidadActual - p_cantidad
     WHERE idInventario = p_idInventario;
 END //
-
+	
 DELIMITER ;
 
 -- ventas Paso 3: Finalizar la Venta
 DELIMITER //
 
-CREATE PROCEDURE FinalizarVenta (
+CREATE PROCEDURE proc_finalizar_venta (
     IN p_idVenta INT,
     IN p_recibioDinero FLOAT,
     IN p_folioTicket VARCHAR(50),
@@ -371,7 +383,7 @@ DELIMITER ;
 -- Procedimiento Almacenado para Manejar Devoluciones
 DELIMITER //
 
-CREATE OR REPLACE PROCEDURE DevolverVenta (
+CREATE OR REPLACE PROCEDURE proc_devolver_venta (
     IN p_idVenta INT
 )
 BEGIN
@@ -401,23 +413,16 @@ BEGIN
         SET cantidadActual = cantidadActual + v_cantidad
         WHERE idInventario = v_idInventario;
 
-        -- Cambiar el estado de los productos devueltos a FALSE
-        UPDATE ventaProductos
-        SET estado = FALSE
+        -- eliminar los productos devueltos
+        DELETE ventaProductos
         WHERE idVenta = p_idVenta AND idInventario = v_idInventario;
     END LOOP;
     
      -- Cerrar el cursor
     CLOSE cur;
-
-    -- Cambiar el estado de la venta a FALSE
-    UPDATE ventas
-    SET estado = FALSE
-    WHERE idVenta = p_idVenta;
     
     -- Actualizar el estado del pagoVenta a FALSE
-    UPDATE pagoVenta
-    SET estado = FALSE
+    DELETE pagoVenta
     WHERE idVenta = p_idVenta;
 
 END //
@@ -428,18 +433,59 @@ DELIMITER ;
 -- Procedimiento Almacenado para Manejar Devoluciones Parciales
 DELIMITER //
 
-CREATE OR REPLACE PROCEDURE DevolverProducto (
+CREATE OR REPLACE PROCEDURE proc_devolver_producto (
     IN p_idVenta INT,
-    IN p_idInventario INT,
-    IN p_cantidadDevuelta FLOAT
+    IN p_idVentaProducto INT
 )
 BEGIN
-    DECLARE v_cantidadOriginal FLOAT;
+	DECLARE p_idInventario INT;
+	DECLARE p_cantidadDevuelta INT;
+	SELECT idInventario INTO p_idInventario FROM ventaProductos WHERE idVentaProducto = p_idVentaProducto; 
+	SELECT cantidad INTO p_cantidadDevuelta FROM ventaProductos WHERE idVentaProducto = p_idVentaProducto; 
+	
+    -- Eliminar producto en ventaProductos
+    DELETE ventaProductos
+    WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
 
+    -- Actualizar la cantidad en el inventario
+    UPDATE inventario
+    SET cantidadActual = cantidadActual + p_cantidadDevuelta
+    WHERE idInventario = p_idInventario;
+
+    -- Actualizar el montoTotal de la venta
+    UPDATE ventas v
+    JOIN (
+        SELECT idVenta, SUM(subtotal) AS nuevoMontoTotal
+        FROM ventaProductos
+        WHERE idVenta = p_idVenta
+        GROUP BY idVenta
+    ) vp ON v.idVenta = vp.idVenta
+    SET v.montoTotal = vp.nuevoMontoTotal
+    WHERE v.idVenta = p_idVenta;
+    
+END //
+
+DELIMITER ;
+
+-- Procedimiento Almacenado para Manejar Devoluciones Parciales
+DELIMITER //
+
+CREATE OR REPLACE PROCEDURE proc_modificar_venta_producto (
+    IN p_idVenta INT,
+    IN p_idVentaProducto INT,
+    IN p_cantidadDevuelta FLOAT,
+    IN p_precioActualizado FLOAT
+)
+BEGIN
+	DECLARE p_idInventario INT;
+	DECLARE v_cantidadOriginal FLOAT;
+	
+	SELECT idInventario INTO p_idInventario FROM ventaProductos WHERE idVentaProducto = p_idVentaProducto; 
+	
     -- Obtener la cantidad original del producto en la venta
     SELECT cantidad INTO v_cantidadOriginal
     FROM ventaProductos
-    WHERE idVenta = p_idVenta AND idInventario = p_idInventario AND estado = TRUE;
+    WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
 
     -- Validar que la cantidad devuelta no sea mayor que la cantidad original
     IF p_cantidadDevuelta > v_cantidadOriginal THEN
@@ -449,14 +495,14 @@ BEGIN
     -- Actualizar la cantidad en ventaProductos
     UPDATE ventaProductos
     SET cantidad = cantidad - p_cantidadDevuelta, 
+    	  precioVenta = p_precioActualizado,
         subtotal = cantidad * precioVenta
-    WHERE idVenta = p_idVenta AND idInventario = p_idInventario AND estado = TRUE;
+    WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
 
     -- Si toda la cantidad del producto ha sido devuelta, cambiar su estado a FALSE
     IF p_cantidadDevuelta = v_cantidadOriginal THEN
-        UPDATE ventaProductos
-        SET estado = FALSE
-        WHERE idVenta = p_idVenta AND idInventario = p_idInventario;
+        DELETE ventaProductos
+    	  WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
     END IF;
 
     -- Actualizar la cantidad en el inventario
@@ -479,11 +525,10 @@ END //
 
 DELIMITER ;
 
-
 -- procedimiento almacenado que inserte datos en la tabla entradaProductos y actualice la tabla inventario con los precios de compra, mayoreo, menudeo y colocado
 DELIMITER //
 
-CREATE PROCEDURE InsertarEntradaProducto(
+CREATE PROCEDURE proc_insertar_entrada_producto(
     IN p_idUsuario INT,
     IN p_idInventario INT,
     IN p_cantidadNueva FLOAT,
