@@ -1,4 +1,0 @@
-mysql-connector-python
-pillow
-python-Levenshtein
-pandas
