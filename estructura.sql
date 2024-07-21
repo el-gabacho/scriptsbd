@@ -37,7 +37,8 @@ CREATE TABLE config (
   rutaLogo VARCHAR(255),
   encabezado VARCHAR(255),
   footer VARCHAR(255),
-  rfc VARCHAR(50)
+  rfc VARCHAR(50),
+  rutaImagenesProductos VARCHAR(255) 
 );
 
 -- CREACION DE LA TABLA DIAS
@@ -162,7 +163,7 @@ CREATE OR REPLACE TABLE inventario (
    mayoreo FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
    menudeo FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
    colocado FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
-   urlImagen VARCHAR(300),
+   nombreImagen VARCHAR(300),
    estado BOOL DEFAULT TRUE,
    FOREIGN KEY (idCategoria) REFERENCES categorias(idCategoria) ON DELETE SET NULL,
    FOREIGN KEY (idUnidadMedida) REFERENCES unidadMedidas(idUnidadMedida)
@@ -255,6 +256,17 @@ CREATE TABLE ventaProductos (
   subtotal FLOAT UNSIGNED NOT NULL,
   FOREIGN KEY (idVenta) REFERENCES ventas(idVenta),
   FOREIGN KEY (idInventario) REFERENCES inventario(idInventario)
+);
+
+-- CREACION DE LA TABLA BITACORAVENTAS
+CREATE TABLE BitacoraVentas (
+  idUsuario INT,
+  idVenta INT NOT NULL,
+  idInventario INT NOT NULL,
+  cantidadProducto FLOAT UNSIGNED NOT NULL,
+  precioVenta FLOAT UNSIGNED NOT NULL,
+  montoTotal FLOAT UNSIGNED NOT NULL,
+  fechaActualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- TIGGERS PARA LA BASE DE DATOS
@@ -473,14 +485,19 @@ CREATE OR REPLACE PROCEDURE proc_insertar_producto (
 )
 BEGIN
     DECLARE v_idInventario INT;
+    DECLARE v_estado BOOL;
 
     -- Verificar si el codigoBarras ya existe y tiene estado FALSE
-    SELECT idInventario INTO v_idInventario
+    SELECT idInventario, estado INTO v_idInventario, v_estado
     FROM inventario
-    WHERE codigoBarras = p_codigoBarras AND estado = FALSE;
-
-    -- Si el codigoBarras existe y tiene estado FALSE, actualizar el registro
-    IF v_idInventario IS NOT NULL THEN
+    WHERE codigoBarras = p_codigoBarras;
+	
+	-- Si el codigoBarras existe y su estado es TRUE, devolver un error
+    IF v_idInventario IS NOT NULL AND v_estado = TRUE THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'El producto con el código de barras especificado ya existe.';
+    -- Si el codigoBarras existe y su estado es FALSE, actualizar el registro
+    ELSEIF v_idInventario IS NOT NULL AND v_estado = FALSE THEN
         UPDATE inventario
         SET idCategoria = p_idCategoria,
             idUnidadMedida = p_idUnidadMedida,
@@ -526,22 +543,8 @@ END //
 
 DELIMITER ;
 
--- Trigger para actualizar registroProductos despues de eliminar un producto del inventario
-DELIMITER //
-
-CREATE TRIGGER trigg_after_inventario_delete
-AFTER DELETE ON inventario
-FOR EACH ROW
-BEGIN
-    UPDATE registroProductos
-    SET idUsuarioElimino = @current_user_id,
-        fechaElimino = NOW()
-    WHERE idInventario = OLD.idInventario;
-END //
-
-DELIMITER ;
-
--- rocedimiento para eliminar un producto
+-- Este procedimiento asegurará que un producto solo se elimine físicamente si no tiene ninguna relación en ventaProductos, 
+-- mientras que en caso contrario, simplemente se deshabilitará (estado = FALSE) y se registrará la acción en registroProductos.
 DELIMITER //
 
 CREATE PROCEDURE proc_eliminar_producto (
@@ -549,15 +552,34 @@ CREATE PROCEDURE proc_eliminar_producto (
     IN p_idUsuario INT
 )
 BEGIN
-    -- Configurar la variable de sesión con el id del usuario
-    SET @current_user_id = p_idUsuario;
-    
-    -- Eliminar el producto de la tabla inventario
-    DELETE FROM inventario
+    DECLARE v_count INT;
+
+    -- Verificar si el producto tiene relaciones en ventaProductos
+    SELECT COUNT(*)
+    INTO v_count
+    FROM ventaProductos
     WHERE idInventario = p_idInventario;
+
+    -- Si no hay relaciones en ventaProductos, permitir la eliminación
+    IF v_count = 0 THEN
+        DELETE FROM inventario
+        WHERE idInventario = p_idInventario;
+    ELSE
+        -- Actualizar el estado del producto a FALSE en inventario
+        UPDATE inventario
+        SET estado = FALSE
+        WHERE idInventario = p_idInventario;
+
+        -- Actualizar el idUsuarioElimino y fechaElimino en registroProductos
+        UPDATE registroProductos
+        SET idUsuarioElimino = p_idUsuario,
+            fechaElimino = NOW()
+        WHERE idInventario = p_idInventario;
+    END IF;
 END //
 
 DELIMITER ;
+
 
 -- procedimiento almacenado que actualice el estado de un producto a FALSE en la tabla inventario 
 -- y actualice el idUsuarioElimino y fechaElimino en la tabla registroProductos
@@ -584,14 +606,11 @@ CREATE OR REPLACE PROCEDURE proc_agregar_producto_venta (
     IN p_idVenta INT,
     IN p_idInventario INT,
     IN p_cantidad FLOAT,
+    IN p_subtotal FLOAT
     IN p_tipoVenta VARCHAR(50),
     IN p_precioVenta FLOAT
 )
 BEGIN
-    DECLARE v_subtotal FLOAT;
-    
-    SET v_subtotal = p_cantidad * p_precioVenta;
-
     INSERT INTO ventaProductos (idVenta, idInventario, cantidad, tipoVenta, precioVenta, subtotal)
     VALUES (p_idVenta, p_idInventario, p_cantidad, p_tipoVenta, p_precioVenta, v_subtotal);
     
@@ -608,6 +627,7 @@ DELIMITER //
 
 CREATE PROCEDURE proc_finalizar_venta (
     IN p_idVenta INT,
+    IN p_montoTotal FLOAT,
     IN p_recibioDinero FLOAT,
     IN p_folioTicket VARCHAR(50),
     IN p_imprimioTicket BOOL,
@@ -616,13 +636,6 @@ CREATE PROCEDURE proc_finalizar_venta (
     IN p_descripcion VARCHAR(50)
 )
 BEGIN
-    DECLARE v_montoTotal FLOAT;
-
-    -- Calcular el monto total sumando los subtotales de los productos en la venta
-    SELECT SUM(subtotal) INTO v_montoTotal
-    FROM ventaProductos
-    WHERE idVenta = p_idVenta AND estado = TRUE;
-
     -- Actualizar el registro de la venta con el monto total y otros detalles
     UPDATE ventas
     SET montoTotal = v_montoTotal,
@@ -708,7 +721,8 @@ BEGIN
 
     -- Actualizar la cantidad en el inventario
     UPDATE inventario
-    SET cantidadActual = cantidadActual + p_cantidadDevuelta
+    SET cantidadActual = cantidadActual + p_cantidadDevuelta,
+    		estado = TRUE
     WHERE idInventario = p_idInventario;
 
     -- Actualizar el montoTotal de la venta
@@ -810,6 +824,19 @@ BEGIN
         menudeo = p_menudeo,
         colocado = p_colocado
     WHERE idInventario = p_idInventario;
+END //
+
+DELIMITER ;
+
+-- trigger para cuando se elimina un registro en la tabla ventaProductos
+DELIMITER //
+
+CREATE TRIGGER after_ventaProductos_delete
+AFTER DELETE ON ventaProductos
+FOR EACH ROW
+BEGIN
+    INSERT INTO BitacoraVentas (idUsuario, idVenta, idInventario, cantidadProducto, precioVenta, montoTotal)
+    VALUES (@current_user_id, OLD.idVenta, OLD.idInventario, OLD.cantidad, OLD.precioVenta, OLD.subtotal);
 END //
 
 DELIMITER ;
