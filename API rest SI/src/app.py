@@ -2,7 +2,7 @@ from flask import Flask
 from config import configuracion
 from models import db, ma  # Importar db y ma para inicializarlos
 import routes
-
+#cambio
 app = Flask(__name__)
 app.config.from_object(configuracion['development'])
 
