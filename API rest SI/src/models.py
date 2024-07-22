@@ -35,7 +35,7 @@ class Inventario(db.Model):
     mayoreo = db.Column(db.Float, nullable=False, default=0.0)
     menudeo = db.Column(db.Float, nullable=False, default=0.0)
     colocado = db.Column(db.Float, nullable=False, default=0.0)
-    urlImagen = db.Column(db.String(300))
+    nombreImagen = db.Column(db.String(300))
 
     unidad_medida = db.relationship('UnidadMedida', backref='inventarios')
     proveedor_productos = db.relationship('ProveedorProducto', backref='inventarios')
