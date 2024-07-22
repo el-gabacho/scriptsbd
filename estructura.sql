@@ -479,7 +479,7 @@ CREATE OR REPLACE PROCEDURE proc_insertar_producto (
     IN p_mayoreo FLOAT,
     IN p_menudeo FLOAT,
     IN p_colocado FLOAT,
-    IN p_urlImagen VARCHAR(300),
+    IN p_nombreImagen VARCHAR(300),
     IN p_idProveedor INT,
     IN p_idUsuario INT
 )
@@ -509,7 +509,7 @@ BEGIN
             mayoreo = p_mayoreo,
             menudeo = p_menudeo,
             colocado = p_colocado,
-            urlImagen = p_urlImagen,
+            nombreImagen = p_nombreImagen,
             estado = TRUE
         WHERE idInventario = v_idInventario;
 			
@@ -521,10 +521,10 @@ BEGIN
     ELSE
         INSERT INTO inventario (
             idCategoria, idUnidadMedida, codigoBarras, nombre, descripcion,
-            cantidadActual, cantidadMinima, precioCompra, mayoreo, menudeo, colocado, urlImagen
+            cantidadActual, cantidadMinima, precioCompra, mayoreo, menudeo, colocado, nombreImagen
         ) VALUES (
             p_idCategoria, p_idUnidadMedida, p_codigoBarras, p_nombre, p_descripcion,
-            p_cantidadActual, p_cantidadMinima, p_precioCompra, p_mayoreo, p_menudeo, p_colocado, p_urlImagen
+            p_cantidadActual, p_cantidadMinima, p_precioCompra, p_mayoreo, p_menudeo, p_colocado, p_nombreImagen
         );
 
         SET v_idInventario = LAST_INSERT_ID();
@@ -606,7 +606,7 @@ CREATE OR REPLACE PROCEDURE proc_agregar_producto_venta (
     IN p_idVenta INT,
     IN p_idInventario INT,
     IN p_cantidad FLOAT,
-    IN p_subtotal FLOAT
+    IN p_subtotal FLOAT,
     IN p_tipoVenta VARCHAR(50),
     IN p_precioVenta FLOAT
 )
