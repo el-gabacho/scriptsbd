@@ -71,8 +71,8 @@ INSERT INTO proveedores (empresa) VALUES
 
 -- INSERCIONES A LA TABLA UNIDAD MEDIDAS (SOLO 2 TIPOS)
 
-INSERT INTO unidadmedidas (tipoMedida, descripcion) VALUES ("PQ / PZ","Conteo por unidad");
-INSERT INTO unidadmedidas (tipoMedida, descripcion) VALUES ("M / CM","Usa enteros y 2 decimales para agranel");
+INSERT INTO unidadmedidas (tipoMedida, descripcion) VALUES ("PQ/PZ","Conteo por unidad");
+INSERT INTO unidadmedidas (tipoMedida, descripcion) VALUES ("M/CM","Usa enteros y 2 decimales para agranel");
 
 -- INSERCIONES A LA TABLA TIPO PAGO (SOLO 4 TIPOS)
 

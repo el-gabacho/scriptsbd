@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import db, MarcaSchema, Marca, Inventario, UnidadMedida, Proveedor, ProveedorProducto
+from models import db, MarcaSchema, Marca, Inventario, UnidadMedida, Proveedor, ProveedorProducto, Categoria
 from sqlalchemy.exc import ProgrammingError
 
 routes = Blueprint('routes', __name__)
@@ -48,17 +48,16 @@ def get_info_productos():
             Inventario.colocado,
             Inventario.nombreImagen,
             UnidadMedida.tipoMedida,
-            UnidadMedida.descripcion.label('unidadMedidaDescripcion'),
+            Categoria.nombre.label('categoriaNombre'),
             Proveedor.empresa.label('proveedorEmpresa'),
-            Proveedor.nombreEncargado.label('proveedorNombreEncargado'),
-            Proveedor.telefono.label('proveedorTelefono'),
-            Proveedor.correo.label('proveedorCorreo')
         ).join(
             UnidadMedida, Inventario.idUnidadMedida == UnidadMedida.idUnidadMedida
         ).join(
             ProveedorProducto, Inventario.idInventario == ProveedorProducto.idInventario
         ).join(
             Proveedor, ProveedorProducto.idProveedor == Proveedor.idProveedor
+        ).join(
+            Categoria, Inventario.idCategoria == Categoria.idCategoria
         ).all()
 
         productos_list = []
@@ -72,13 +71,12 @@ def get_info_productos():
                 'cantidadMinima': producto.cantidadMinima,
                 'precioCompra': producto.precioCompra,
                 'precioMayoreo': producto.mayoreo,
-                 'precioMenudeo': producto.menudeo,
+                'precioMenudeo': producto.menudeo,
                 'precioColocado': producto.colocado,
                 'imagen': producto.nombreImagen,
                 'tipoMedida': producto.tipoMedida,
-                'unidadMedidaDescripcion': producto.unidadMedidaDescripcion,
-                'proveedorEmpresa': producto.proveedorEmpresa,
-                'Proveedor': producto.proveedorNombreEncargado,
+                'proveedor': producto.proveedorEmpresa,
+                'categoria': producto.categoriaNombre,
             })
 
         return jsonify(productos_list)
