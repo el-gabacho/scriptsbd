@@ -123,16 +123,16 @@ CREATE TABLE marcas (
 -- CREACION DE LA TABLA MODELOS
 
 CREATE TABLE modelos (
-	idModelo INT AUTO_INCREMENT PRIMARY KEY,
+  idModelo INT AUTO_INCREMENT PRIMARY KEY,
   idMarca INT NOT NULL,
   nombre VARCHAR(50) NOT NULL,
-  FOREIGN KEY (idMarca) REFERENCES marcas(idMarca) ON DELETE CASCADE
+  FOREIGN KEY (idMarca) REFERENCES marcas(idMarca)
 );
 
 -- CREACION DE LA TABLA AÑOS
 
 CREATE TABLE anios (
-	idAnio INT AUTO_INCREMENT PRIMARY KEY,
+  idAnio INT AUTO_INCREMENT PRIMARY KEY,
   anioInicio INT UNSIGNED NOT NULL,
   anioFin INT UNSIGNED NOT NULL,
   anioTodo BOOL DEFAULT FALSE NOT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE modeloAnios (
 );
 
 -- CREACION DE LA TABLA INVENTARIO AUTOPARTES
-CREATE OR REPLACE TABLE inventario (
+CREATE TABLE inventario (
 	idInventario INT AUTO_INCREMENT PRIMARY KEY,
 	idCategoria INT DEFAULT NULL,
 	idUnidadMedida INT NOT NULL,
@@ -487,12 +487,12 @@ BEGIN
     DECLARE v_idInventario INT;
     DECLARE v_estado BOOL;
 
-    -- Verificar si el codigoBarras ya existe y tiene estado FALSE
+    -- Verificar si el codigoBarras ya existe
     SELECT idInventario, estado INTO v_idInventario, v_estado
     FROM inventario
     WHERE codigoBarras = p_codigoBarras;
 	
-	-- Si el codigoBarras existe y su estado es TRUE, devolver un error
+	-- Si el codigoBarras existe, devolver un error.
     IF v_idInventario IS NOT NULL THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'El producto con el código de barras especificado no puedes utilizarlo.';
