@@ -493,30 +493,9 @@ BEGIN
     WHERE codigoBarras = p_codigoBarras;
 	
 	-- Si el codigoBarras existe y su estado es TRUE, devolver un error
-    IF v_idInventario IS NOT NULL AND v_estado = TRUE THEN
+    IF v_idInventario IS NOT NULL THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'El producto con el código de barras especificado ya existe.';
-    -- Si el codigoBarras existe y su estado es FALSE, actualizar el registro
-    ELSEIF v_idInventario IS NOT NULL AND v_estado = FALSE THEN
-        UPDATE inventario
-        SET idCategoria = p_idCategoria,
-            idUnidadMedida = p_idUnidadMedida,
-            nombre = p_nombre,
-            descripcion = p_descripcion,
-            cantidadActual = p_cantidadActual,
-            cantidadMinima = p_cantidadMinima,
-            precioCompra = p_precioCompra,
-            mayoreo = p_mayoreo,
-            menudeo = p_menudeo,
-            colocado = p_colocado,
-            nombreImagen = p_nombreImagen,
-            estado = TRUE
-        WHERE idInventario = v_idInventario;
-			
-			UPDATE registroProductos
-			SET idUsuarioRegistro = p_idUsuario,
-				fechaCreacion = NOW()
-			WHERE idInventario = v_idInventario;
+        SET MESSAGE_TEXT = 'El producto con el código de barras especificado no puedes utilizarlo.';
     -- Insertar un nuevo registro si el codigoBarras no existe
     ELSE
         INSERT INTO inventario (
