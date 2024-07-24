@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
-from models import db, MarcaSchema, Marca, Inventario, UnidadMedida, Proveedor, ProveedorProducto, Categoria
+from models import db, MarcaSchema, Marca, Inventario, UnidadMedida, Proveedor, ProveedorProducto, Categoria, Modelo, ModeloAnio, ModeloAutoparte, Anio
 from sqlalchemy.exc import ProgrammingError
+from sqlalchemy import func
 
 routes = Blueprint('routes', __name__)
 
@@ -8,11 +9,28 @@ marca_schema = MarcaSchema()
 marcas_schema = MarcaSchema(many=True)
 
 @routes.route('/marcas', methods=['GET'])
-def get_marcas():
+def get_marcas_with_model_count():
     try:
-        marcas = Marca.query.all()  # Obtener todas las marcas
-        result = marcas_schema.dump(marcas)
-        return jsonify(result)
+        marcas = db.session.query(
+            Marca.idMarca,
+            Marca.nombre,
+            db.func.count(Modelo.nombre)
+        ).join(
+            Modelo, Marca.idMarca == Modelo.idMarca
+        ).group_by(
+            Marca.idMarca
+        ).all()
+
+        marcas_list = []
+        for marca in marcas:
+            marcas_list.append({
+                'idMarca': marca.idMarca,
+                'nombre': marca.nombre,
+                'count': marca[2]
+            })
+
+        return jsonify(marcas_list)
+
     except ProgrammingError as e:
         return jsonify({'error': 'Error en la estructura de la base de datos', 'details': str(e)}), 500
     except Exception as e:
@@ -31,6 +49,65 @@ def get_marca(id):
     except Exception as e:
         return jsonify({'error': 'Ocurrió un error inesperado', 'details': str(e)}), 500
 
+@routes.route('/modelos/<int:idmarca>', methods=['GET'])
+def get_modelo_anio_count(idmarca):
+    try:
+        query = db.session.query(
+            ModeloAnio.idModeloAnio,
+            Modelo.nombre,
+            func.concat(func.coalesce(Anio.anioInicio, ''), '-', func.coalesce(Anio.anioFin, '')).label('anioRango'),
+            func.count(ModeloAutoparte.idInventario).label('numProductos')
+        ).outerjoin(
+            Modelo, Modelo.idModelo == ModeloAnio.idModelo
+        ).outerjoin(
+            Anio, ModeloAnio.idAnio == Anio.idAnio
+        ).outerjoin(
+            ModeloAutoparte, ModeloAnio.idModeloAnio == ModeloAutoparte.idModeloAnio
+        ).filter(
+            Modelo.idMarca == idmarca
+        ).group_by(
+            Modelo.idModelo, Anio.idAnio
+        ).order_by(
+            Modelo.nombre, ModeloAnio.idModeloAnio
+        ).all()
+
+        result = []
+        for row in query:
+            result.append({
+                'idModeloAnio': row.idModeloAnio,
+                'nombre': row.nombre,
+                'anioRango': row.anioRango,
+                'numProductos': row.numProductos
+            })
+
+        return jsonify(result)
+
+    except ProgrammingError as e:
+        return jsonify({'error': 'Error en la estructura de la base de datos', 'details': str(e)}), 500
+    except Exception as e:
+        return jsonify({'error': 'Ocurrió un error inesperado', 'details': str(e)}), 500
+
+@routes.route('/categorias', methods=['GET'])
+def get_categorias():
+    try:
+        categorias = Categoria.query \
+            .join(Inventario, Categoria.idCategoria == Inventario.idCategoria, isouter=True) \
+            .with_entities(Categoria.idCategoria, Categoria.nombre, db.func.count(Inventario.idInventario).label('numProductos')) \
+            .group_by(Categoria.idCategoria, Categoria.nombre) \
+            .order_by(Categoria.idCategoria) \
+            .all()
+
+        result = []
+        for categoria in categorias:
+            result.append({
+                'idCategoria': categoria.idCategoria,
+                'nombre': categoria.nombre,
+                'numProductos': categoria.numProductos
+            })
+
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @routes.route('/info_productos', methods=['GET'])
 def get_info_productos():
