@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import db, MarcaSchema, Marca, Inventario, UnidadMedida, Proveedor, ProveedorProducto, Categoria, Modelo, ModeloAnio, ModeloAutoparte, Anio
+from models import db, MarcaSchema, Marca, Inventario, UnidadMedida, Proveedor, ProveedorProducto, Categoria, Modelo, ModeloAnio, ModeloAutoparte, Anio, Usuario, Rol
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import func
 
@@ -219,3 +219,65 @@ def get_info_productos_by(codigo_barras):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@routes.route('/proveedores', methods=['GET'])
+def get_proveedores():
+    try:
+        proveedores = Proveedor.query.all()
+        result = []
+        for proveedor in proveedores:
+            result.append({
+                'idProveedor': proveedor.idProveedor,
+                'empresa': proveedor.empresa,
+                'nombreEncargado': proveedor.nombreEncargado,
+                'telefono': proveedor.telefono,
+                'correo': proveedor.correo
+            })
+
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@routes.route('/proveedores/<int:id>', methods=['GET'])
+def get_proveedor(id):
+    try:
+        proveedor = Proveedor.query.get(id)
+        if proveedor:
+            result = {
+                'idProveedor': proveedor.idProveedor,
+                'empresa': proveedor.empresa,
+                'nombreEncargado': proveedor.nombreEncargado,
+                'telefono': proveedor.telefono,
+                'correo': proveedor.correo
+            }
+            return jsonify(result)
+        return jsonify({'message': 'Proveedor no encontrado'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/usuarios', methods=['GET'])
+def get_usuarios():
+    try:
+        usuarios = db.session.query(
+            Usuario.idUsuario,
+            Usuario.nombreCompleto,
+            Usuario.usuario,
+            Rol.nombre,
+            Usuario.fechaCreacion
+        ).join(
+            Rol, Usuario.idRol == Rol.idRol
+        ).filter(
+            Usuario.estado == True
+        ).all()
+        
+        usuarios_list = []
+        for usuario in usuarios:
+            usuarios_list.append({
+                'idUsuario': usuario.idUsuario,
+                'nombreCompleto': usuario.nombreCompleto,
+                'usuario': usuario.usuario,
+                'rol': usuario.nombre,
+                'fechaCreacion': usuario.fechaCreacion
+            })
+        return jsonify(usuarios_list)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

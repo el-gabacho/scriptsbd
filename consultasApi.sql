@@ -45,4 +45,4 @@ SELECT * FROM proveedores;
 # UsuariosForm.cs
 SELECT u.idUsuario, u.nombreCompleto, u.usuario, r.nombre, u.fechaCreacion
 FROM usuarios u JOIN roles r ON u.idRol = r.idRol 
-WHERE u.estado = 1;
+WHERE u.estado = TRUE;
