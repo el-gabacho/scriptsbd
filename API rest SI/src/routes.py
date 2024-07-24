@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from models import db, MarcaSchema, Marca, Inventario, UnidadMedida, Proveedor, ProveedorProducto, Categoria, Modelo, ModeloAnio, ModeloAutoparte, Anio, Usuario, Rol
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import func
+from sqlalchemy.orm import aliased
 
 routes = Blueprint('routes', __name__)
 
@@ -55,10 +56,12 @@ def get_modelo_anio_count(idmarca):
         query = db.session.query(
             ModeloAnio.idModeloAnio,
             Modelo.nombre,
-            func.concat(func.coalesce(Anio.anioInicio, ''), '-', func.coalesce(Anio.anioFin, '')).label('anioRango'),
+            func.concat(
+                func.coalesce(Anio.anioInicio, ''), '-', func.coalesce(Anio.anioFin, '')
+            ).label('anioRango'),
             func.count(ModeloAutoparte.idInventario).label('numProductos')
         ).outerjoin(
-            Modelo, Modelo.idModelo == ModeloAnio.idModelo
+            ModeloAnio, Modelo.idModelo == ModeloAnio.idModelo
         ).outerjoin(
             Anio, ModeloAnio.idAnio == Anio.idAnio
         ).outerjoin(
@@ -66,15 +69,16 @@ def get_modelo_anio_count(idmarca):
         ).filter(
             Modelo.idMarca == idmarca
         ).group_by(
-            Modelo.idModelo, Anio.idAnio
+            Modelo.idModelo, ModeloAnio.idModeloAnio
         ).order_by(
             Modelo.nombre, ModeloAnio.idModeloAnio
         ).all()
 
         result = []
         for row in query:
+            idModeloAnio = row.idModeloAnio if row.idModeloAnio else None
             result.append({
-                'idModeloAnio': row.idModeloAnio,
+                'idModeloAnio': idModeloAnio,
                 'nombre': row.nombre,
                 'anioRango': row.anioRango,
                 'numProductos': row.numProductos
@@ -112,7 +116,7 @@ def get_categorias():
 @routes.route('/info_productos', methods=['GET'])
 def get_info_productos():
     try:
-        productos = db.session.query(
+        query = db.session.query(
             Inventario.idInventario,
             Inventario.codigoBarras,
             Inventario.nombre,
@@ -123,10 +127,16 @@ def get_info_productos():
             Inventario.mayoreo,
             Inventario.menudeo,
             Inventario.colocado,
-            Inventario.nombreImagen,
             UnidadMedida.tipoMedida,
             Categoria.nombre.label('categoriaNombre'),
             Proveedor.empresa.label('proveedorEmpresa'),
+            func.group_concat(
+                func.concat(
+                    Marca.nombre, ' ', Modelo.nombre, ' ', 
+                    func.coalesce(Anio.anioInicio, ''), '-', 
+                    func.coalesce(Anio.anioFin, '')
+                ).distinct()
+            ).label('Aplicaciones')
         ).join(
             UnidadMedida, Inventario.idUnidadMedida == UnidadMedida.idUnidadMedida
         ).join(
@@ -135,10 +145,22 @@ def get_info_productos():
             Proveedor, ProveedorProducto.idProveedor == Proveedor.idProveedor
         ).join(
             Categoria, Inventario.idCategoria == Categoria.idCategoria
+        ).outerjoin(
+            ModeloAutoparte, Inventario.idInventario == ModeloAutoparte.idInventario
+        ).outerjoin(
+            ModeloAnio, ModeloAutoparte.idModeloAnio == ModeloAnio.idModeloAnio
+        ).outerjoin(
+            Modelo, ModeloAnio.idModelo == Modelo.idModelo
+        ).outerjoin(
+            Marca, Modelo.idMarca == Marca.idMarca
+        ).outerjoin(
+            Anio, ModeloAnio.idAnio == Anio.idAnio
+        ).group_by(
+            Inventario.idInventario
         ).all()
 
         productos_list = []
-        for producto in productos:
+        for producto in query:
             productos_list.append({
                 'idInventario': producto.idInventario,
                 'codigo': producto.codigoBarras,
@@ -150,10 +172,10 @@ def get_info_productos():
                 'precioMayoreo': producto.mayoreo,
                 'precioMenudeo': producto.menudeo,
                 'precioColocado': producto.colocado,
-                'imagen': producto.nombreImagen,
                 'tipoMedida': producto.tipoMedida,
                 'proveedor': producto.proveedorEmpresa,
                 'categoria': producto.categoriaNombre,
+                'Aplicaciones': producto.Aplicaciones.split(',')
             })
 
         return jsonify(productos_list)

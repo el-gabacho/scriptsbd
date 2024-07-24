@@ -1,3 +1,43 @@
+# get_info_productos
+# mainForm.cs
+SELECT 
+    i.idInventario,
+    GROUP_CONCAT(CONCAT(mc.nombre, ' ', m.nombre, ' ', COALESCE(a.anioInicio, ''), '-', COALESCE(a.anioFin, '')) SEPARATOR ', ') AS Aplicaciones,
+    i.codigoBarras,
+    i.nombre,
+    i.descripcion,
+    i.cantidadActual,
+    p.empresa,
+    i.precioCompra,
+    um.tipoMedida,
+    i.cantidadMinima,
+    i.mayoreo,
+    i.menudeo,
+    i.colocado,
+    c.nombre AS categoriaNombre
+FROM 
+    inventario i
+JOIN 
+    categorias c ON i.idCategoria = c.idCategoria
+JOIN 
+    unidadmedidas um ON i.idUnidadMedida = um.idUnidadMedida
+JOIN 
+    proveedorproductos pp ON i.idInventario = pp.idInventario
+JOIN 
+    proveedores p ON pp.idProveedor = p.idProveedor
+LEFT JOIN 
+    modeloautopartes mp ON i.idInventario = mp.idInventario
+LEFT JOIN 
+    modeloanios ma ON mp.idModeloAnio = ma.idModeloAnio
+LEFT JOIN 
+    modelos m ON ma.idModelo = m.idModelo
+LEFT JOIN 
+    marcas mc ON m.idMarca = mc.idMarca
+LEFT JOIN 
+    anios a ON ma.idAnio = a.idAnio
+GROUP BY 
+    i.idInventario;
+
 # get_marca(id)
 # VehiculosForm.cs
 SELECT m.idMarca, m.nombre, count(mo.nombre) FROM marcas m JOIN modelos mo ON m.idMarca = mo.idMarca GROUP BY m.idMarca;
@@ -46,3 +86,44 @@ SELECT * FROM proveedores;
 SELECT u.idUsuario, u.nombreCompleto, u.usuario, r.nombre, u.fechaCreacion
 FROM usuarios u JOIN roles r ON u.idRol = r.idRol 
 WHERE u.estado = TRUE;
+
+# Inventario_StockBajo.cs
+SELECT codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima FROM inventario WHERE cantidadMinima > cantidadActual;
+
+# Inventario_busquedaAvanzada.cs
+SELECT 
+    i.idInventario,
+    GROUP_CONCAT(CONCAT(mc.nombre, ' ', m.nombre, ' ', COALESCE(a.anioInicio, ''), '-', COALESCE(a.anioFin, '')) SEPARATOR ', ') AS Aplicaciones,
+    i.codigoBarras,
+    i.nombre,
+    i.descripcion,
+    i.cantidadActual,
+    p.empresa,
+FROM 
+    inventario i
+JOIN 
+    categorias c ON i.idCategoria = c.idCategoria
+JOIN 
+    unidadmedidas um ON i.idUnidadMedida = um.idUnidadMedida
+JOIN 
+    proveedorproductos pp ON i.idInventario = pp.idInventario
+JOIN 
+    proveedores p ON pp.idProveedor = p.idProveedor
+LEFT JOIN 
+    modeloautopartes mp ON i.idInventario = mp.idInventario
+LEFT JOIN 
+    modeloanios ma ON mp.idModeloAnio = ma.idModeloAnio
+LEFT JOIN 
+    modelos m ON ma.idModelo = m.idModelo
+LEFT JOIN 
+    marcas mc ON m.idMarca = mc.idMarca
+LEFT JOIN 
+    anios a ON ma.idAnio = a.idAnio
+GROUP BY 
+    i.idInventario
+WHERE i.codigoBarras LIKE "%ala%" AND 
+i.nombre LIKE "%ala%" AND
+i.descripcion LIKE "%ala%" AND
+c.nombre LIKE "%ala%" AND
+p.empresa LIKE "%ala%" AND
+Aplicaciones;
