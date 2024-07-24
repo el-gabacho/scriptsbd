@@ -25,7 +25,7 @@ ORDER BY
     m.nombre, ma.idModeloAnio;
 
 # get_categorias
-CategoriasForm.cs
+# CategoriasForm.cs
 SELECT 
     c.idCategoria, 
     c.nombre, 
@@ -38,3 +38,11 @@ GROUP BY
     c.idCategoria, c.nombre
 ORDER BY 
     c.idCategoria;
+
+# ProveedoresForm.cs
+SELECT * FROM proveedores;
+
+# UsuariosForm.cs
+SELECT u.idUsuario, u.nombreCompleto, u.usuario, r.nombre, u.fechaCreacion
+FROM usuarios u JOIN roles r ON u.idRol = r.idRol 
+WHERE u.estado = 1;
