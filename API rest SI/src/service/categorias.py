@@ -17,3 +17,21 @@ def get_categorias():
         })
 
     return result
+
+def crear_categoria(nombre):
+    nueva_categoria = Categoria(nombre=nombre)
+    db.session.add(nueva_categoria)
+    db.session.commit()
+    return nueva_categoria.idCategoria
+
+def eliminar_categoria(idCategoria):
+    categoria = Categoria.query.get(idCategoria)
+    db.session.delete(categoria)
+    db.session.commit()
+    return True
+
+def actualizar_categoria(idCategoria, nombre):
+    categoria = Categoria.query.get(idCategoria)
+    categoria.nombre = nombre
+    db.session.commit()
+    return True

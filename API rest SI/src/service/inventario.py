@@ -1,4 +1,5 @@
 from sqlalchemy import func
+from sqlalchemy.exc import DBAPIError
 from models import db, Inventario, Proveedor, ProveedorProducto, Categoria, ModeloAutoparte, ModeloAnio, Modelo, Marca, Anio, UnidadMedida
 
 def get_productos():
@@ -191,3 +192,39 @@ def buscar_inventarios(filtros):
         })
 
     return inventarios
+
+def get_stock_bajo():
+    stock_bajo = Inventario.query.filter(Inventario.cantidadMinima > Inventario.cantidadActual).all()
+    return stock_bajo
+
+def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, precioCompra, mayoreo, 
+                   menudeo, colocado, idUnidadMedida, idCategoria, idProveedor, idUsuario, id_modeloAnio):
+    try:
+        # Llamar al procedimiento almacenado para insertar un producto en el inventario
+        db.session.execute(
+        f"CALL proc_insertar_producto({idCategoria}, {idUnidadMedida}, {codigoBarras}, {nombre}, {descripcion}, {cantidadActual}, {cantidadMinima}, {precioCompra}, {mayoreo}, {menudeo}, {colocado}, {idProveedor}, {idUsuario}, @v_idInventario)"
+        )
+        result = db.session.execute("SELECT @v_idInventario").first()
+        id_inventario = result[0]
+
+        # Llamar al procedimiento almacenado para relacionar un modeloanio con un Autoparte del Inventario
+        db.session.execute(f"CALL proc_modeloanio_autoparte({id_inventario}, {id_modeloAnio})")
+
+        # Confirmar los cambios en la base de datos
+        db.session.commit()
+
+        # Cerrar la sesión
+        db.session.close()
+        return id_inventario
+    except DBAPIError as e:
+        return str(e)
+
+def eliminar_producto(idInventario, idUsuario):
+    # Llamar al procedimiento almacenado para eliminar un producto del inventario
+    db.session.execute(f"CALL proc_eliminar_producto({idInventario},{idUsuario})")
+
+    # Confirmar los cambios en la base de datos
+    db.session.commit()
+
+    # Cerrar la sesión
+    db.session.close()

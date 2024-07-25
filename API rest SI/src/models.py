@@ -35,7 +35,6 @@ class Inventario(db.Model):
     mayoreo = db.Column(db.Float, nullable=False, default=0.0)
     menudeo = db.Column(db.Float, nullable=False, default=0.0)
     colocado = db.Column(db.Float, nullable=False, default=0.0)
-    nombreImagen = db.Column(db.String(300))
 
     unidad_medida = db.relationship('UnidadMedida', backref='inventarios')
     proveedor_productos = db.relationship('ProveedorProducto', backref='inventarios')
@@ -132,3 +131,86 @@ class ModeloAutoparte(db.Model):
 
     modeloAnio = db.relationship('ModeloAnio', backref='modeloAutopartes')
     inventario = db.relationship('Inventario', backref='modeloAutopartes')
+
+class EntradaProducto(db.Model):
+    __tablename__ = 'entradaProductos'
+
+    idEntradaProducto = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    idUsuario = db.Column(db.Integer, nullable=False)
+    idInventario = db.Column(db.Integer, nullable=False)
+    cantidadNueva = db.Column(db.Float(unsigned=True), nullable=False)
+    precioCompra = db.Column(db.Float(unsigned=True), nullable=False)
+    fechaEntrada = db.Column(db.TIMESTAMP, default=db.func.current_timestamp())
+
+    usuario = db.relationship('Usuario', backref='entradas_productos')
+    inventario = db.relationship('Inventario', backref='entradas_productos')
+
+
+class RegistroProducto(db.Model):
+    __tablename__ = 'registroProductos'
+
+    idRegistroProducto = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    idInventario = db.Column(db.Integer, nullable=False)
+    idUsuarioRegistro = db.Column(db.Integer, nullable=False)
+    fechaCreacion = db.Column(db.TIMESTAMP, default=db.func.current_timestamp())
+    idUsuarioElimino = db.Column(db.Integer, default=None)
+    fechaElimino = db.Column(db.TIMESTAMP, default=None)
+
+    inventario = db.relationship('Inventario', backref='registros_productos')
+    usuario_registro = db.relationship('Usuario', backref='registros_productos')
+    usuario_elimino = db.relationship('Usuario', backref='registros_productos_deleted')
+
+
+class Venta(db.Model):
+    __tablename__ = 'ventas'
+
+    idVenta = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    idUsuario = db.Column(db.Integer, nullable=False)
+    idCliente = db.Column(db.Integer, nullable=False)
+    montoTotal = db.Column(db.Float(unsigned=True), nullable=False)
+    recibioDinero = db.Column(db.Float(unsigned=True), nullable=False)
+    folioTicket = db.Column(db.String(50), nullable=False)
+    imprimioTicket = db.Column(db.Boolean, nullable=False)
+    fechaVenta = db.Column(db.TIMESTAMP, default=db.func.current_timestamp())
+
+    usuario = db.relationship('Usuario', backref='ventas')
+    cliente = db.relationship('Cliente', backref='ventas')
+
+
+class PagoVenta(db.Model):
+    __tablename__ = 'pagoVenta'
+
+    idPagoVenta = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    idVenta = db.Column(db.Integer, nullable=False)
+    idTipoPago = db.Column(db.Integer, nullable=False)
+    referenciaUnica = db.Column(db.String(50))
+
+    venta = db.relationship('Venta', backref='pagos_venta')
+    tipo_pago = db.relationship('TipoPago', backref='pagos_venta')
+
+
+class VentaProducto(db.Model):
+    __tablename__ = 'ventaProductos'
+
+    idVentaProducto = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    idVenta = db.Column(db.Integer, nullable=False)
+    idInventario = db.Column(db.Integer, nullable=False)
+    cantidad = db.Column(db.Float(unsigned=True), nullable=False)
+    tipoVenta = db.Column(db.String(50), nullable=False)
+    precioVenta = db.Column(db.Float(unsigned=True), nullable=False)
+    subtotal = db.Column(db.Float(unsigned=True), nullable=False)
+
+    venta = db.relationship('Venta', backref='productos_venta')
+    inventario = db.relationship('Inventario', backref='productos_venta')
+
+
+class BitacoraVentas(db.Model):
+    __tablename__ = 'BitacoraVentas'
+
+    idUsuario = db.Column(db.Integer)
+    idVenta = db.Column(db.Integer, nullable=False)
+    idInventario = db.Column(db.Integer, nullable=False)
+    cantidadProducto = db.Column(db.Float(unsigned=True), nullable=False)
+    precioVenta = db.Column(db.Float(unsigned=True), nullable=False)
+    montoTotal = db.Column(db.Float(unsigned=True), nullable=False)
+    fechaActualizacion = db.Column(db.TIMESTAMP, default=db.func.current_timestamp())

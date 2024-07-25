@@ -1,4 +1,4 @@
-from models import Proveedor
+from models import db, Proveedor
 
 def get_proveedores():
     proveedores = Proveedor.query.all()
@@ -25,3 +25,29 @@ def get_proveedor(id):
             'correo': proveedor.correo
         }
         return result
+    
+def crear_proveedor(empresa, nombreEncargado, telefono, correo):
+    nuevo_proveedor = Proveedor(
+        empresa=empresa,
+        nombreEncargado=nombreEncargado,
+        telefono=telefono,
+        correo=correo
+    )
+    db.session.add(nuevo_proveedor)
+    db.session.commit()
+    return nuevo_proveedor.idProveedor
+
+def eliminar_proveedor(idProveedor):
+    proveedor = Proveedor.query.get(idProveedor)
+    db.session.delete(proveedor)
+    db.session.commit()
+    return True
+
+def actualizar_proveedor(idProveedor, empresa, nombreEncargado, telefono, correo):
+    proveedor = Proveedor.query.get(idProveedor)
+    proveedor.empresa = empresa
+    proveedor.nombreEncargado = nombreEncargado
+    proveedor.telefono = telefono
+    proveedor.correo = correo
+    db.session.commit()
+    return True

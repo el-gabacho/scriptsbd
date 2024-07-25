@@ -2599,7 +2599,7 @@ CALL proc_modeloanio_autoparte(10, 14);
 -- proc_crear_venta (idUsuario, idCliente)
 -- proc_agregar_producto_venta (idVenta, idInventario, cantidad, tipoVenta, precioVenta, subtotal)
 -- FinalizarVenta (idVenta, montoTotal, recibioDinero, folioTicket, imprimioTicket, idTipoPago, referenciaUnica)
-CALL proc_crear_venta(3,1);
+CALL proc_crear_venta(3,1,@v_idVenta);
 CALL proc_agregar_producto_venta(1,1,2,'COLOCADO',420.0,840.0);
 CALL proc_agregar_producto_venta(1,2,1,'MENUDEO',1400.0,1400.0);
 CALL proc_finalizar_venta(1,2240.0,2300,'48f484c8f4c8f',TRUE,1,'NO APLICA');

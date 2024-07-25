@@ -558,11 +558,13 @@ DELIMITER //
 
 CREATE PROCEDURE proc_crear_venta (
     IN p_idUsuario INT,
-    IN p_idCliente INT
+    IN p_idCliente INT,
+    OUT p_v_idVenta INT
 )
 BEGIN
     INSERT INTO ventas (idUsuario, idCliente, montoTotal, recibioDinero, folioTicket, imprimioTicket)
     VALUES (p_idUsuario, p_idCliente, 0, 0, '', FALSE);
+    SET p_v_idVenta = LAST_INSERT_ID();
 END //
 
 DELIMITER ;

@@ -61,3 +61,8 @@ def get_modelo_anio_count(idmarca):
         })
 
     return result
+
+def relaciona_modelo_anio(idModelo, anio_inicio, anio_fin, anio_todo):
+    result = db.session.execute(f"CALL proc_modelo_anio({idModelo}, {anio_inicio}, {anio_fin}, {anio_todo})")
+    errors = result.fetchall()
+    return errors
