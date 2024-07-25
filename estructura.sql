@@ -14,13 +14,6 @@ CREATE OR REPLACE DATABASE el_gabacho;
 
 USE el_gabacho;
 
--- CREACION DE LA TABLA ANUNCIOS
-
-CREATE TABLE anuncios (
-  idAnuncio INT AUTO_INCREMENT PRIMARY KEY,
-  rutaImagen VARCHAR(255) NOT NULL
-);
-
 -- CREACION DE LA TABLA TELEFONOSEMPRESA
 
 CREATE TABLE telefonosEmpresa (
@@ -34,11 +27,9 @@ CREATE TABLE telefonosEmpresa (
 CREATE TABLE config (
   correo VARCHAR(50),
   direccion VARCHAR(100),
-  rutaLogo VARCHAR(255),
   encabezado VARCHAR(255),
   footer VARCHAR(255),
-  rfc VARCHAR(50),
-  rutaImagenesProductos VARCHAR(255) 
+  rfc VARCHAR(50)
 );
 
 -- CREACION DE LA TABLA DIAS
@@ -163,7 +154,6 @@ CREATE TABLE inventario (
    mayoreo FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
    menudeo FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
    colocado FLOAT UNSIGNED DEFAULT 0.00 NOT NULL,
-   nombreImagen VARCHAR(300),
    estado BOOL DEFAULT TRUE,
    FOREIGN KEY (idCategoria) REFERENCES categorias(idCategoria) ON DELETE SET NULL,
    FOREIGN KEY (idUnidadMedida) REFERENCES unidadMedidas(idUnidadMedida)
@@ -239,7 +229,6 @@ CREATE TABLE pagoVenta (
   idVenta INT NOT NULL,
   idTipoPago INT NOT NULL,
   referenciaUnica VARCHAR(50),
-  descripcionPago VARCHAR(50),
   FOREIGN KEY (idVenta) REFERENCES ventas(idVenta),
   FOREIGN KEY (idTipoPago) REFERENCES tipoPagos(idTipoPago)
 );
@@ -479,9 +468,9 @@ CREATE OR REPLACE PROCEDURE proc_insertar_producto (
     IN p_mayoreo FLOAT,
     IN p_menudeo FLOAT,
     IN p_colocado FLOAT,
-    IN p_nombreImagen VARCHAR(300),
     IN p_idProveedor INT,
-    IN p_idUsuario INT
+    IN p_idUsuario INT,
+    OUT p_v_idInventario INT
 )
 BEGIN
     DECLARE v_idInventario INT;
@@ -500,10 +489,10 @@ BEGIN
     ELSE
         INSERT INTO inventario (
             idCategoria, idUnidadMedida, codigoBarras, nombre, descripcion,
-            cantidadActual, cantidadMinima, precioCompra, mayoreo, menudeo, colocado, nombreImagen
+            cantidadActual, cantidadMinima, precioCompra, mayoreo, menudeo, colocado
         ) VALUES (
             p_idCategoria, p_idUnidadMedida, p_codigoBarras, p_nombre, p_descripcion,
-            p_cantidadActual, p_cantidadMinima, p_precioCompra, p_mayoreo, p_menudeo, p_colocado, p_nombreImagen
+            p_cantidadActual, p_cantidadMinima, p_precioCompra, p_mayoreo, p_menudeo, p_colocado
         );
 
         SET v_idInventario = LAST_INSERT_ID();
@@ -516,8 +505,8 @@ BEGIN
     		INSERT INTO registroProductos (idInventario, idUsuarioRegistro)
     		VALUES (v_idInventario, p_idUsuario);
     END IF;
-
-    
+    -- Asignar el id del inventario al parámetro de salida
+    SET p_v_idInventario = v_idInventario;
 END //
 
 DELIMITER ;
@@ -585,13 +574,13 @@ CREATE OR REPLACE PROCEDURE proc_agregar_producto_venta (
     IN p_idVenta INT,
     IN p_idInventario INT,
     IN p_cantidad FLOAT,
-    IN p_subtotal FLOAT,
     IN p_tipoVenta VARCHAR(50),
-    IN p_precioVenta FLOAT
+    IN p_precioVenta FLOAT,
+    IN p_subtotal FLOAT
 )
 BEGIN
     INSERT INTO ventaProductos (idVenta, idInventario, cantidad, tipoVenta, precioVenta, subtotal)
-    VALUES (p_idVenta, p_idInventario, p_cantidad, p_tipoVenta, p_precioVenta, v_subtotal);
+    VALUES (p_idVenta, p_idInventario, p_cantidad, p_tipoVenta, p_precioVenta, p_subtotal);
     
     -- Actualizar la catidad de cada producto
     UPDATE inventario
@@ -604,28 +593,27 @@ DELIMITER ;
 -- ventas Paso 3: Finalizar la Venta
 DELIMITER //
 
-CREATE PROCEDURE proc_finalizar_venta (
+CREATE OR REPLACE PROCEDURE proc_finalizar_venta (
     IN p_idVenta INT,
     IN p_montoTotal FLOAT,
     IN p_recibioDinero FLOAT,
     IN p_folioTicket VARCHAR(50),
     IN p_imprimioTicket BOOL,
     IN p_idTipoPago INT,
-    IN p_referenciaUnica VARCHAR(50),
-    IN p_descripcion VARCHAR(50)
+    IN p_referenciaUnica VARCHAR(50)
 )
 BEGIN
     -- Actualizar el registro de la venta con el monto total y otros detalles
     UPDATE ventas
-    SET montoTotal = v_montoTotal,
+    SET montoTotal = p_montoTotal,
         recibioDinero = p_recibioDinero,
         folioTicket = p_folioTicket,
         imprimioTicket = p_imprimioTicket
     WHERE idVenta = p_idVenta;
 
     -- Registrar el pago en la tabla pagoVenta
-    INSERT INTO pagoVenta (idVenta, idTipoPago, referenciaUnica, descripcion)
-    VALUES (p_idVenta, p_idTipoPago, p_referenciaUnica, p_descripcion);
+    INSERT INTO pagoVenta (idVenta, idTipoPago, referenciaUnica)
+    VALUES (p_idVenta, p_idTipoPago, p_referenciaUnica);
 END //
 
 DELIMITER ;

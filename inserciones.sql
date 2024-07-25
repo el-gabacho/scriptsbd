@@ -1,20 +1,13 @@
 USE el_gabacho;
 
-INSERT INTO anuncios (rutaImagen) VALUES
-('promocion1.jpg'),
-('promocion2.jpg'),
-('promocion3.jpg'),
-('promocion4.jpg'),
-('promocion5.jpg');
-
 INSERT INTO telefonosempresa (numero, tipo) VALUES 
 ('7341641332','WHATSAPP'),
 ('7341641326','WHATSAPP'),
 ('7342060902','FIJOS'),
 ('7346901508','FIJOS');
 
-INSERT INTO config (correo, direccion, rutaLogo, encabezado, footer, rfc) VALUES
-('','carretera jojutla-alpuyeca km 7.5, Jojutla, Mexico','logo.png','AUTOPARTES Y CRISTALES EL GABACHO','Tienes 30 dias de gararntia','');
+INSERT INTO config (correo, direccion, encabezado, footer, rfc) VALUES
+('ejemplo@gmail.com','carretera jojutla-alpuyeca km 7.5, Jojutla, Mexico','AUTOPARTES Y CRISTALES EL GABACHO','Tienes 30 dias de gararntia','');
 
 INSERT INTO horario (dias, horaInicio, horaFin) VALUES 
 ('LUNES A VIERNES','8AM','6PM'),
@@ -2570,20 +2563,20 @@ CALL proc_modelo_anio(1301, 2008, 2010, FALSE); -- aprio: nissan
 CALL proc_modelo_anio(1310, 1981, 1983, FALSE); -- datsun: nissan
 CALL proc_modelo_anio(1657, 0, 0, TRUE); -- camion: universal
 
-SELECT * FROM proveedores;
 -- insertar producto en inventario y relacionar con proveedorProductos y registroProductos
+-- CALL proc_insertar_producto
 -- Parametros (idCategoria,idUnidadMedida, codigoBarras, p_nombre, descripcion, p_cantidadActual, p_cantidadMinima, precioCompra, 
---					p_mayoreo, p_menudeo, p_colocado, urlImagen, idProveedor, idUsuario)
-CALL proc_insertar_producto(93, 1, '8341','MANIJA INTERIOR ','PUERTA CORREDIZA DERECHO',3,1,155.0,260.0,340.0,420.0,'',16,3);
-CALL proc_insertar_producto(100, 1, 'DW01443GTN','PARABRISAS','SD/HB 2 Y 4 PTAS',5,1,1200.0,1300.0,1400.0,1600.0,'DW01443GTN.webp',23,3);
-CALL proc_insertar_producto(45, 1, '017-0604-12','CALAVERA','S/ARNES DERECHA',10,1,50.0,75.0,180.0,280.0,'',23,3);
-CALL proc_insertar_producto(68, 1, '019-0604-03','FARO','4P IZQUIERDO',4,1,150.0,175.0,280.0,380.0,'',23,3);
-CALL proc_insertar_producto(7, 1, '90481270','AMORTIGUADOR','5TA PUERTA Y PUERTA TRASERA',8,1,249.0,350.0,400.0,450.0,'',4,3);
-CALL proc_insertar_producto(49, 1, '1660251','CILINDRO PUERTA','CON LLAVE',0,1,224.0,360.0,490.0,650.0,'',16,3);
-CALL proc_insertar_producto(63, 1, '96419','ELEVADOR MANUAL','DELANTERA IZQUIERDA',20,1,417.0,600.0,680.0,760.0,'',16,3);
-CALL proc_insertar_producto(64, 1, '018-2302-09','ESPEJO','ELECTRICO IZQUIERDO',2,1,545.95,700.0,750.0,820.0,'',23,3);
-CALL proc_insertar_producto(98, 1, 'SV2540-M1459A','MOTOR LIMPIAPARABRISAS','',0,0,500.0,750.0,1800.0,1900.0,'',28,3);
-CALL proc_insertar_producto(85, 2, '1660','HULE DE PUERTA','SIN CEJA',50.0,1,50.0,75.0,180.0,280.0,'',5,3);
+--					p_mayoreo, p_menudeo, p_colocado, idProveedor, idUsuario)
+CALL proc_insertar_producto(93, 1, '8341','MANIJA INTERIOR','PUERTA CORREDIZA DERECHO',3,1,155.0,260.0,340.0,420.0,16,3, @v_idInventario);
+CALL proc_insertar_producto(100, 1, 'DW01443GTN','PARABRISAS','SD/HB 2 Y 4 PTAS',5,1,1200.0,1300.0,1400.0,1600.0,23,3, @v_idInventario);
+CALL proc_insertar_producto(45, 1, '017-0604-12','CALAVERA','S/ARNES DERECHA',10,1,50.0,75.0,180.0,280.0,23,3, @v_idInventario);
+CALL proc_insertar_producto(68, 1, '019-0604-03','FARO','4P IZQUIERDO',4,1,150.0,175.0,280.0,380.0,23,3, @v_idInventario);
+CALL proc_insertar_producto(7, 1, '90481270','AMORTIGUADOR','5TA PUERTA Y PUERTA TRASERA',8,1,249.0,350.0,400.0,450.0,4,3, @v_idInventario);
+CALL proc_insertar_producto(49, 1, '1660251','CILINDRO PUERTA','CON LLAVE',0,1,224.0,360.0,490.0,650.0,16,3, @v_idInventario);
+CALL proc_insertar_producto(63, 1, '96419','ELEVADOR MANUAL','DELANTERA IZQUIERDA',20,1,417.0,600.0,680.0,760.0,16,3, @v_idInventario);
+CALL proc_insertar_producto(64, 1, '018-2302-09','ESPEJO','ELECTRICO IZQUIERDO',2,1,545.95,700.0,750.0,820.0,23,3, @v_idInventario);
+CALL proc_insertar_producto(98, 1, 'SV2540-M1459A','MOTOR LIMPIAPARABRISAS','',0,0,500.0,750.0,1800.0,1900.0,28,3, @v_idInventario);
+CALL proc_insertar_producto(85, 2, '1660','HULE DE PUERTA','SIN CEJA',50.0,1,50.0,75.0,180.0,280.0,5,3, @v_idInventario);
 
 -- Relacionar un modeloanio con un Autoparte del Inventario
 -- CALL proc_modeloanios_con_autoparte(proc_id_inventario, proc_id_modeloAnio)
@@ -2601,3 +2594,12 @@ CALL proc_modeloanio_autoparte(8, 11);
 CALL proc_modeloanio_autoparte(9, 12); 
 CALL proc_modeloanio_autoparte(9, 13); 
 CALL proc_modeloanio_autoparte(10, 14);
+
+-- Crear una venta en 3 pasos para llenar la tabla ventas, ventaproductos y pagoventa  
+-- proc_crear_venta (idUsuario, idCliente)
+-- proc_agregar_producto_venta (idVenta, idInventario, cantidad, tipoVenta, precioVenta, subtotal)
+-- FinalizarVenta (idVenta, montoTotal, recibioDinero, folioTicket, imprimioTicket, idTipoPago, referenciaUnica)
+CALL proc_crear_venta(3,1);
+CALL proc_agregar_producto_venta(1,1,2,'COLOCADO',420.0,840.0);
+CALL proc_agregar_producto_venta(1,2,1,'MENUDEO',1400.0,1400.0);
+CALL proc_finalizar_venta(1,2240.0,2300,'48f484c8f4c8f',TRUE,1,'NO APLICA');
