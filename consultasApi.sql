@@ -93,18 +93,18 @@ SELECT codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima FROM in
 # Inventario_busquedaAvanzada.cs
 SELECT 
     i.idInventario,
-    GROUP_CONCAT(CONCAT(mc.nombre, ' ', m.nombre, ' ', COALESCE(a.anioInicio, ''), '-', COALESCE(a.anioFin, '')) SEPARATOR ', ') AS Aplicaciones,
     i.codigoBarras,
     i.nombre,
     i.descripcion,
     i.cantidadActual,
     p.empresa,
+    mc.nombre AS marca,
+    m.nombre AS modelo,
+    CONCAT(COALESCE(a.anioInicio, ''), '-', COALESCE(a.anioFin, '')) AS anioRango
 FROM 
     inventario i
 JOIN 
     categorias c ON i.idCategoria = c.idCategoria
-JOIN 
-    unidadmedidas um ON i.idUnidadMedida = um.idUnidadMedida
 JOIN 
     proveedorproductos pp ON i.idInventario = pp.idInventario
 JOIN 
@@ -119,11 +119,14 @@ LEFT JOIN
     marcas mc ON m.idMarca = mc.idMarca
 LEFT JOIN 
     anios a ON ma.idAnio = a.idAnio
+WHERE 
+    i.codigoBarras LIKE "%DW01443GTN%" OR 
+    i.nombre LIKE "%PARABRISAS%" OR
+    i.descripcion LIKE "%SD/HB 2 Y 4 PTAS%" OR
+    c.nombre LIKE "%PARABRISAS%" OR
+    p.empresa LIKE "%RADEC%" OR
+    mc.nombre LIKE "%CHEVROLET%" OR
+    m.nombre LIKE "%ASTRA%" OR
+    CONCAT(COALESCE(a.anioInicio, ''), '-', COALESCE(a.anioFin, '')) = "2001-2006"
 GROUP BY 
-    i.idInventario
-WHERE i.codigoBarras LIKE "%ala%" AND 
-i.nombre LIKE "%ala%" AND
-i.descripcion LIKE "%ala%" AND
-c.nombre LIKE "%ala%" AND
-p.empresa LIKE "%ala%" AND
-Aplicaciones;
+    i.idInventario;
