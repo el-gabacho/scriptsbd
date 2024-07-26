@@ -1,11 +1,11 @@
 from flask import Blueprint, request, jsonify
 from models import MarcaSchema
 from sqlalchemy.exc import ProgrammingError
-from service.inventario import buscar_inventarios, get_productos, get_producto, get_stock_bajo, crear_producto, eliminar_producto
-from service.vehiculos import get_marcas_con_count_modelos, get_marca, get_modelo_anio_count, relaciona_modelo_anio
-from service.categorias import get_categorias, crear_categoria, eliminar_categoria, actualizar_categoria
-from service.proveedores import get_proveedores, get_proveedor, crear_proveedor, eliminar_proveedor, actualizar_proveedor
-from service.usuarios import get_usuarios, get_usuario, crear_usuario, eliminar_usuario, actualizar_usuario
+from service.inventario import buscar_inventarios, get_productos, get_producto, obtener_stock_bajo, crear_producto, eliminar_producto
+from service.vehiculos import get_marcas_con_count_modelos, obtener_marca, obtener_modelo_anio_con_count, relaciona_modelo_anio
+from service.categorias import obtener_categorias, crear_categoria, eliminar_categoria, actualizar_categoria
+from service.proveedores import obtener_proveedores, obtener_proveedor, crear_proveedor, eliminar_proveedor, actualizar_proveedor
+from service.usuarios import obtener_usuarios, obtener_usuario, crear_usuario, eliminar_usuario, actualizar_usuario
 from service.ventas import obtener_ventas_por_usuario_fecha, obtener_detalle_venta, obtener_ventas_totales_por_usuario_fechas, crear_venta
 
 routes = Blueprint('routes', __name__)
@@ -32,7 +32,7 @@ def get_info_productos_by(codigo_barras):
         return jsonify({'error': str(e)}), 500
 
 @routes.route('/productos_busqueda_avanzada', methods=['GET'])
-def get_productos_busqueda_avanzada(filtros):
+def get_productos_busqueda_avanzada():
     try:
         # Obtener los parámetros de consulta de la solicitud GET
         codigoBarras = request.args.get('codigoBarras', None)
@@ -62,6 +62,49 @@ def get_productos_busqueda_avanzada(filtros):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
+@routes.route('/stock_bajo', methods=['GET'])
+def get_stock_bajo():
+    try:
+        stock_bajo = obtener_stock_bajo()
+        return jsonify(stock_bajo)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/productos', methods=['POST'])
+def create_producto():
+    try:
+        # Obtener los datos del producto del cuerpo de la solicitud POST
+        data = request.get_json()
+        codigoBarras = data.get('codigoBarras')
+        nombre = data.get('nombre')
+        descripcion = data.get('descripcion')
+        cantidadActual = data.get('cantidadActual')
+        cantidadMinima = data.get('cantidadMinima')
+        precioCompra = data.get('precioCompra')
+        mayoreo = data.get('mayoreo')
+        menudeo = data.get('menudeo')
+        colocado = data.get('colocado')
+        idUnidadMedida = data.get('idUnidadMedida')
+        idCategoria = data.get('idCategoria')
+        idProveedor = data.get('idProveedor')
+        idUsuario = data.get('idUsuario')
+        id_modeloAnio = data.get('id_modeloAnio')
+
+        # Llamar a la función para crear el producto
+        producto = crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, precioCompra, mayoreo, menudeo, colocado, idUnidadMedida, idCategoria, idProveedor, idUsuario, id_modeloAnio)
+        return jsonify(producto), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/productos/<int:id>', methods=['DELETE'])
+def delete_producto(id):
+    try:
+        # Llamar a la función para eliminar el producto
+        eliminar_producto(id)
+        return jsonify({'message': 'Producto eliminado correctamente'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @routes.route('/marcas', methods=['GET'])
 def get_marcas_with_model_count():
     try:
@@ -75,7 +118,7 @@ def get_marcas_with_model_count():
 @routes.route('/marcas/<int:id>', methods=['GET'])
 def get_marca(id):
     try:
-        marca = get_marca(id)
+        marca = obtener_marca(id)
         if marca:
             return jsonify(marca)
         return jsonify({'message': 'Marca no encontrada'}), 404
@@ -87,7 +130,7 @@ def get_marca(id):
 @routes.route('/modelos/<int:idmarca>', methods=['GET'])
 def get_modelo_anio_count(idmarca):
     try:
-        modelos = get_modelo_anio_count(idmarca)
+        modelos = obtener_modelo_anio_con_count(idmarca)
         return jsonify(modelos)
     except ProgrammingError as e:
         return jsonify({'error': 'Error en la estructura de la base de datos', 'details': str(e)}), 500
@@ -97,15 +140,43 @@ def get_modelo_anio_count(idmarca):
 @routes.route('/categorias', methods=['GET'])
 def get_categorias():
     try:
-        categorias = get_categorias()
+        categorias = obtener_categorias()
         return jsonify(categorias)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/categorias', methods=['POST'])
+def create_categoria():
+    try:
+        data = request.get_json()
+        nombre = data.get('nombre')
+        id_categoria = crear_categoria(nombre)
+        return jsonify({'idCategoria': id_categoria}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/categorias/<int:id>', methods=['DELETE'])
+def delete_categoria(id):
+    try:
+        eliminar_categoria(id)
+        return jsonify({'message': 'Categoría eliminada correctamente'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/categorias/<int:id>', methods=['PUT'])
+def update_categoria(id):
+    try:
+        data = request.get_json()
+        nombre = data.get('nombre')
+        actualizar_categoria(id, nombre)
+        return jsonify({'message': 'Categoría actualizada correctamente'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @routes.route('/proveedores', methods=['GET'])
 def get_proveedores():
     try:
-        proveedores = get_proveedores()
+        proveedores = obtener_proveedores()
         return jsonify(proveedores)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -113,17 +184,144 @@ def get_proveedores():
 @routes.route('/proveedores/<int:id>', methods=['GET'])
 def get_proveedor(id):
     try:
-        proveedor = get_proveedor(id)
+        proveedor = obtener_proveedor(id)
         if proveedor:
             return jsonify(proveedor)
         return jsonify({'message': 'Proveedor no encontrado'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@routes.route('/proveedores', methods=['POST'])
+def crearte_proveedor():
+    try:
+        data = request.get_json()
+        nombre = data.get('nombre')
+        encargado = data.get('encargado')
+        telefono = data.get('telefono')
+        correo = data.get('correo')
+        id_proveedor = crear_proveedor(nombre, encargado, telefono, correo)
+        return jsonify({'idCategoria': id_proveedor}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/proveedores/<int:id>', methods=['DELETE'])
+def delete_proveedor(id):
+    try:
+        eliminar_proveedor(id)
+        return jsonify({'message': 'Proveedor eliminado correctamente'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/proveedores/<int:id>', methods=['PUT'])
+def update_proveedor(id):
+    try:
+        data = request.get_json()
+        nombre = data.get('nombre')
+        encargado = data.get('encargado')
+        telefono = data.get('telefono')
+        correo = data.get('correo')
+        actualizar_proveedor(id, nombre, encargado, telefono, correo)
+        return jsonify({'message': 'Proveedor actualizado correctamente'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @routes.route('/usuarios', methods=['GET'])
 def get_usuarios():
     try:
-        usuarios = get_usuarios()
+        usuarios = obtener_usuarios()
         return jsonify(usuarios)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@routes.route('/usuarios/<int:id>', methods=['GET'])
+def get_usuario(id):
+    try:
+        usuario = obtener_usuario(id)
+        if usuario:
+            return jsonify(usuario)
+        return jsonify({'message': 'Usuario no encontrado'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/usuarios', methods=['POST'])
+def create_usuario():
+    try:
+        data = request.get_json()
+        nombre = data.get('nombre')
+        usuario = data.get('usuario')
+        contrasena = data.get('contrasena')
+        idRol = data.get('idRol')
+        id_usuario = crear_usuario(nombre, usuario, contrasena, idRol)
+        return jsonify({'idUsuario': id_usuario}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/usuarios/<int:id>', methods=['DELETE'])
+def delete_usuario(id):
+    try:
+        eliminar_usuario(id)
+        return jsonify({'message': 'Usuario eliminado correctamente'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/usuarios/<int:id>', methods=['PUT'])
+def update_usuario(id):
+    try:
+        data = request.get_json()
+        nombre = data.get('nombre')
+        usuario = data.get('usuario')
+        contrasena = data.get('contrasena')
+        idRol = data.get('idRol')
+        actualizar_usuario(id, nombre, usuario, contrasena, idRol)
+        return jsonify({'message': 'Usuario actualizado correctamente'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/ventas/usuario_fecha', methods=['GET'])
+def get_ventas_por_usuario_fecha():
+    try:
+        usuario = request.args.get('usuario')
+        fecha = request.args.get('fecha')
+        ventas = obtener_ventas_por_usuario_fecha(usuario, fecha)
+        return jsonify(ventas)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/ventas/detalle/<int:id>', methods=['GET'])
+def get_detalle_venta(id):
+    try:
+        detalle_venta = obtener_detalle_venta(id)
+        if detalle_venta:
+            return jsonify(detalle_venta)
+        return jsonify({'message': 'Detalle de venta no encontrado'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/ventas/usuario_fechas', methods=['GET'])
+def get_ventas_totales_por_usuario_fechas():
+    try:
+        usuario = request.args.get('usuario')
+        fecha_inicio = request.args.get('fecha_inicio')
+        fecha_fin = request.args.get('fecha_fin')
+        ventas_totales = obtener_ventas_totales_por_usuario_fechas(usuario, fecha_inicio, fecha_fin)
+        return jsonify(ventas_totales)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/ventas', methods=['POST'])
+def create_venta():
+    try:
+        data = request.get_json()
+        idUsuario = data.get('id_usuario')
+        idCliente = data.get('id_cliente')
+        productos = data.get('productos')
+        montoTotal = data.get('monto_total')
+        recibioDinero = data.get('recicio_dinero')
+        folioTicket = data.get('folio_ticket')
+        imprimioTicket = data.get('imprimio_ticket')
+        idTipoPago = data.get('id_tipo_pago')
+        referenciaUnica = data.get('referencia_unica')
+        id_venta = crear_venta(idUsuario, idCliente, productos, montoTotal, recibioDinero, folioTicket, imprimioTicket, idTipoPago, referenciaUnica)
+        return jsonify({'idVenta': id_venta}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500

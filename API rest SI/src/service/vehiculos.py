@@ -1,5 +1,8 @@
-from models import db, Marca, Modelo, ModeloAnio, ModeloAutoparte, Anio
+from models import db, Marca, Modelo, ModeloAnio, ModeloAutoparte, Anio, MarcaSchema
 from sqlalchemy import func
+
+marca_schema = MarcaSchema()
+marcas_schema = MarcaSchema(many=True) 
 
 def get_marcas_con_count_modelos():
     marcas = db.session.query(
@@ -22,13 +25,16 @@ def get_marcas_con_count_modelos():
 
     return marcas_list
 
-def get_marca(id):
+def obtener_marca(id):
     marca = Marca.query.get(id)
+    print(marca)
     if marca:
-        return marca
+        result = marca_schema.dump(marca)
+        print(result)
+        return result
     return None
 
-def get_modelo_anio_count(idmarca):
+def obtener_modelo_anio_con_count(idmarca):
     query = db.session.query(
         ModeloAnio.idModeloAnio,
         Modelo.nombre,

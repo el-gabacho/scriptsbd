@@ -1,6 +1,6 @@
 from models import db, Categoria, Inventario
 
-def get_categorias():
+def obtener_categorias():
     categorias = Categoria.query \
         .join(Inventario, Categoria.idCategoria == Inventario.idCategoria, isouter=True) \
         .with_entities(Categoria.idCategoria, Categoria.nombre, db.func.count(Inventario.idInventario).label('numProductos')) \

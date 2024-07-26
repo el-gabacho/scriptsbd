@@ -1,6 +1,6 @@
 from models import db, Proveedor
 
-def get_proveedores():
+def obtener_proveedores():
     proveedores = Proveedor.query.all()
     result = []
     for proveedor in proveedores:
@@ -14,7 +14,7 @@ def get_proveedores():
 
     return result
 
-def get_proveedor(id):
+def obtener_proveedor(id):
     proveedor = Proveedor.query.get(id)
     if proveedor:
         result = {

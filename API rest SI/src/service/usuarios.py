@@ -1,6 +1,6 @@
 from models import Usuario, Rol, db
 
-def get_usuarios():
+def obtener_usuarios():
     usuarios = db.session.query(
         Usuario.idUsuario,
         Usuario.nombreCompleto,
@@ -24,7 +24,7 @@ def get_usuarios():
         })
     return usuarios_list
 
-def get_usuario(idUsuario):
+def obtener_usuario(idUsuario):
     usuario = db.session.query(
         Usuario.idUsuario,
         Usuario.nombreCompleto,

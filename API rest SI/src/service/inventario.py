@@ -193,7 +193,7 @@ def buscar_inventarios(filtros):
 
     return inventarios
 
-def get_stock_bajo():
+def obtener_stock_bajo():
     stock_bajo = Inventario.query.filter(Inventario.cantidadMinima > Inventario.cantidadActual).all()
     return stock_bajo
 
