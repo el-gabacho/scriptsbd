@@ -1,11 +1,12 @@
 from flask import Blueprint, request, jsonify
 from models import MarcaSchema
 from sqlalchemy.exc import ProgrammingError
-from service.inventario import buscar_inventarios, get_productos, get_producto, get_stock_bajo
-from service.vehiculos import get_marcas_con_count_modelos, get_marca, get_modelo_anio_count
+from service.inventario import buscar_inventarios, get_productos, get_producto, get_stock_bajo, crear_producto, eliminar_producto
+from service.vehiculos import get_marcas_con_count_modelos, get_marca, get_modelo_anio_count, relaciona_modelo_anio
 from service.categorias import get_categorias, crear_categoria, eliminar_categoria, actualizar_categoria
 from service.proveedores import get_proveedores, get_proveedor, crear_proveedor, eliminar_proveedor, actualizar_proveedor
 from service.usuarios import get_usuarios, get_usuario, crear_usuario, eliminar_usuario, actualizar_usuario
+from service.ventas import obtener_ventas_por_usuario_fecha, obtener_detalle_venta, obtener_ventas_totales_por_usuario_fechas, crear_venta
 
 routes = Blueprint('routes', __name__)
 

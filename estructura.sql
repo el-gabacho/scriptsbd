@@ -556,7 +556,7 @@ DELIMITER ;
 -- ventas Paso 1: Crear una Venta
 DELIMITER //
 
-CREATE PROCEDURE proc_crear_venta (
+CREATE OR REPLACE PROCEDURE proc_crear_venta (
     IN p_idUsuario INT,
     IN p_idCliente INT,
     OUT p_v_idVenta INT

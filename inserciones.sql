@@ -2603,3 +2603,7 @@ CALL proc_crear_venta(3,1,@v_idVenta);
 CALL proc_agregar_producto_venta(1,1,2,'COLOCADO',420.0,840.0);
 CALL proc_agregar_producto_venta(1,2,1,'MENUDEO',1400.0,1400.0);
 CALL proc_finalizar_venta(1,2240.0,2300,'48f484c8f4c8f',TRUE,1,'NO APLICA');
+
+CALL proc_crear_venta(3,1,@v_idVenta);
+CALL proc_agregar_producto_venta(2,3,3,'MAYOREO',75.0,225.0);
+CALL proc_finalizar_venta(2,225.0,225.0,'c1c51cf51cr5h4',TRUE,2,'5s5f4g5h4d5h5j5v');

@@ -160,7 +160,13 @@ class RegistroProducto(db.Model):
     usuario_registro = db.relationship('Usuario', backref='registros_productos')
     usuario_elimino = db.relationship('Usuario', backref='registros_productos_deleted')
 
+class TipoPago(db.Model):
+    __tablename__ = 'tipoPagos'
 
+    idTipoPago = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    tipoPago = db.Column(db.String(20), nullable=False)
+    descripcion = db.Column(db.String(100))
+    
 class Venta(db.Model):
     __tablename__ = 'ventas'
 

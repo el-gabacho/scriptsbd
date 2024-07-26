@@ -130,3 +130,25 @@ WHERE
     CONCAT(COALESCE(a.anioInicio, ''), '-', COALESCE(a.anioFin, '')) = "2001-2006"
 GROUP BY 
     i.idInventario;
+
+-- ventasForm.cs
+SELECT v.folioTicket, p.referenciaUnica, t.tipoPago, v.montoTotal, v.fechaVenta, u.usuario 
+FROM ventas v 
+JOIN pagoventa p ON v.idVenta = p.idVenta
+JOIN tipopagos t ON p.idTipoPago = t.idTipoPago
+JOIN usuarios u ON v.idUsuario = u.idUsuario
+WHERE u.usuario = "Alma123" AND DATE(v.fechaVenta) = "2024-07-25";
+
+-- ventas_revertirForm.cs
+SELECT v.idVentaProducto, i.codigoBarras, i.nombre, i.descripcion, v.precioVenta, v.cantidad, u.tipoMedida, v.subtotal, v.tipoVenta 
+FROM ventaproductos v 
+JOIN inventario i ON v.idInventario = i.idInventario
+JOIN unidadmedidas u ON i.idUnidadMedida = u.idUnidadMedida
+WHERE v.idVenta=1;
+
+-- ventas_generalesForm.cs
+SELECT u.usuario, sum(v.montoTotal), v.fechaVenta
+FROM ventas v 
+JOIN usuarios u ON v.idUsuario = u.idUsuario
+WHERE u.usuario = "Alma123" AND DATE(v.fechaVenta) BETWEEN "2024-07-14" AND "2024-07-25"
+GROUP BY u.usuario;
