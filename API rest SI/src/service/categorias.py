@@ -11,9 +11,9 @@ def obtener_categorias():
     result = []
     for categoria in categorias:
         result.append({
-            'idCategoria': categoria.idCategoria,
-            'nombre': categoria.nombre,
-            'numProductos': categoria.numProductos
+            'Id': categoria.idCategoria,
+            'Nombre': categoria.nombre,
+            'NumProductos': categoria.numProductos
         })
 
     return result
