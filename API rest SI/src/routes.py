@@ -220,7 +220,7 @@ def update_proveedor(id):
         encargado = data.get('encargado')
         telefono = data.get('telefono')
         correo = data.get('correo')
-        actualizar_proveedor(id, nombre, encargado, telefono, correo)
+        response = actualizar_proveedor(id, nombre, encargado, telefono, correo)
         return jsonify({'message': 'Proveedor actualizado correctamente'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
