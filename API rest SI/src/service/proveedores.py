@@ -5,11 +5,11 @@ def obtener_proveedores():
     result = []
     for proveedor in proveedores:
         result.append({
-            'idProveedor': proveedor.idProveedor,
-            'empresa': proveedor.empresa,
-            'nombreEncargado': proveedor.nombreEncargado,
-            'telefono': proveedor.telefono,
-            'correo': proveedor.correo
+            'Id': proveedor.idProveedor,
+            'Nombre': proveedor.empresa,
+            'Encargado': proveedor.nombreEncargado,
+            'Telefono': proveedor.telefono,
+            'Correo': proveedor.correo
         })
 
     return result
