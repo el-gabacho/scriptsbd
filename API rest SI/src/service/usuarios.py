@@ -16,9 +16,9 @@ def obtener_usuarios():
     usuarios_list = []
     for usuario in usuarios:
         usuarios_list.append({
-            'idUsuario': usuario.idUsuario,
-            'nombreCompleto': usuario.nombreCompleto,
-            'usuario': usuario.usuario,
+            'Id': usuario.idUsuario,
+            'NombreCompleto': usuario.nombreCompleto,
+            'NombreUsuario': usuario.usuario,
             'rol': usuario.nombre,
             'fechaCreacion': usuario.fechaCreacion
         })

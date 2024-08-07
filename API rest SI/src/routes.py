@@ -6,7 +6,7 @@ from service.vehiculos import get_marcas_con_count_modelos, obtener_marca, obten
 from service.categorias import obtener_categorias, crear_categoria, eliminar_categoria, actualizar_categoria
 from service.proveedores import obtener_proveedores, obtener_proveedor, crear_proveedor, eliminar_proveedor, actualizar_proveedor
 from service.usuarios import obtener_usuarios, obtener_usuario, crear_usuario, eliminar_usuario, actualizar_usuario
-from service.ventas import obtener_ventas_por_usuario_fecha, obtener_detalle_venta, obtener_ventas_totales_por_usuario_fechas, crear_venta
+from service.ventas import obtener_ventas, obtener_ventas_por_usuario_fecha, obtener_detalle_venta, obtener_ventas_totales_por_usuario_fechas, crear_venta
 
 routes = Blueprint('routes', __name__)
 
@@ -277,7 +277,22 @@ def update_usuario(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@routes.route('/ventas/usuario_fecha', methods=['GET'])
+@routes.route('/ventas', methods=['GET'])
+def get_ventas():
+    try:
+        id_usuario = request.args.get('IdUsuario', None)
+        fecha = request.args.get('Fecha', None)
+        
+        filtros = {
+            'idUsuario': id_usuario,
+            'fecha': fecha
+        }
+        ventas = obtener_ventas(filtros)
+        return jsonify(ventas)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/ventas/usuario', methods=['GET'])
 def get_ventas_por_usuario_fecha():
     try:
         usuario = request.args.get('usuario')
@@ -287,7 +302,7 @@ def get_ventas_por_usuario_fecha():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@routes.route('/ventas/detalle/<int:id>', methods=['GET'])
+@routes.route('/ventas/<int:id>/productos', methods=['GET'])
 def get_detalle_venta(id):
     try:
         detalle_venta = obtener_detalle_venta(id)
