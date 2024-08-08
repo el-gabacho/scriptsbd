@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import func, case
 from sqlalchemy.exc import DBAPIError
 from models import db, Inventario, Proveedor, ProveedorProducto, Categoria, ModeloAutoparte, ModeloAnio, Modelo, Marca, Anio, UnidadMedida
 
@@ -16,23 +16,29 @@ def get_productos():
         Inventario.colocado,
         Inventario.estado,
         UnidadMedida.tipoMedida,
-        Categoria.nombre.label('categoriaNombre'),
+        func.coalesce(Categoria.nombre, 'SIN CATEGORIA').label('categoriaNombre'),
         Proveedor.empresa.label('proveedorEmpresa'),
         func.group_concat(
             func.concat(
-                Marca.nombre, ' ', Modelo.nombre, ' ', 
-                func.coalesce(Anio.anioInicio, ''), '-', 
-                func.coalesce(Anio.anioFin, '')
+                Marca.nombre, ' ', Modelo.nombre, ' ',
+                case(
+                    (Anio.anioTodo == 1, 'ALL YEARS'),
+                    else_=func.concat(
+                        func.right(func.coalesce(Anio.anioInicio, ''), 2),
+                        '-',
+                        func.right(func.coalesce(Anio.anioFin, ''), 2)
+                    )
+                )
             ).distinct()
-        ).label('Aplicaciones')
+        ).label('aplicaciones')
+    ).outerjoin(
+        Categoria, Inventario.idCategoria == Categoria.idCategoria
     ).join(
         UnidadMedida, Inventario.idUnidadMedida == UnidadMedida.idUnidadMedida
     ).join(
         ProveedorProducto, Inventario.idInventario == ProveedorProducto.idInventario
     ).join(
         Proveedor, ProveedorProducto.idProveedor == Proveedor.idProveedor
-    ).join(
-        Categoria, Inventario.idCategoria == Categoria.idCategoria
     ).outerjoin(
         ModeloAutoparte, Inventario.idInventario == ModeloAutoparte.idInventario
     ).outerjoin(
@@ -51,6 +57,12 @@ def get_productos():
 
     productos_list = []
     for producto in query:
+        aplicaciones = producto.aplicaciones
+        if not aplicaciones:
+            aplicaciones = ["SIN NINGUNA APLICACION"]
+        else:
+            aplicaciones = [app.strip() for app in aplicaciones.split(',') if app.strip()]
+
         productos_list.append({
             'idInventario': producto.idInventario,
             'codigo': producto.codigoBarras,
@@ -65,7 +77,7 @@ def get_productos():
             'tipoMedida': producto.tipoMedida,
             'proveedor': producto.proveedorEmpresa,
             'categoria': producto.categoriaNombre,
-            'aplicaciones': producto.Aplicaciones.split(',')
+            'aplicaciones': aplicaciones
         })
 
     return productos_list
