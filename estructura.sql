@@ -715,14 +715,18 @@ DELIMITER //
 CREATE OR REPLACE PROCEDURE proc_modificar_venta_producto (
     IN p_idVenta INT,
     IN p_idVentaProducto INT,
-    IN p_cantidadDevuelta FLOAT,
+    IN p_tipoVenta VARCHAR(50),
+    IN p_cantidad FLOAT,
     IN p_precioActualizado FLOAT
 )
 BEGIN
 	DECLARE p_idInventario INT;
 	DECLARE v_cantidadOriginal FLOAT;
+    DECLARE v_existenciasActual FLOAT;
+    DECLARE v_existenciasActualizado FLOAT;
 	
 	SELECT idInventario INTO p_idInventario FROM ventaProductos WHERE idVentaProducto = p_idVentaProducto; 
+    SELECT cantidadActual INTO v_existenciasActual FROM inventario WHERE idInventario = p_idInventario;
 	
     -- Obtener la cantidad original del producto en la venta
     SELECT cantidad INTO v_cantidadOriginal
@@ -730,17 +734,19 @@ BEGIN
     WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
 
     -- Validar que la cantidad devuelta no sea mayor que la cantidad original
-    IF p_cantidadDevuelta > v_cantidadOriginal THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cantidad devuelta no puede ser mayor que la cantidad vendida';
+    IF p_cantidad > v_cantidadOriginal THEN
+        v_existenciasActualizado = v_existenciasActual - (p_cantidad - v_cantidadOriginal);
+    ELSE
+        v_existenciasActualizado = v_existenciasActual + (v_cantidadOriginal - p_cantidad);
     END IF;
 
     -- Actualizar la cantidad en ventaProductos
     UPDATE ventaProductos
-    SET cantidad = cantidad - p_cantidadDevuelta, 
-    	  precioVenta = p_precioActualizado,
+    SET cantidad = p_cantidad, 
+        tipoVenta = p_tipoVenta
+    	precioVenta = p_precioActualizado,
         subtotal = cantidad * precioVenta
     WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
-
     -- Si toda la cantidad del producto ha sido devuelta, cambiar su estado a FALSE
     IF p_cantidadDevuelta = v_cantidadOriginal THEN
         DELETE FROM ventaProductos
@@ -749,7 +755,7 @@ BEGIN
 
     -- Actualizar la cantidad en el inventario
     UPDATE inventario
-    SET cantidadActual = cantidadActual + p_cantidadDevuelta
+    SET cantidadActual = v_existenciasActualizado
     WHERE idInventario = p_idInventario;
 
     -- Actualizar el montoTotal de la venta

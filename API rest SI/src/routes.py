@@ -6,7 +6,7 @@ from service.vehiculos import get_marcas_con_count_modelos, obtener_marca, obten
 from service.categorias import obtener_categorias, crear_categoria, eliminar_categoria, actualizar_categoria
 from service.proveedores import obtener_proveedores, obtener_proveedor, crear_proveedor, eliminar_proveedor, actualizar_proveedor
 from service.usuarios import obtener_usuarios, obtener_usuario, crear_usuario, eliminar_usuario, actualizar_usuario
-from service.ventas import obtener_ventas, obtener_ventas_por_usuario_fecha, obtener_detalle_venta, obtener_ventas_totales_por_usuario_fechas, crear_venta
+from service.ventas import obtener_ventas, obtener_detalle_venta, obtener_ventas_totales_por_usuario_fechas, crear_venta, revertir_venta, revertir_venta_producto, modificar_venta_producto
 
 routes = Blueprint('routes', __name__)
 
@@ -292,16 +292,6 @@ def get_ventas():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@routes.route('/ventas/usuario', methods=['GET'])
-def get_ventas_por_usuario_fecha():
-    try:
-        usuario = request.args.get('usuario')
-        fecha = request.args.get('fecha')
-        ventas = obtener_ventas_por_usuario_fecha(usuario, fecha)
-        return jsonify(ventas)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
 @routes.route('/ventas/<int:id>/productos', methods=['GET'])
 def get_detalle_venta(id):
     try:
@@ -312,13 +302,19 @@ def get_detalle_venta(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@routes.route('/ventas/usuario_fechas', methods=['GET'])
+@routes.route('/ventas/usuario', methods=['GET'])
 def get_ventas_totales_por_usuario_fechas():
     try:
-        usuario = request.args.get('usuario')
-        fecha_inicio = request.args.get('fecha_inicio')
-        fecha_fin = request.args.get('fecha_fin')
-        ventas_totales = obtener_ventas_totales_por_usuario_fechas(usuario, fecha_inicio, fecha_fin)
+        id_usuario = request.args.get('id_usuario', None)
+        fecha_inicio = request.args.get('fecha_inicio', None)
+        fecha_fin = request.args.get('fecha_fin', None)
+        
+        filtros = {
+            'usuario': id_usuario,
+            'fecha_inicio': fecha_inicio,
+            'fecha_fin': fecha_fin
+        }
+        ventas_totales = obtener_ventas_totales_por_usuario_fechas(filtros)
         return jsonify(ventas_totales)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -338,5 +334,33 @@ def create_venta():
         referenciaUnica = data.get('referencia_unica')
         id_venta = crear_venta(idUsuario, idCliente, productos, montoTotal, recibioDinero, folioTicket, imprimioTicket, idTipoPago, referenciaUnica)
         return jsonify({'idVenta': id_venta}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@routes.route('/ventas/<int:id>', methods=['DELETE'])
+def reverse_venta(id):
+    try:
+        revertir_venta(id)
+        return jsonify({'message': 'Venta eliminada correctamente'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/ventas/<int:ventaId>/productos/<int:productoId>', methods=['DELETE'])
+def reverse_venta_producto(ventaId,productoId):
+    try:
+        revertir_venta_producto(ventaId,productoId)
+        return jsonify({'message': 'Producto eliminado de la venta correctamente'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@routes.route('/ventas/<int:ventaId>/productos/<int:productoId>', methods=['PUT'])
+def update_venta_producto(ventaId,productoId):
+    try:
+        data = request.get_json()
+        cantidad = data.get('cantidad')
+        tipoVenta = data.get('tipoVenta')
+        precioVenta = data.get('precioVenta')
+        modificar_venta_producto(ventaId,productoId,tipoVenta,cantidad,precioVenta)
+        return jsonify({'message': 'Producto actualizado de la venta correctamente'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
