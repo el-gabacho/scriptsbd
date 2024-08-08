@@ -14,6 +14,7 @@ def get_productos():
         Inventario.mayoreo,
         Inventario.menudeo,
         Inventario.colocado,
+        Inventario.estado,
         UnidadMedida.tipoMedida,
         Categoria.nombre.label('categoriaNombre'),
         Proveedor.empresa.label('proveedorEmpresa'),
@@ -42,6 +43,8 @@ def get_productos():
         Marca, Modelo.idMarca == Marca.idMarca
     ).outerjoin(
         Anio, ModeloAnio.idAnio == Anio.idAnio
+    ).filter(
+        Inventario.estado == 1
     ).group_by(
         Inventario.idInventario
     ).all()
@@ -51,9 +54,9 @@ def get_productos():
         productos_list.append({
             'idInventario': producto.idInventario,
             'codigo': producto.codigoBarras,
-            'NombreProducto': producto.nombre,
+            'nombre': producto.nombre,
             'descripcion': producto.descripcion,
-            'Existencias': producto.cantidadActual,
+            'existencias': producto.cantidadActual,
             'cantidadMinima': producto.cantidadMinima,
             'precioCompra': producto.precioCompra,
             'precioMayoreo': producto.mayoreo,
@@ -62,7 +65,7 @@ def get_productos():
             'tipoMedida': producto.tipoMedida,
             'proveedor': producto.proveedorEmpresa,
             'categoria': producto.categoriaNombre,
-            'Aplicaciones': producto.Aplicaciones.split(',')
+            'aplicaciones': producto.Aplicaciones.split(',')
         })
 
     return productos_list
