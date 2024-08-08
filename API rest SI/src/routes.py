@@ -359,8 +359,9 @@ def update_venta_producto(ventaId,productoId):
         data = request.get_json()
         cantidad = data.get('cantidad')
         tipoVenta = data.get('tipoVenta')
-        precioVenta = data.get('precioVenta')
-        modificar_venta_producto(ventaId,productoId,tipoVenta,cantidad,precioVenta)
+        precioVenta = data.get('precio')
+        response = modificar_venta_producto(ventaId,productoId,tipoVenta,cantidad,precioVenta)
         return jsonify({'message': 'Producto actualizado de la venta correctamente'})
     except Exception as e:
+        print(e)
         return jsonify({'error': str(e)}), 500

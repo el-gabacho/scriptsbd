@@ -722,33 +722,34 @@ CREATE OR REPLACE PROCEDURE proc_modificar_venta_producto (
 BEGIN
 	DECLARE p_idInventario INT;
 	DECLARE v_cantidadOriginal FLOAT;
-    DECLARE v_existenciasActual FLOAT;
-    DECLARE v_existenciasActualizado FLOAT;
+   DECLARE v_existenciasActual FLOAT;
+   DECLARE v_existenciasActualizado FLOAT;
 	
 	SELECT idInventario INTO p_idInventario FROM ventaProductos WHERE idVentaProducto = p_idVentaProducto; 
-    SELECT cantidadActual INTO v_existenciasActual FROM inventario WHERE idInventario = p_idInventario;
+   SELECT cantidadActual INTO v_existenciasActual FROM inventario WHERE idInventario = p_idInventario;
 	
-    -- Obtener la cantidad original del producto en la venta
-    SELECT cantidad INTO v_cantidadOriginal
-    FROM ventaProductos
-    WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
+   -- Obtener la cantidad original del producto en la venta
+   SELECT cantidad INTO v_cantidadOriginal
+   FROM ventaProductos
+   WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
 
     -- Validar que la cantidad devuelta no sea mayor que la cantidad original
-    IF p_cantidad > v_cantidadOriginal THEN
-        v_existenciasActualizado = v_existenciasActual - (p_cantidad - v_cantidadOriginal);
-    ELSE
-        v_existenciasActualizado = v_existenciasActual + (v_cantidadOriginal - p_cantidad);
-    END IF;
+   IF p_cantidad > v_cantidadOriginal THEN
+      SET v_existenciasActualizado = v_existenciasActual - (p_cantidad - v_cantidadOriginal);
+   ELSE
+   	SET v_existenciasActualizado = v_existenciasActual + (v_cantidadOriginal - p_cantidad);
+   END IF;
 
     -- Actualizar la cantidad en ventaProductos
     UPDATE ventaProductos
     SET cantidad = p_cantidad, 
-        tipoVenta = p_tipoVenta
+      tipoVenta = p_tipoVenta,
     	precioVenta = p_precioActualizado,
-        subtotal = cantidad * precioVenta
+      subtotal = cantidad * precioVenta
     WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
-    -- Si toda la cantidad del producto ha sido devuelta, cambiar su estado a FALSE
-    IF p_cantidadDevuelta = v_cantidadOriginal THEN
+   
+	 -- Verificar si toda la cantidad del producto ha sido devuelta
+    IF p_cantidad = 0 THEN
         DELETE FROM ventaProductos
     	  WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
     END IF;
@@ -763,7 +764,7 @@ BEGIN
     JOIN (
         SELECT idVenta, SUM(subtotal) AS nuevoMontoTotal
         FROM ventaProductos
-        WHERE idVenta = p_idVenta AND estado = TRUE
+        WHERE idVenta = p_idVenta
         GROUP BY idVenta
     ) vp ON v.idVenta = vp.idVenta
     SET v.montoTotal = vp.nuevoMontoTotal

@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import func, text
 from models import db, Venta, PagoVenta, TipoPago, VentaProducto, Usuario, Inventario, UnidadMedida
 from datetime import datetime
 
@@ -49,7 +49,8 @@ def obtener_detalle_venta(idVenta):
     productos_list = []
     for producto in detalle_venta:
         productos_list.append({
-            'idVentaProducto': producto.idVentaProducto,
+            'id': producto.idVentaProducto,
+            'idVenta': idVenta,
             'codigoBarras': producto.codigoBarras,
             'nombre': producto.nombre,
             'descripcion': producto.descripcion,
@@ -96,6 +97,6 @@ def revertir_venta_producto(ventaId,productoId):
     return True
 
 def modificar_venta_producto(ventaId,productoId,tipoVenta,cantidad,precioVenta):
-    db.session.execute(f"CALL proc_modificar_producto_venta({ventaId},{productoId},{tipoVenta},{cantidad},{precioVenta})")
+    db.session.execute(text(f"CALL proc_modificar_producto_venta({ventaId},{productoId},{tipoVenta},{cantidad},{precioVenta})"))
     db.session.commit()
     return True
