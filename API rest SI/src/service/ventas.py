@@ -87,16 +87,16 @@ def obtener_ventas_totales_por_usuario_fechas(filtros):
     return ventas_totales_list
 
 def revertir_venta(id):
-    db.session.execute(f"CALL proc_devolver_venta({id})")
+    db.session.execute(text(f"CALL proc_devolver_venta({id})"))
     db.session.commit()
     return True
 
 def revertir_venta_producto(ventaId,productoId):
-    db.session.execute(f"CALL proc_devolver_producto({ventaId},{productoId})")
+    db.session.execute(text(f"CALL proc_devolver_producto({ventaId},{productoId})"))
     db.session.commit()
     return True
 
 def modificar_venta_producto(ventaId,productoId,tipoVenta,cantidad,precioVenta):
-    db.session.execute(text(f"CALL proc_modificar_producto_venta({ventaId},{productoId},{tipoVenta},{cantidad},{precioVenta})"))
+    db.session.execute(text(f"CALL proc_modificar_venta_producto({ventaId},{productoId},'{tipoVenta}',{cantidad},{precioVenta})"))
     db.session.commit()
     return True
