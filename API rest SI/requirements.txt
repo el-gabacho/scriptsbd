@@ -3,3 +3,4 @@ Flask-SQLAlchemy
 flask-marshmallow
 marshmallow-sqlalchemy
 PyMySQL
+python-dotenv
