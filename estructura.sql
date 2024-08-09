@@ -694,6 +694,7 @@ CREATE OR REPLACE PROCEDURE proc_devolver_producto (
 BEGIN
 	DECLARE p_idInventario INT;
 	DECLARE p_cantidadDevuelta INT;
+
 	SELECT idInventario INTO p_idInventario FROM ventaProductos WHERE idVentaProducto = p_idVentaProducto; 
 	SELECT cantidad INTO p_cantidadDevuelta FROM ventaProductos WHERE idVentaProducto = p_idVentaProducto; 
 	
@@ -701,23 +702,30 @@ BEGIN
     DELETE FROM ventaProductos
     WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
 
-    -- Actualizar la cantidad en el inventario
-    UPDATE inventario
-    SET cantidadActual = cantidadActual + p_cantidadDevuelta,
-    		estado = TRUE
-    WHERE idInventario = p_idInventario;
+    -- Verificar la cantidad de productos en la venta
+    SELECT COUNT(*) INTO p_cantidadProductos FROM ventaProductos WHERE idVenta = p_idVenta;
 
-    -- Actualizar el montoTotal de la venta
-    UPDATE ventas v
-    JOIN (
-        SELECT idVenta, SUM(subtotal) AS nuevoMontoTotal
-        FROM ventaProductos
-        WHERE idVenta = p_idVenta
-        GROUP BY idVenta
-    ) vp ON v.idVenta = vp.idVenta
-    SET v.montoTotal = vp.nuevoMontoTotal
-    WHERE v.idVenta = p_idVenta;
-    
+    IF p_cantidadProductos = 0 THEN
+        -- Si no hay más productos en la venta, eliminar la venta
+        DELETE FROM ventas WHERE idVenta = p_idVenta;
+    ELSE
+        -- Actualizar la cantidad en el inventario
+        UPDATE inventario
+        SET cantidadActual = cantidadActual + p_cantidadDevuelta,
+                estado = TRUE
+        WHERE idInventario = p_idInventario;
+
+        -- Actualizar el montoTotal de la venta
+        UPDATE ventas v
+        JOIN (
+            SELECT idVenta, SUM(subtotal) AS nuevoMontoTotal
+            FROM ventaProductos
+            WHERE idVenta = p_idVenta
+            GROUP BY idVenta
+        ) vp ON v.idVenta = vp.idVenta
+        SET v.montoTotal = vp.nuevoMontoTotal
+        WHERE v.idVenta = p_idVenta;
+    END IF;
 END //
 
 DELIMITER ;
