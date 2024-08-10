@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models import MarcaSchema
 from sqlalchemy.exc import ProgrammingError
-from service.inventario import buscar_inventarios, get_productos, get_producto, obtener_stock_bajo, crear_producto, eliminar_producto
+from service.inventario import get_productos, get_producto_preciso, get_productos_similares, buscar_inventarios, obtener_stock_bajo, crear_producto, eliminar_producto
 from service.vehiculos import get_marcas_con_count_modelos, obtener_marca, obtener_modelo_anio_con_count, relaciona_modelo_anio
 from service.categorias import obtener_categorias, crear_categoria, eliminar_categoria, actualizar_categoria
 from service.proveedores import obtener_proveedores, obtener_proveedor, crear_proveedor, eliminar_proveedor, actualizar_proveedor
@@ -13,6 +13,7 @@ routes = Blueprint('routes', __name__)
 marca_schema = MarcaSchema()
 marcas_schema = MarcaSchema(many=True)
 
+# TODOS LOS PRODUCTOS CON INFORMACION
 @routes.route('/info_productos', methods=['GET'])
 def get_info_productos():
     try:
@@ -22,15 +23,32 @@ def get_info_productos():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-@routes.route('/info_productos/<codigo_barras>', methods=['GET'])
-def get_info_productos_by(codigo_barras):
+# UN PRODUCTO CON TODA INFORMACION CON CODIGO FIJO
+@routes.route('/info_productos_preciso/<codigo_barras>', methods=['GET'])
+def get_info_productos_preciso_by(codigo_barras):
     try:
-        producto = get_producto(codigo_barras)
-        return jsonify(producto)
+        producto_preciso = get_producto_preciso(codigo_barras)
+        return jsonify(producto_preciso)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+# TODOS LOS PRODUCTOS CON INFORMACION CON CODIGO SIMILAR
+@routes.route('/info_productos_similitud/<codigo_barras>', methods=['GET'])
+def get_info_productos_similar_by(codigo_barras):
+    try:
+        # Obtén los productos similares
+        producto_similar = get_productos_similares(codigo_barras)
+
+        # Devuelve una lista vacía si no se encuentran productos similares
+        if producto_similar is None or len(producto_similar) == 0:
+            return jsonify([])
+
+        # Devuelve la lista de productos similares
+        return jsonify(producto_similar)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# TODOS LOS PRODUCTOS CON INFORMACION CON INFORMACION DE CIERTOS CAMPOS SIMILAR
 @routes.route('/productos_busqueda_avanzada', methods=['GET'])
 def get_productos_busqueda_avanzada():
     try:
@@ -61,7 +79,8 @@ def get_productos_busqueda_avanzada():
         return jsonify(inventarios)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
+
+# TODOS LOS PRODUCTOS CON INFORMACION CON STOCK BAJO    
 @routes.route('/stock_bajo', methods=['GET'])
 def get_stock_bajo():
     try:
@@ -70,7 +89,8 @@ def get_stock_bajo():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@routes.route('/productos', methods=['POST'])
+# CREAR UN PRODUCTO
+@routes.route('/producto', methods=['POST'])
 def create_producto():
     try:
         # Obtener los datos del producto del cuerpo de la solicitud POST
@@ -96,6 +116,9 @@ def create_producto():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# MODIFICAR UN PRODUCTO
+
+# ELIMINAR UN PRODUCTO MEDIANTE SU ID
 @routes.route('/productos/<int:id>', methods=['DELETE'])
 def delete_producto(id):
     try:
