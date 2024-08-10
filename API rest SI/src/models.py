@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-
+from itsdangerous import URLSafeTimedSerializer as Serializer
+from werkzeug.security import check_password_hash
 db = SQLAlchemy()
 ma = Marshmallow()
 
@@ -105,6 +106,13 @@ class Usuario(db.Model):
     estado = db.Column(db.Boolean, default=True)
 
     rol = db.relationship('Rol', backref='usuarios')
+    
+    def check_password(self, password):
+        return check_password_hash(self.contrasenia, password)
+    
+    def generate_token(self, secret_key):
+        s = Serializer(secret_key)
+        return s.dumps({'user_id': self.idUsuario})
 
 class Modelo(db.Model):
     __tablename__ = 'modelos'

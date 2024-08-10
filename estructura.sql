@@ -70,7 +70,7 @@ CREATE TABLE roles (
   idRol INT NOT NULL,
   nombreCompleto VARCHAR(50) NOT NULL,
   usuario VARCHAR(15) NOT NULL,
-  contrasenia VARCHAR(100) NOT NULL,
+  contrasenia VARCHAR(200) NOT NULL,
   fechaCreacion TIMESTAMP default CURRENT_TIMESTAMP,
   estado BOOL DEFAULT TRUE,
   FOREIGN KEY (idRol) REFERENCES roles(idRol)

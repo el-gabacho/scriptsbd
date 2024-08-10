@@ -1,3 +1,4 @@
+from werkzeug.security import generate_password_hash
 from models import Usuario, Rol, db
 
 def obtener_usuarios():
@@ -46,11 +47,12 @@ def obtener_usuario(idUsuario):
     }
     return usuario_dict
 
-def crear_usuario(nombreCompleto, usuario, contrasena, idRol):
+def crear_usuario(nombre, username, password, idRol):
+    password_hash = generate_password_hash(password)
     nuevo_usuario = Usuario(
-        nombreCompleto=nombreCompleto,
-        usuario=usuario,
-        contrasena=contrasena,
+        nombreCompleto=nombre,
+        usuario=username,
+        contrasenia=password_hash,
         idRol=idRol
     )
     db.session.add(nuevo_usuario)
@@ -65,13 +67,16 @@ def eliminar_usuario(idUsuario):
     db.session.commit()
     return True
 
-def actualizar_usuario(idUsuario, nombreCompleto, usuario, contrasena, idRol):
+def actualizar_usuario(idUsuario, nombreCompleto, username, password, idRol, fechaCreacion):
     usuario = db.session.query(Usuario).filter(
         Usuario.idUsuario == idUsuario
     ).first()
+    password_hash = generate_password_hash(password)
     usuario.nombreCompleto = nombreCompleto
-    usuario.usuario = usuario
-    usuario.contrasena = contrasena
+    usuario.usuario = username
+    usuario.contrasenia = password_hash
     usuario.idRol = idRol
+    usuario.fechaCreacion = fechaCreacion
+    
     db.session.commit()
     return True

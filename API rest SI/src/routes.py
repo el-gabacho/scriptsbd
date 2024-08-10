@@ -7,6 +7,7 @@ from service.categorias import obtener_categorias, crear_categoria, eliminar_cat
 from service.proveedores import obtener_proveedores, obtener_proveedor, crear_proveedor, eliminar_proveedor, actualizar_proveedor
 from service.usuarios import obtener_usuarios, obtener_usuario, crear_usuario, eliminar_usuario, actualizar_usuario
 from service.ventas import obtener_ventas, obtener_detalle_venta, obtener_ventas_totales_por_usuario_fechas, crear_venta, revertir_venta, revertir_venta_producto, modificar_venta_producto
+from tools.decorators import token_required
 
 routes = Blueprint('routes', __name__)
 
@@ -249,6 +250,7 @@ def update_proveedor(id):
         return jsonify({'error': str(e)}), 500
 
 @routes.route('/usuarios', methods=['GET'])
+# @token_required
 def get_usuarios():
     try:
         usuarios = obtener_usuarios()
@@ -270,13 +272,15 @@ def get_usuario(id):
 def create_usuario():
     try:
         data = request.get_json()
-        nombre = data.get('nombre')
-        usuario = data.get('usuario')
+        print(data)
+        nombre = data.get('nombreCompleto')
+        usuario = data.get('nombreUsuario')
         contrasena = data.get('contrasena')
         idRol = data.get('idRol')
         id_usuario = crear_usuario(nombre, usuario, contrasena, idRol)
         return jsonify({'idUsuario': id_usuario}), 201
     except Exception as e:
+        print(e)
         return jsonify({'error': str(e)}), 500
 
 @routes.route('/usuarios/<int:id>', methods=['DELETE'])
@@ -291,11 +295,13 @@ def delete_usuario(id):
 def update_usuario(id):
     try:
         data = request.get_json()
-        nombre = data.get('nombre')
-        usuario = data.get('usuario')
+        nombre = data.get('nombreCompleto')
+        usuario = data.get('nombreUsuario')
         contrasena = data.get('contrasena')
         idRol = data.get('idRol')
-        actualizar_usuario(id, nombre, usuario, contrasena, idRol)
+        fecha = data.get('fechaCreacion')
+        
+        actualizar_usuario(id, nombre, usuario, contrasena, idRol, fecha)
         return jsonify({'message': 'Usuario actualizado correctamente'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
