@@ -675,9 +675,9 @@ BEGIN
      -- Cerrar el cursor
     CLOSE cur;
     
-    -- Actualizar el estado del pagoVenta a FALSE
-    DELETE FROM pagoVenta
-    WHERE idVenta = p_idVenta;
+    -- Eliminar el pagoVenta relacionado
+    DELETE FROM pagoVenta WHERE idVenta = p_idVenta;
+    DELETE FROM ventas WHERE idVenta = p_idVenta;
 
 END //
 
@@ -694,6 +694,7 @@ CREATE OR REPLACE PROCEDURE proc_devolver_producto (
 BEGIN
 	DECLARE p_idInventario INT;
 	DECLARE p_cantidadDevuelta INT;
+	DECLARE p_cantidadProductos INT;
 
 	SELECT idInventario INTO p_idInventario FROM ventaProductos WHERE idVentaProducto = p_idVentaProducto; 
 	SELECT cantidad INTO p_cantidadDevuelta FROM ventaProductos WHERE idVentaProducto = p_idVentaProducto; 
@@ -701,20 +702,20 @@ BEGIN
     -- Eliminar producto en ventaProductos
     DELETE FROM ventaProductos
     WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
+    
+   UPDATE inventario
+   SET cantidadActual = cantidadActual + p_cantidadDevuelta,
+      estado = TRUE
+   WHERE idInventario = p_idInventario;
 
     -- Verificar la cantidad de productos en la venta
     SELECT COUNT(*) INTO p_cantidadProductos FROM ventaProductos WHERE idVenta = p_idVenta;
 
     IF p_cantidadProductos = 0 THEN
         -- Si no hay más productos en la venta, eliminar la venta
+        DELETE FROM pagoVenta WHERE idVenta = p_idVenta;
         DELETE FROM ventas WHERE idVenta = p_idVenta;
     ELSE
-        -- Actualizar la cantidad en el inventario
-        UPDATE inventario
-        SET cantidadActual = cantidadActual + p_cantidadDevuelta,
-                estado = TRUE
-        WHERE idInventario = p_idInventario;
-
         -- Actualizar el montoTotal de la venta
         UPDATE ventas v
         JOIN (
@@ -769,28 +770,30 @@ BEGIN
       subtotal = cantidad * precioVenta
     WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
    
+   -- Actualizar la cantidad en el inventario
+   UPDATE inventario
+   SET cantidadActual = v_existenciasActualizado
+   WHERE idInventario = p_idInventario;
+    
 	 -- Verificar si toda la cantidad del producto ha sido devuelta
-    IF p_cantidad = 0 THEN
-        DELETE FROM ventaProductos
-    	  WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
-    END IF;
-
-    -- Actualizar la cantidad en el inventario
-    UPDATE inventario
-    SET cantidadActual = v_existenciasActualizado
-    WHERE idInventario = p_idInventario;
-
-    -- Actualizar el montoTotal de la venta
-    UPDATE ventas v
-    JOIN (
+   IF p_cantidad = 0 THEN
+      DELETE FROM ventaProductos
+    	WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
+  		
+  		DELETE FROM pagoVenta WHERE idVenta = p_idVenta;
+      DELETE FROM ventas WHERE idVenta = p_idVenta;
+   ELSE
+   	-- Actualizar el montoTotal de la venta
+    	UPDATE ventas v
+    	JOIN (
         SELECT idVenta, SUM(subtotal) AS nuevoMontoTotal
         FROM ventaProductos
         WHERE idVenta = p_idVenta
         GROUP BY idVenta
-    ) vp ON v.idVenta = vp.idVenta
-    SET v.montoTotal = vp.nuevoMontoTotal
-    WHERE v.idVenta = p_idVenta;
-    
+    	) vp ON v.idVenta = vp.idVenta
+    	SET v.montoTotal = vp.nuevoMontoTotal
+    	WHERE v.idVenta = p_idVenta;
+   END IF;
 END //
 
 DELIMITER ;
