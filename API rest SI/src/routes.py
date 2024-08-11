@@ -82,10 +82,15 @@ def get_productos_busqueda_avanzada():
         return jsonify({'error': str(e)}), 500
 
 # TODOS LOS PRODUCTOS CON INFORMACION CON STOCK BAJO    
-@routes.route('/stock_bajo', methods=['GET'])
+@routes.route('/productos_bajo', methods=['GET'])
 def get_stock_bajo():
     try:
         stock_bajo = obtener_stock_bajo()
+
+        # Devuelve una lista vacía si no se encuentran productos similares
+        if stock_bajo is None or len(stock_bajo) == 0:
+            return jsonify([])
+        
         return jsonify(stock_bajo)
     except Exception as e:
         return jsonify({'error': str(e)}), 500

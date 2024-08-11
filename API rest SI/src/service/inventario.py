@@ -1,4 +1,4 @@
-from sqlalchemy import func, case
+from sqlalchemy import func, case, or_
 from sqlalchemy.exc import DBAPIError
 from models import db, Inventario, Proveedor, ProveedorProducto, Categoria, ModeloAutoparte, ModeloAnio, Modelo, Marca, Anio, UnidadMedida, Imagenes
 
@@ -170,9 +170,6 @@ def get_producto_preciso(codigo_barras):
         Inventario.idInventario
     ).first()
 
-    if query is None:
-        return {'error': 'Producto no encontrado'}
-
     # Procesar el campo de aplicaciones
     aplicaciones = query.aplicaciones
     if aplicaciones:
@@ -279,7 +276,6 @@ def get_productos_similares(codigo_barras):
         Inventario.idInventario
     ).all()
 
-
     productos = []
     base_path = "C:\\imagenes_el_gabacho\\productosInventario"
     for item in query:
@@ -324,7 +320,7 @@ def get_productos_similares(codigo_barras):
 
     return productos
 
-# XDDDDDDDDDDDDDDDDDDDDDDDD
+# OBTENER INFORMACION DE PRODUCTOS ACTIVOS MEDIANTE DICHA INFORMACION DE MODO SIMILITUD
 def buscar_inventarios(filtros):
     query = db.session.query(
         Inventario.idInventario,
@@ -390,8 +386,113 @@ def buscar_inventarios(filtros):
     return inventarios
 
 def obtener_stock_bajo():
-    stock_bajo = Inventario.query.filter(Inventario.cantidadMinima > Inventario.cantidadActual).all()
-    return stock_bajo
+    query = db.session.query(
+        Inventario.idInventario,
+        Inventario.codigoBarras,
+        Inventario.nombre,
+        Inventario.descripcion,
+        Inventario.cantidadActual,
+        Inventario.cantidadMinima,
+        Inventario.precioCompra,
+        Inventario.mayoreo,
+        Inventario.menudeo,
+        Inventario.colocado,
+        Inventario.estado,
+        UnidadMedida.tipoMedida,
+        func.coalesce(Categoria.nombre, 'SIN CATEGORIA').label('categoriaNombre'),
+        Proveedor.empresa.label('proveedorEmpresa'),
+        func.group_concat(
+            func.concat(
+                Marca.nombre, ' ', Modelo.nombre, ' ',
+                case(
+                    (Anio.anioTodo == 1, 'ALL YEARS'),
+                    else_=func.concat(
+                        func.right(func.coalesce(Anio.anioInicio, ''), 2),
+                        '-',
+                        func.right(func.coalesce(Anio.anioFin, ''), 2)
+                    )
+                )
+            ).distinct()
+        ).label('aplicaciones'),
+        func.coalesce(Imagenes.imgRepresentativa, False).label('imgRepresentativa'),
+        func.coalesce(Imagenes.img2, False).label('img2'),
+        func.coalesce(Imagenes.img3, False).label('img3'),
+        func.coalesce(Imagenes.img4, False).label('img4'),
+        func.coalesce(Imagenes.img5, False).label('img5')
+    ).outerjoin(
+        Categoria, Inventario.idCategoria == Categoria.idCategoria
+    ).join(
+        UnidadMedida, Inventario.idUnidadMedida == UnidadMedida.idUnidadMedida
+    ).join(
+        ProveedorProducto, Inventario.idInventario == ProveedorProducto.idInventario
+    ).join(
+        Proveedor, ProveedorProducto.idProveedor == Proveedor.idProveedor
+    ).outerjoin(
+        ModeloAutoparte, Inventario.idInventario == ModeloAutoparte.idInventario
+    ).outerjoin(
+        ModeloAnio, ModeloAutoparte.idModeloAnio == ModeloAnio.idModeloAnio
+    ).outerjoin(
+        Modelo, ModeloAnio.idModelo == Modelo.idModelo
+    ).outerjoin(
+        Marca, Modelo.idMarca == Marca.idMarca
+    ).outerjoin(
+        Anio, ModeloAnio.idAnio == Anio.idAnio
+    ).outerjoin(
+        Imagenes, Inventario.idInventario == Imagenes.idInventario
+    ).filter(
+        Inventario.estado == 1,
+        or_(
+            Inventario.cantidadMinima > Inventario.cantidadActual,
+            Inventario.cantidadMinima == Inventario.cantidadActual
+        )
+    ).group_by(
+        Inventario.idInventario
+    ).all()
+
+    producto_bajo = []
+    base_path = "C:\\imagenes_el_gabacho\\productosInventario"
+
+    for item in query:
+        aplicaciones = item.aplicaciones
+        if aplicaciones:
+            aplicaciones = [app.strip() for app in aplicaciones.split(',') if app.strip()]
+        else:
+            aplicaciones = ["SIN NINGUNA APLICACION"]
+
+        imagenes = []
+        if item.imgRepresentativa:
+            imagenes.append(f"{base_path}\\{item.codigoBarras}_1.png")
+        if item.img2:
+            imagenes.append(f"{base_path}\\{item.codigoBarras}_2.png")
+        if item.img3:
+            imagenes.append(f"{base_path}\\{item.codigoBarras}_3.png")
+        if item.img4:
+            imagenes.append(f"{base_path}\\{item.codigoBarras}_4.png")
+        if item.img5:
+            imagenes.append(f"{base_path}\\{item.codigoBarras}_5.png")
+
+        if not imagenes:
+            imagenes.append('SIN IMAGEN')
+
+        producto_bajo.append({
+            'idInventario': item.idInventario,
+            'codigo': item.codigoBarras,
+            'nombre': item.nombre,
+            'descripcion': item.descripcion,
+            'existencias': item.cantidadActual,
+            'cantidadMinima': item.cantidadMinima,
+            'precioCompra': item.precioCompra,
+            'precioMayoreo': item.mayoreo,
+            'precioMenudeo': item.menudeo,
+            'precioColocado': item.colocado,
+            'tipoMedida': item.tipoMedida,
+            'proveedor': item.proveedorEmpresa,
+            'categoria': item.categoriaNombre,
+            'aplicaciones': aplicaciones,
+            'imagenes': imagenes
+        })
+
+    return producto_bajo
 
 def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, precioCompra, mayoreo, 
                    menudeo, colocado, idUnidadMedida, idCategoria, idProveedor, idUsuario, id_modeloAnio):
