@@ -1,6 +1,6 @@
 from flask import jsonify, request
-from inventario.Application.funciones import get_productos, get_producto_preciso, get_productos_similares, buscar_inventarios, obtener_stock_bajo,crear_producto
-from inventario import suppliers as routes
+from inventario.Application.funciones import get_productos, get_producto_preciso, get_productos_similares, buscar_inventarios, obtener_stock_bajo,crear_producto, eliminar_producto
+from inventario import inventory as routes
 
 # TODOS LOS PRODUCTOS CON INFORMACION
 @routes.route('/info_productos', methods=['GET'])

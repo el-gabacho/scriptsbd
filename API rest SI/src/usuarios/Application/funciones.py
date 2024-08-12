@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash
-from models import Rol
 from usuarios.Domain.Usuario import db, Usuario
+from usuarios.Domain.Rol import Rol
 
 def obtener_usuarios():
     usuarios = db.session.query(

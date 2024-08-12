@@ -1,10 +1,12 @@
 from sqlalchemy import func, text
-from models import db, Inventario, UnidadMedida
 from ventas.Domain.Venta import Venta
 from ventas.Domain.PagoVenta import PagoVenta
 from ventas.Domain.TipoPago import TipoPago
 from ventas.Domain.VentaProducto import VentaProducto
+from ventas.Domain.Cliente import Cliente
 from usuarios.Domain.Usuario import Usuario
+from inventario.Domain.Inventario import Inventario, UnidadMedida
+from models import db
 from datetime import datetime
 
 def obtener_ventas(filtros):  
