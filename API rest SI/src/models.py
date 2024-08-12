@@ -1,7 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-from itsdangerous import URLSafeTimedSerializer as Serializer
-from werkzeug.security import check_password_hash
+
 db = SQLAlchemy()
 ma = Marshmallow()
 
@@ -60,17 +59,6 @@ class UnidadMedida(db.Model):
     tipoMedida = db.Column(db.String(8), unique=True, nullable=False)
     descripcion = db.Column(db.String(100))
 
-class Proveedor(db.Model):
-    __tablename__ = 'proveedores'
-
-    idProveedor = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    empresa = db.Column(db.String(50), nullable=False)
-    nombreEncargado = db.Column(db.String(50))
-    telefono = db.Column(db.String(10))
-    correo = db.Column(db.String(50))
-
-    proveedor_productos = db.relationship('ProveedorProducto', backref='proveedores')
-
 class ProveedorProducto(db.Model):
     __tablename__ = 'proveedorproductos'
 
@@ -81,38 +69,12 @@ class ProveedorProducto(db.Model):
     proveedor = db.relationship('Proveedor', backref='productos_proveedor')
     inventario = db.relationship('Inventario', backref='productos_inventario')
 
-class Categoria(db.Model):
-    __tablename__ = 'categorias'
-
-    idCategoria = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    nombre = db.Column(db.String(50), unique=True, nullable=False)
-
 class Rol(db.Model):
     __tablename__ = 'roles'
 
     idRol = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String(50), nullable=False)
     descripcion = db.Column(db.String(100))
-
-class Usuario(db.Model):
-    __tablename__ = 'usuarios'
-
-    idUsuario = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idRol = db.Column(db.Integer, db.ForeignKey('roles.idRol'), nullable=False)
-    nombreCompleto = db.Column(db.String(50), nullable=False)
-    usuario = db.Column(db.String(15), nullable=False)
-    contrasenia = db.Column(db.String(100), nullable=False)
-    fechaCreacion = db.Column(db.TIMESTAMP, default=db.func.current_timestamp())
-    estado = db.Column(db.Boolean, default=True)
-
-    rol = db.relationship('Rol', backref='usuarios')
-    
-    def check_password(self, password):
-        return check_password_hash(self.contrasenia, password)
-    
-    def generate_token(self, secret_key):
-        s = Serializer(secret_key)
-        return s.dumps({'user_id': self.idUsuario})
 
 class Modelo(db.Model):
     __tablename__ = 'modelos'
@@ -180,58 +142,9 @@ class RegistroProducto(db.Model):
     inventario = db.relationship('Inventario', backref='registros_productos')
     usuario_registro = db.relationship('Usuario', foreign_keys=[idUsuarioRegistro], backref='registros_productos')
     usuario_elimino = db.relationship('Usuario', foreign_keys=[idUsuarioElimino], backref='registros_productos_deleted')
-
-class TipoPago(db.Model):
-    __tablename__ = 'tipoPagos'
-
-    idTipoPago = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    tipoPago = db.Column(db.String(20), nullable=False)
-    descripcion = db.Column(db.String(100))
     
 class Cliente(db.Model):
     __tablename__ = 'clientes'
 
     idCliente = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String(30), nullable=False)
-    
-class Venta(db.Model):
-    __tablename__ = 'ventas'
-
-    idVenta = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idUsuario = db.Column(db.Integer, db.ForeignKey('usuarios.idUsuario'), nullable=False)
-    idCliente = db.Column(db.Integer, db.ForeignKey('clientes.idCliente'), nullable=False)
-    montoTotal = db.Column(db.Float, nullable=False)
-    recibioDinero = db.Column(db.Float, nullable=False)
-    folioTicket = db.Column(db.String(50), nullable=False)
-    imprimioTicket = db.Column(db.Boolean, nullable=False)
-    fechaVenta = db.Column(db.TIMESTAMP, default=db.func.current_timestamp())
-
-    usuario = db.relationship('Usuario', backref='ventas')
-    cliente = db.relationship('Cliente', backref='ventas')
-
-
-class PagoVenta(db.Model):
-    __tablename__ = 'pagoVenta'
-
-    idPagoVenta = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idVenta = db.Column(db.Integer, db.ForeignKey('ventas.idVenta'), nullable=False)
-    idTipoPago = db.Column(db.Integer, db.ForeignKey('tipoPagos.idTipoPago'), nullable=False)
-    referenciaUnica = db.Column(db.String(50))
-
-    venta = db.relationship('Venta', backref='pagos_venta')
-    tipo_pago = db.relationship('TipoPago', backref='pagos_venta')
-
-
-class VentaProducto(db.Model):
-    __tablename__ = 'ventaProductos'
-
-    idVentaProducto = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    idVenta = db.Column(db.Integer, db.ForeignKey('ventas.idVenta'), nullable=False)
-    idInventario = db.Column(db.Integer, db.ForeignKey('inventario.idInventario'), nullable=False)
-    cantidad = db.Column(db.Float, nullable=False)
-    tipoVenta = db.Column(db.String(50), nullable=False)
-    precioVenta = db.Column(db.Float, nullable=False)
-    subtotal = db.Column(db.Float, nullable=False)
-
-    venta = db.relationship('Venta', backref='productos_venta')
-    inventario = db.relationship('Inventario', backref='productos_venta')
