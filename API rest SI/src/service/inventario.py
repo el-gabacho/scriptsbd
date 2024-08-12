@@ -1,8 +1,13 @@
 from sqlalchemy import func, case, or_
 from sqlalchemy.exc import DBAPIError
-from models import db, Inventario, ProveedorProducto, ModeloAutoparte, ModeloAnio, Modelo, Marca, Anio, UnidadMedida, Imagenes
+from models import db, Inventario, ProveedorProducto, UnidadMedida, Imagenes
 from categorias.Domain.Categoria import Categoria
 from proveedores.Domain.Proveedor import Proveedor
+from vehiculos.Domain.Modelo import Modelo
+from vehiculos.Domain.Marca import Marca
+from vehiculos.Domain.ModeloAnio import ModeloAnio
+from vehiculos.Domain.Anio import Anio
+from vehiculos.Domain.ModeloAutoparte import ModeloAutoparte
 
 # OBTENER INFORMACION DE TODOS LOS PRODUTOS ACTIVOS
 def get_productos():

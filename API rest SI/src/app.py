@@ -7,6 +7,7 @@ from categorias import categories
 from usuarios import users
 from proveedores import suppliers
 from ventas import sales
+from vehiculos import vehicles
 
 #cambio
 app = Flask(__name__)
@@ -24,6 +25,7 @@ app.register_blueprint(categories)
 app.register_blueprint(users)
 app.register_blueprint(suppliers)
 app.register_blueprint(sales)
+app.register_blueprint(vehicles)
 
 if __name__ == '__main__':
     app.run(debug=True)

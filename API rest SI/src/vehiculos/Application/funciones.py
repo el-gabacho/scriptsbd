@@ -1,4 +1,9 @@
-from models import db, Marca, Modelo, ModeloAnio, ModeloAutoparte, Anio, MarcaSchema
+from models import db
+from vehiculos.Domain.Marca import Marca, MarcaSchema
+from vehiculos.Domain.Modelo import Modelo
+from vehiculos.Domain.ModeloAnio import ModeloAnio
+from vehiculos.Domain.Anio import Anio
+from vehiculos.Domain.ModeloAutoparte import ModeloAutoparte
 from sqlalchemy import func
 
 marca_schema = MarcaSchema()

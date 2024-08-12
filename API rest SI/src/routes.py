@@ -1,13 +1,7 @@
 from flask import Blueprint, request, jsonify
-from models import MarcaSchema
-from sqlalchemy.exc import ProgrammingError
 from service.inventario import get_productos, get_producto_preciso, get_productos_similares, buscar_inventarios, obtener_stock_bajo, crear_producto, eliminar_producto
-from service.vehiculos import get_marcas_con_count_modelos, obtener_marca, obtener_modelo_anio_con_count, relaciona_modelo_anio
 
 routes = Blueprint('routes', __name__)
-
-marca_schema = MarcaSchema()
-marcas_schema = MarcaSchema(many=True)
 
 # TODOS LOS PRODUCTOS CON INFORMACION
 @routes.route('/info_productos', methods=['GET'])
@@ -128,35 +122,3 @@ def delete_producto(id):
         return jsonify({'message': 'Producto eliminado correctamente'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-@routes.route('/marcas', methods=['GET'])
-def get_marcas_with_model_count():
-    try:
-        marcas = get_marcas_con_count_modelos()
-        return jsonify(marcas)
-    except ProgrammingError as e:
-        return jsonify({'error': 'Error en la estructura de la base de datos', 'details': str(e)}), 500
-    except Exception as e:
-        return jsonify({'error': 'Ocurrió un error inesperado', 'details': str(e)}), 500
-
-@routes.route('/marcas/<int:id>', methods=['GET'])
-def get_marca(id):
-    try:
-        marca = obtener_marca(id)
-        if marca:
-            return jsonify(marca)
-        return jsonify({'message': 'Marca no encontrada'}), 404
-    except ProgrammingError as e:
-        return jsonify({'error': 'Error en la estructura de la base de datos', 'details': str(e)}), 500
-    except Exception as e:
-        return jsonify({'error': 'Ocurrió un error inesperado', 'details': str(e)}), 500
-
-@routes.route('/modelos/<int:idmarca>', methods=['GET'])
-def get_modelo_anio_count(idmarca):
-    try:
-        modelos = obtener_modelo_anio_con_count(idmarca)
-        return jsonify(modelos)
-    except ProgrammingError as e:
-        return jsonify({'error': 'Error en la estructura de la base de datos', 'details': str(e)}), 500
-    except Exception as e:
-        return jsonify({'error': 'Ocurrió un error inesperado', 'details': str(e)}), 500
