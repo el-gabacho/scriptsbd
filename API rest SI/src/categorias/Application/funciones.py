@@ -1,4 +1,5 @@
-from models import db, Categoria, Inventario
+from models import Inventario
+from categorias.Domain.Categoria import db, Categoria
 
 def obtener_categorias():
     categorias = Categoria.query \

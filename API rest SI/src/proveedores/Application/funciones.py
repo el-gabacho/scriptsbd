@@ -1,4 +1,4 @@
-from models import db, Proveedor
+from proveedores.Domain.Proveedor import db, Proveedor
 
 def obtener_proveedores():
     proveedores = Proveedor.query.all()

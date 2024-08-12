@@ -1,7 +1,7 @@
 import os
 from . import auth
 from flask import request, jsonify
-from models import Usuario
+from usuarios.Domain.Usuario import Usuario
 from dotenv import load_dotenv
 
 load_dotenv()
