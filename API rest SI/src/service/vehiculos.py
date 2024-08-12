@@ -8,11 +8,12 @@ def get_marcas_con_count_modelos():
     marcas = db.session.query(
         Marca.idMarca,
         Marca.nombre,
-        db.func.count(Modelo.nombre)
-    ).join(
+        Marca.urlLogo,
+        db.func.count(Modelo.idModelo).label('numeroModelos')  # Cambiado a idModelo para mayor precisión
+    ).outerjoin(  # Cambiado a outerjoin para incluir marcas sin modelos
         Modelo, Marca.idMarca == Modelo.idMarca
     ).group_by(
-        Marca.idMarca
+        Marca.idMarca  # Agrupar por idMarca
     ).all()
 
     marcas_list = []
@@ -20,7 +21,8 @@ def get_marcas_con_count_modelos():
         marcas_list.append({
             'idMarca': marca.idMarca,
             'nombre': marca.nombre,
-            'count': marca[2]
+            'urlLogo': marca.urlLogo,
+            'numModelos': marca.numeroModelos,
         })
 
     return marcas_list

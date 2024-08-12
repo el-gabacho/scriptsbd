@@ -134,7 +134,7 @@ def delete_producto(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@routes.route('/marcas', methods=['GET'])
+@routes.route('/marcas_con_modelo', methods=['GET'])
 def get_marcas_with_model_count():
     try:
         marcas = get_marcas_con_count_modelos()
