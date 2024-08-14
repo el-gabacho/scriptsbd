@@ -30,23 +30,40 @@ def get_marcas_count_modelos():
     marcas_list = []
     for marca in marcas:
         marcas_list.append({
-            'idMarca': marca.idMarca,
-            'nombre': marca.nombre,
-            'numModelos': marca.numeroModelos,
+            'IdMarca': marca.idMarca,
+            'Nombre': marca.nombre,
+            'NumModelos': marca.numeroModelos,
         })
 
     return marcas_list
 
 # -----------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------
+
 # CRUD DE MARCA: BUSCAR POR NOMBRE DE LA MARCA, REALIZAR UN NUEVO MODELO, EDITAR MODELO Y ELIMINAR MODELO
-# BUSCAR MARCA POR NOMBRE
-def buscar_marca(nombre):
-    marca = Marca.query.filter_by(nombre=nombre).first()
-    if marca:
-        return marca, None
-    else:
-        return None, "Marca no encontrada"
+
+def get_buscar_marcas_similar(nombremarca):
+    marcas = db.session.query(
+        Marca.idMarca,
+        Marca.nombre,
+        db.func.count(Modelo.idModelo).label('numeroModelos')
+        ).outerjoin(
+            Modelo, Marca.idMarca == Modelo.idMarca
+        ).filter(
+            Marca.nombre.like(f'%{nombremarca}%')
+        ).group_by(
+            Marca.idMarca
+        ).all()
+    
+    marcas_list = []
+    for marca in marcas:
+        marcas_list.append({
+            'IdMarca': marca.idMarca,
+            'Nombre': marca.nombre,
+            'NumModelos': marca.numeroModelos,
+            })
+        
+        return marcas_list
 
 # CREAR UNA NUEVA MARCA
 def crear_marca(nombre, urlLogo):
@@ -54,38 +71,40 @@ def crear_marca(nombre, urlLogo):
     try:
         db.session.add(nueva_marca)
         db.session.commit()
-        return nueva_marca, None
+        return nueva_marca
     except IntegrityError:
         db.session.rollback()
-        return None, "El nombre de la marca ya existe"
+        return None
 
 # EDITAR UNA MARCA POR IDMARCA
-def editar_marca(idMarca, nombre=None, urlLogo=None):
-    marca = Marca.query.get(idMarca)
-    if not marca:
-        return None, "Marca no encontrada"
-
-    if nombre:
-        marca.nombre = nombre
-    if urlLogo:
-        marca.urlLogo = urlLogo
-
+def editar_marca(idMarca, nombre, urlLogo):
     try:
+        marca = Marca.query.get(idMarca)
+        if not marca:
+            return None, "Marca no encontrada"
+        
+        marca.nombre = nombre
+        marca.urlLogo = urlLogo
+        
         db.session.commit()
-        return marca, None
+        return marca
     except IntegrityError:
         db.session.rollback()
-        return None, "El nombre de la marca ya existe"
+        return None
 
 # ELIMINAR UNA MARCA POR IDMARCA
 def eliminar_marca(idMarca):
-    marca = Marca.query.get(idMarca)
-    if not marca:
-        return None, "Marca no encontrada"
+    try:
+        marca = Marca.query.get(idMarca)
+        if not marca:
+            return None, "Marca no encontrada"
 
-    db.session.delete(marca)
-    db.session.commit()
-    return marca, None
+        db.session.delete(marca)
+        db.session.commit()
+        return True
+    except IntegrityError:
+        db.session.rollback()
+        return False
 
 # -----------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------
