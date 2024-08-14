@@ -1,6 +1,6 @@
 from itsdangerous import URLSafeTimedSerializer as Serializer
 from werkzeug.security import check_password_hash
-from models import db
+from init import db
 
 class Usuario(db.Model):
     __tablename__ = 'usuarios'

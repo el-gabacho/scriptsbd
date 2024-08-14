@@ -6,7 +6,7 @@ from ventas.Domain.VentaProducto import VentaProducto
 from ventas.Domain.Cliente import Cliente
 from usuarios.Domain.Usuario import Usuario
 from inventario.Domain.Inventario import Inventario, UnidadMedida
-from models import db
+from init import db
 from datetime import datetime
 
 def obtener_ventas(filtros):  

@@ -1,7 +1,7 @@
-from proveedores.Domain.Proveedor import db, Proveedor
+from proveedores.Domain.Proveedor import Proveedor
 from sqlalchemy import func, case, or_
 from sqlalchemy.exc import DBAPIError
-from models import db
+from init import db
 from inventario.Domain.Inventario import Inventario, UnidadMedida, Imagenes
 from categorias.Domain.Categoria import Categoria
 from proveedores.Domain.Proveedor import Proveedor

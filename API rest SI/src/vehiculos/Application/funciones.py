@@ -1,4 +1,4 @@
-from models import db
+from init import db
 from vehiculos.Domain.Marca import Marca, MarcaSchema
 from vehiculos.Domain.Modelo import Modelo
 from vehiculos.Domain.ModeloAnio import ModeloAnio

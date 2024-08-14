@@ -1,4 +1,4 @@
-from models import db
+from init import db
 
 class TipoPago(db.Model):
     __tablename__ = 'tipoPagos'

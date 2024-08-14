@@ -1,5 +1,5 @@
 from configuracion.Domain.Configuracion import Configuracion, Horario, TelefonosEmpresa
-from models import db
+from init import db
 
 def obtenerConfiguracion():
     # Consulta para obtener los datos de telefonos de la empresa

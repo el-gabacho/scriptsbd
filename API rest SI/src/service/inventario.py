@@ -1,6 +1,6 @@
 from sqlalchemy import func, case, or_
 from sqlalchemy.exc import DBAPIError
-from models import db, Inventario, ProveedorProducto, UnidadMedida, Imagenes
+from init import db, Inventario, ProveedorProducto, UnidadMedida, Imagenes
 from categorias.Domain.Categoria import Categoria
 from proveedores.Domain.Proveedor import Proveedor
 from vehiculos.Domain.Modelo import Modelo

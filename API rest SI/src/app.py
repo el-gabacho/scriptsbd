@@ -1,6 +1,6 @@
 from flask import Flask
 from config import configuracion
-from models import db, ma  # Importar db y ma para inicializarlos
+from init import db, ma  # Importar db y ma para inicializarlos
 from auth import auth
 from categorias import categories
 from usuarios import users

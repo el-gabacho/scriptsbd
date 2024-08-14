@@ -1,4 +1,4 @@
-from models import db, ma
+from init import db, ma
 
 class Marca(db.Model):
     __tablename__ = 'marcas'
