@@ -3,11 +3,11 @@ USE el_gabacho;
 INSERT INTO telefonosempresa (numero, tipo) VALUES 
 ('7341641332','WHATSAPP'),
 ('7341641326','WHATSAPP'),
-('7342060902','FIJOS'),
-('7346901508','FIJOS');
+('7342060902','FIJO'),
+('7346901508','FIJO');
 
-INSERT INTO config (correo, direccion, encabezado, footer, rfc) VALUES
-('ejemplo@gmail.com','carretera jojutla-alpuyeca km 7.5, Jojutla, Mexico','AUTOPARTES Y CRISTALES EL GABACHO','Tienes 30 dias de gararntia','');
+INSERT INTO configuracion (correo, direccion, encabezado, footer) VALUES
+('ejemplo@gmail.com','carretera jojutla-alpuyeca km 7.5, Jojutla, Mexico','AUTOPARTES Y CRISTALES EL GABACHO','Tienes 30 dias de gararntia');
 
 INSERT INTO horario (dias, horaInicio, horaFin) VALUES 
 ('LUNES A VIERNES','8AM','6PM'),

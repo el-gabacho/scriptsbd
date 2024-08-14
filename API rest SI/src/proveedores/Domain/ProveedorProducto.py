@@ -7,5 +7,5 @@ class ProveedorProducto(db.Model):
     idProveedor = db.Column(db.Integer, db.ForeignKey('proveedores.idProveedor'), nullable=False)
     idInventario = db.Column(db.Integer, db.ForeignKey('inventario.idInventario'), nullable=False)
 
-    proveedor = db.relationship('Proveedor', backref='productos_proveedor')
-    inventario = db.relationship('Inventario', backref='productos_inventario')
+    proveedor = db.relationship('Proveedor', back_populates='proveedor_productos')
+    inventario = db.relationship('Inventario', back_populates='proveedor_productos', overlaps="inventarios,proveedor_productos")

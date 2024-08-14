@@ -18,7 +18,7 @@ class Inventario(db.Model):
     estado = db.Column(db.Boolean, nullable=False, default=1)
 
     unidad_medida = db.relationship('UnidadMedida', backref='inventarios')
-    proveedor_productos = db.relationship('ProveedorProducto', backref='inventarios')
+    proveedor_productos = db.relationship('ProveedorProducto', back_populates='inventario', overlaps="inventarios,proveedor_productos")
     imagenes = db.relationship('Imagenes', backref='inventarios')
 
 class Imagenes(db.Model):

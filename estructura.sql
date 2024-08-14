@@ -22,14 +22,14 @@ CREATE TABLE telefonosEmpresa (
   tipo VARCHAR(20) NOT NULL
 );
 
--- CREACION DE LA TABLA CONFIG
+-- CREACION DE LA TABLA CONFIGURACION
 
-CREATE TABLE config (
+CREATE TABLE configuracion (
+  idConfiguracion INT AUTO_INCREMENT PRIMARY KEY,
   correo VARCHAR(50),
   direccion VARCHAR(100),
   encabezado VARCHAR(255),
-  footer VARCHAR(255),
-  rfc VARCHAR(50)
+  footer VARCHAR(255)
 );
 
 -- CREACION DE LA TABLA DIAS
