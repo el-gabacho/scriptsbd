@@ -64,15 +64,15 @@ INSERT INTO proveedores (empresa) VALUES
 
 -- INSERCIONES A LA TABLA UNIDAD MEDIDAS (SOLO 2 TIPOS)
 
-INSERT INTO unidadmedidas (tipoMedida, descripcion) VALUES ("PQ/PZ","Conteo por unidad");
-INSERT INTO unidadmedidas (tipoMedida, descripcion) VALUES ("M/CM","Usa enteros y 2 decimales para agranel");
+INSERT INTO unidadMedidas (tipoMedida, descripcion) VALUES ("PQ/PZ","Conteo por unidad");
+INSERT INTO unidadMedidas (tipoMedida, descripcion) VALUES ("M/CM","Usa enteros y 2 decimales para agranel");
 
 -- INSERCIONES A LA TABLA TIPO PAGO (SOLO 4 TIPOS)
 
-INSERT INTO tipopagos (tipoPago, descripcion) VALUES ("EFECTIVO","Pago hecho en el local");
-INSERT INTO tipopagos (tipoPago, descripcion) VALUES ("TARJETA","Pago hecho en el local");
-INSERT INTO tipopagos (tipoPago, descripcion) VALUES ("TRANSFERENCIA","Recibe foto de la tranferencia hecha");
-INSERT INTO tipopagos (tipoPago, descripcion) VALUES ("DEPOSITO","Recibe foto del ticket del deposito hecha");
+INSERT INTO tipoPagos (tipoPago, descripcion) VALUES ("EFECTIVO","Pago hecho en el local");
+INSERT INTO tipoPagos (tipoPago, descripcion) VALUES ("TARJETA","Pago hecho en el local");
+INSERT INTO tipoPagos (tipoPago, descripcion) VALUES ("TRANSFERENCIA","Recibe foto de la tranferencia hecha");
+INSERT INTO tipoPagos (tipoPago, descripcion) VALUES ("DEPOSITO","Recibe foto del ticket del deposito hecha");
 
 -- INSERCIONES A LA TABLA CATEGORIAS
 

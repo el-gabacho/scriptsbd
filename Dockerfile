@@ -10,4 +10,4 @@ COPY API_rest_SI/ .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Run app
-CMD ["python3", "app.py"]
+CMD ["python3", "src/app.py"]
