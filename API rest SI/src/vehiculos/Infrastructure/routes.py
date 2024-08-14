@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from sqlalchemy.exc import ProgrammingError
 from vehiculos.Application.funciones import get_marcas_count_modelos, get_modelos_count_productos, \
-    crear_marca, obtener_modelo_anio_con_count
+    crear_marca, editar_marca, eliminar_marca, get_buscar_marcas_similar
 from vehiculos import vehicles as routes
 
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -24,26 +24,57 @@ def get_marcas_with_model_count():
 # -----------------------------------------------------------------------------------------------------------------------------------
 # CRUD DE MARCA: BUSCAR POR NOMBRE DE LA MARCA, CREAR NUEVA MARCA, EDITAR MARCA Y ELIMINAR MARCA
 
+# BUSCAR POR NOMBRE DE LA MARCA SIMILITUD
+@routes.route('/buscar_marca_similar/<string:nombremarca>', methods=['GET'])
+def search_marca_similar(nombremarca):
+    try:
+        marcas = get_buscar_marcas_similar(nombremarca)
+        
+        # Devuelve una lista vacía si no se encuentran productos similares
+        if marcas is None or len(marcas) == 0:
+            return jsonify([])
+        
+        # Devuelve la lista de productos similares
+        return jsonify(marcas)
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 # CREAR UNA NUEVA MARCA
 @routes.route('/nueva_marca', methods=['POST'])
 def create_marca():
-    data = request.get_json()
-    nombre = data.get('nombre')
-    urlLogo = data.get('urlLogo', None)  # Permitir None si no se proporciona
+    try:
+        data = request.get_json()
+        nombre = data.get('Nombre')
+        urlLogo = data.get('UrlLogo', None)
 
-    if not nombre:
-        return jsonify({'error': 'El nombre de la marca es obligatorio'}), 400
+        marca = crear_marca(nombre, urlLogo)
+        return jsonify({'Marca': marca}), 201
+    except Exception as e:
+        return jsonify({'error':str(e)}), 500
 
-    marca, error = crear_marca(nombre, urlLogo)
+# EDITAR UNA MARCA
+@routes.route('/editar_marca/<int:idMarca>', methods=['PUT'])
+def update_marca(idMarca):
+    try:
+        data = request.get_json()
+        nombre = data.get('Nombre')
+        urlLogo = data.get('UrlLogo', None)  # Permitir None si no se proporciona
+        editar_marca(idMarca, nombre, urlLogo)
+        return jsonify({'message': 'Marca actualizada correctamente'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-    if error:
-        return jsonify({'error': error}), 409
 
-    return jsonify({'message': 'Marca creada exitosamente', 'idMarca': marca.idMarca}), 201
-
-
-
-
+# ELIMINAR UNA MARCA
+@routes.route('/eliminar_marca/<int:idMarca>', methods=['DELETE'])
+def delete_marca(idMarca):
+    try:
+        eliminar_marca(id)
+        return jsonify({'message': 'Marca eliminada correctamente'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # -----------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -63,13 +94,3 @@ def get_modelos_with_productos_count(id):
 
 # -----------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------
-
-@routes.route('/modelos/<int:idmarca>', methods=['GET'])
-def get_modelo_anio_count(idmarca):
-    try:
-        modelos = obtener_modelo_anio_con_count(idmarca)
-        return jsonify(modelos)
-    except ProgrammingError as e:
-        return jsonify({'error': 'Error en la estructura de la base de datos', 'details': str(e)}), 500
-    except Exception as e:
-        return jsonify({'error': 'Ocurrió un error inesperado', 'details': str(e)}), 500

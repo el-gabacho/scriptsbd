@@ -80,7 +80,7 @@ CREATE TABLE roles (
 
 CREATE TABLE proveedores (
   idProveedor INT AUTO_INCREMENT PRIMARY KEY,
-  empresa VARCHAR(50) NOT NULL,
+  empresa VARCHAR(50) NOT NULL UNIQUE,
   nombreEncargado VARCHAR(50),
   telefono VARCHAR(10),
   correo VARCHAR(50)
