@@ -1,6 +1,6 @@
 USE el_gabacho;
 
-INSERT INTO telefonosempresa (numero, tipo) VALUES 
+INSERT INTO telefonosEmpresa (numero, tipo) VALUES 
 ('7341641332','WHATSAPP'),
 ('7341641326','WHATSAPP'),
 ('7342060902','FIJO'),

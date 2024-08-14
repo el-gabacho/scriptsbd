@@ -180,7 +180,7 @@ CREATE TABLE modeloAutopartes (
 	idModeloAutoparte INT AUTO_INCREMENT PRIMARY KEY,
 	idModeloAnio INT NOT NULL,
 	idInventario INT NOT NULL,
-	FOREIGN KEY (idModeloAnio) REFERENCES modeloanios(idModeloAnio) ON DELETE CASCADE,
+	FOREIGN KEY (idModeloAnio) REFERENCES modeloAnios(idModeloAnio) ON DELETE CASCADE,
 	FOREIGN KEY (idInventario) REFERENCES inventario(idInventario)
 );
 
