@@ -8,6 +8,7 @@ from proveedores import suppliers
 from ventas import sales
 from vehiculos import vehicles
 from inventario import inventory
+from configuracion import config
 
 #cambio
 app = Flask(__name__)
@@ -26,6 +27,7 @@ app.register_blueprint(suppliers)
 app.register_blueprint(sales)
 app.register_blueprint(vehicles)
 app.register_blueprint(inventory)
+app.register_blueprint(config)
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -9,4 +9,4 @@ class Proveedor(db.Model):
     telefono = db.Column(db.String(10))
     correo = db.Column(db.String(50))
 
-    proveedor_productos = db.relationship('ProveedorProducto', backref='proveedores')
+    proveedor_productos = db.relationship('ProveedorProducto', back_populates='proveedor')

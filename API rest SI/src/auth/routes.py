@@ -10,17 +10,20 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 @auth.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-    if not username or not password:
-        return jsonify({'error': 'Missing username or password'}), 400
-    user = Usuario.query.filter_by(usuario=username).first()
-    print(user)
-    if user is None or not user.check_password(password):
-        return jsonify({'error': 'Invalid username or password'}), 401
-    token = user.generate_token(SECRET_KEY)
-    return jsonify({'token': token})
+    try:
+        data = request.get_json()
+        username = data.get('usuario')
+        password = data.get('contrasena')
+        if not username or not password:
+            return jsonify({'error': 'Missing username or password'}), 400
+        user = Usuario.query.filter_by(usuario=username).first()
+        if user is None or not user.check_password(password):
+            return jsonify({'error': 'Invalid username or password'}), 401
+        token = user.generate_token(SECRET_KEY)
+        return jsonify({'token': token})
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'Error en el login'}), 500
 
 @auth.route('/signup', methods=['POST'])
 def signup():
