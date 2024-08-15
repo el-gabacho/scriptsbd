@@ -4,7 +4,7 @@
 
 -- ELIMINAR BASE DE DATOS
 
-DROP DATABASE el_gabacho;
+-- DROP DATABASE el_gabacho;
 
 -- CREACION DE LA BASE DE DATOS
 
@@ -359,7 +359,7 @@ BEGIN
     ELSE
         -- Verificar si ya existe un registro en la tabla MODELOANIOS
         SELECT idModeloAnio INTO idModeloAnio_select
-        FROM modeloanios
+        FROM modeloAnios
         WHERE idModelo = idModelo_select AND idAnio = idAnio_select
         LIMIT 1;
         
@@ -422,7 +422,7 @@ BEGIN
     -- Obtener el ID de ModeloAnios
     IF proc_id_modeloAnio IS NOT NULL THEN
         SELECT idModeloAnio INTO idModeloAnio_select
-        FROM modeloanios
+        FROM modeloAnios
         WHERE idModeloAnio = proc_id_modeloAnio;
     END IF;
     

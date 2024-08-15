@@ -82,17 +82,10 @@ def editar_marca(idMarca, nombre, urlLogo):
 
 # ELIMINAR UNA MARCA POR IDMARCA
 def eliminar_marca(idMarca):
-    try:
-        marca = Marca.query.get(idMarca)
-        if not marca:
-            return None, "Marca no encontrada"
-
-        db.session.delete(marca)
-        db.session.commit()
-        return True
-    except IntegrityError:
-        db.session.rollback()
-        return False
+    marca = Marca.query.get(idMarca)
+    db.session.delete(marca)
+    db.session.commit()
+    return True
 
 # -----------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------

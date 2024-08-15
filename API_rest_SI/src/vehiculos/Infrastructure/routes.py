@@ -68,8 +68,8 @@ def update_marca(id):
 
 
 # ELIMINAR UNA MARCA
-@routes.route('/eliminar_marca/<int:idMarca>', methods=['DELETE'])
-def delete_marca(idMarca):
+@routes.route('/eliminar_marca/<int:id>', methods=['DELETE'])
+def delete_marca(id):
     try:
         eliminar_marca(id)
         return jsonify({'message': 'Marca eliminada correctamente'})
@@ -84,9 +84,7 @@ def delete_marca(idMarca):
 def get_modelos_with_productos_count(id):
     try:
         marca = get_modelos_count_productos(id)
-        if marca:
-            return jsonify(marca)
-        return jsonify({'message': 'Marca no encontrada'}), 404
+        return jsonify(marca)
     except ProgrammingError as e:
         return jsonify({'error': 'Error en la estructura de la base de datos', 'details': str(e)}), 500
     except Exception as e:

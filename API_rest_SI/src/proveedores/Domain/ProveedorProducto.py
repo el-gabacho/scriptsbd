@@ -1,7 +1,7 @@
 from init import db
 
 class ProveedorProducto(db.Model):
-    __tablename__ = 'proveedorproductos'
+    __tablename__ = 'proveedorProductos'
 
     idProveedorProducto = db.Column(db.Integer, primary_key=True, autoincrement=True)
     idProveedor = db.Column(db.Integer, db.ForeignKey('proveedores.idProveedor'), nullable=False)
