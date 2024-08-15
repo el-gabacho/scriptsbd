@@ -5,7 +5,7 @@ class Inventario(db.Model):
 
     idInventario = db.Column(db.Integer, primary_key=True, autoincrement=True)
     idCategoria = db.Column(db.Integer, db.ForeignKey('categoria.idCategoria'))  # Asumiendo que existe una tabla `categoria`
-    idUnidadMedida = db.Column(db.Integer, db.ForeignKey('unidadmedidas.idUnidadMedida'))
+    idUnidadMedida = db.Column(db.Integer, db.ForeignKey('unidadMedidas.idUnidadMedida'))
     codigoBarras = db.Column(db.String(50), unique=True, nullable=False)
     nombre = db.Column(db.String(100), nullable=False)
     descripcion = db.Column(db.String(150), nullable=False)
@@ -33,7 +33,7 @@ class Imagenes(db.Model):
     img5 = db.Column(db.Boolean, nullable=False, default=False)
 
 class UnidadMedida(db.Model):
-    __tablename__ = 'unidadmedidas'
+    __tablename__ = 'unidadMedidas'
 
     idUnidadMedida = db.Column(db.Integer, primary_key=True, autoincrement=True)
     tipoMedida = db.Column(db.String(8), unique=True, nullable=False)

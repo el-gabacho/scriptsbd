@@ -4,7 +4,7 @@
 
 -- ELIMINAR BASE DE DATOS
 
-DROP DATABASE el_gabacho;
+-- DROP DATABASE el_gabacho;
 
 -- CREACION DE LA BASE DE DATOS
 
