@@ -46,22 +46,22 @@ def search_marca_similar(nombremarca):
 def create_marca():
     try:
         data = request.get_json()
-        nombre = data.get('Nombre')
-        urlLogo = data.get('UrlLogo', None)
+        nombre = data.get('nombre')
+        urlLogo = data.get('urlLogo', None)
 
-        marca = crear_marca(nombre, urlLogo)
-        return jsonify({'Marca': marca}), 201
+        id_marca = crear_marca(nombre, urlLogo)
+        return jsonify({'Marca': id_marca}), 201
     except Exception as e:
         return jsonify({'error':str(e)}), 500
 
 # EDITAR UNA MARCA
-@routes.route('/editar_marca/<int:idMarca>', methods=['PUT'])
-def update_marca(idMarca):
+@routes.route('/editar_marca/<int:id>', methods=['PUT'])
+def update_marca(id):
     try:
         data = request.get_json()
-        nombre = data.get('Nombre')
-        urlLogo = data.get('UrlLogo', None)  # Permitir None si no se proporciona
-        editar_marca(idMarca, nombre, urlLogo)
+        nombre = data.get('nombre')
+        urlLogo = data.get('urlLogo', None)  # Permitir None si no se proporciona
+        editar_marca(id, nombre, urlLogo)
         return jsonify({'message': 'Marca actualizada correctamente'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500

@@ -1,6 +1,6 @@
 class Config():
     debug= True
-    mysql_Host='localhost:8080'
+    mysql_Host='localhost:3306'
     mysql_user= 'root'
     mysql_password= 'root'
     mysql_db='el_gabacho'

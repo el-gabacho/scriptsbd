@@ -68,29 +68,17 @@ def get_buscar_marcas_similar(nombremarca):
 # CREAR UNA NUEVA MARCA
 def crear_marca(nombre, urlLogo):
     nueva_marca = Marca(nombre=nombre, urlLogo=urlLogo)
-    try:
-        db.session.add(nueva_marca)
-        db.session.commit()
-        return nueva_marca
-    except IntegrityError:
-        db.session.rollback()
-        return None
+    db.session.add(nueva_marca)
+    db.session.commit()
+    return nueva_marca.idMarca
 
 # EDITAR UNA MARCA POR IDMARCA
 def editar_marca(idMarca, nombre, urlLogo):
-    try:
-        marca = Marca.query.get(idMarca)
-        if not marca:
-            return None, "Marca no encontrada"
-        
-        marca.nombre = nombre
-        marca.urlLogo = urlLogo
-        
-        db.session.commit()
-        return marca
-    except IntegrityError:
-        db.session.rollback()
-        return None
+    marca = Marca.query.get(idMarca)
+    marca.nombre = nombre
+    marca.urlLogo = urlLogo
+    db.session.commit()
+    return True
 
 # ELIMINAR UNA MARCA POR IDMARCA
 def eliminar_marca(idMarca):
