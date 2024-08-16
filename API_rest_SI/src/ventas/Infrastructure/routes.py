@@ -35,7 +35,7 @@ def get_ventas_totales_por_usuario_fechas():
         fecha_fin = request.args.get('fecha_fin', None)
         
         filtros = {
-            'usuario': id_usuario,
+            'id_usuario': id_usuario,
             'fecha_inicio': fecha_inicio,
             'fecha_fin': fecha_fin
         }

@@ -71,7 +71,7 @@ def obtener_detalle_venta(idVenta):
     return productos_list
 
 def obtener_ventas_totales_por_usuario_fechas(filtros):
-    ventas_totales = db.session.query(Usuario.usuario, func.sum(Venta.montoTotal), func.DATE(Venta.fechaVenta))\
+    ventas_totales = db.session.query(Usuario.usuario, func.sum(Venta.montoTotal))\
         .join(Venta, Usuario.idUsuario == Venta.idUsuario)
         
     if filtros.get('id_usuario'):
@@ -88,8 +88,7 @@ def obtener_ventas_totales_por_usuario_fechas(filtros):
     for venta in ventas_totales:
         ventas_totales_list.append({
             'Usuario': venta[0],
-            'MontoTotal': float(venta[1]) if venta[1] else 0,
-            'Fecha': venta[2].isoformat() if venta[2] else None
+            'MontoTotal': float(venta[1]) if venta[1] else 0
         })
     return ventas_totales_list
 

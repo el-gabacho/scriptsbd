@@ -150,5 +150,5 @@ WHERE v.idVenta=1;
 SELECT u.usuario, sum(v.montoTotal), v.fechaVenta
 FROM ventas v 
 JOIN usuarios u ON v.idUsuario = u.idUsuario
-WHERE u.usuario = "Alma123" AND DATE(v.fechaVenta) BETWEEN "2024-07-14" AND "2024-07-25"
+WHERE DATE(v.fechaVenta) BETWEEN "2024-08-01" AND "2024-08-31"
 GROUP BY u.usuario;
