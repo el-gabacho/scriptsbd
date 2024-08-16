@@ -20,6 +20,7 @@ def get_marcas_count_modelos():
     marcas = db.session.query(
         Marca.idMarca,
         Marca.nombre,
+        Marca.urlLogo,
         db.func.count(Modelo.idModelo).label('numeroModelos')
     ).outerjoin(
         Modelo, Marca.idMarca == Modelo.idMarca
@@ -30,9 +31,10 @@ def get_marcas_count_modelos():
     marcas_list = []
     for marca in marcas:
         marcas_list.append({
-            'IdMarca': marca.idMarca,
+            'Id': marca.idMarca,
             'Nombre': marca.nombre,
-            'NumModelos': marca.numeroModelos,
+            'UrlLogo': marca.urlLogo,
+            'NumModelos': marca.numeroModelos
         })
 
     return marcas_list
@@ -40,12 +42,13 @@ def get_marcas_count_modelos():
 # -----------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------
 
-# CRUD DE MARCA: BUSCAR POR NOMBRE DE LA MARCA, REALIZAR UN NUEVO MODELO, EDITAR MODELO Y ELIMINAR MODELO
+# CRUD DE MARCA: BUSCAR POR NOMBRE DE LA MARCA, REALIZAR UNA NUEVA MARCA, EDITAR MARCA Y ELIMINAR MARCA
 
 def get_buscar_marcas_similar(nombremarca):
     marcas = db.session.query(
         Marca.idMarca,
         Marca.nombre,
+        Marca.urlLogo,
         db.func.count(Modelo.idModelo).label('numeroModelos')
         ).outerjoin(
             Modelo, Marca.idMarca == Modelo.idMarca
@@ -58,8 +61,9 @@ def get_buscar_marcas_similar(nombremarca):
     marcas_list = []
     for marca in marcas:
         marcas_list.append({
-            'IdMarca': marca.idMarca,
+            'Id': marca.idMarca,
             'Nombre': marca.nombre,
+            'UrlLogo': marca.urlLogo,
             'NumModelos': marca.numeroModelos,
             })
         
@@ -114,66 +118,69 @@ def get_modelos_count_productos(idMarca):
     modelos_list = []
     for resultado in resultados:
         modelos_list.append({
-            'idMarca': resultado.idMarca,
-            'idModelo': resultado.idModelo,
-            'nombreModelo': resultado.nombreModelo,
-            'numeroProductos': resultado.numeroProductos,
+            'IdMarca': resultado.idMarca,
+            'Id': resultado.idModelo,
+            'Nombre': resultado.nombreModelo,
+            'NumProductos': resultado.numeroProductos,
         })
 
     return modelos_list
 # -----------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------
-
-def obtener_marca(id):
-    marca = Marca.query.get(id)
-    print(marca)
-    if marca:
-        result = marca_schema.dump(marca)
-        print(result)
-        return result
-    return None
-
-# -----------------------------------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------------------------------
-
-def obtener_modelo_anio_con_count(idmarca):
-    query = db.session.query(
-        ModeloAnio.idModeloAnio,
-        Modelo.nombre,
-        func.concat(
-            func.coalesce(Anio.anioInicio, ''), '-', func.coalesce(Anio.anioFin, '')
-        ).label('anioRango'),
-        func.count(ModeloAutoparte.idInventario).label('numProductos')
+# CRUD DE MODELOS: BUSCAR POR NOMBRE DEL MODELO, REALIZAR UN NUEVO MODELO, EDITAR MODELO Y ELIMINAR MODELO
+def get_buscar_modelos_similar(idMarca,nombremodelo):
+    resultados = db.session.query(
+        Marca.idMarca,
+        Modelo.idModelo,
+        Modelo.nombre.label('nombreModelo'),
+        func.count(distinct(Inventario.idInventario)).label('numeroProductos')
+    ).join(
+        Modelo, Marca.idMarca == Modelo.idMarca
     ).outerjoin(
         ModeloAnio, Modelo.idModelo == ModeloAnio.idModelo
     ).outerjoin(
-        Anio, ModeloAnio.idAnio == Anio.idAnio
-    ).outerjoin(
         ModeloAutoparte, ModeloAnio.idModeloAnio == ModeloAutoparte.idModeloAnio
+    ).outerjoin(
+        Inventario, ModeloAutoparte.idInventario == Inventario.idInventario
     ).filter(
-        Modelo.idMarca == idmarca
+        Marca.idMarca == idMarca,
+        Modelo.nombre.like(f'%{nombremodelo}%')
     ).group_by(
-        Modelo.idModelo, ModeloAnio.idModeloAnio
-    ).order_by(
-        Modelo.nombre, ModeloAnio.idModeloAnio
+        Modelo.idModelo
     ).all()
 
-    result = []
-    for row in query:
-        idModeloAnio = row.idModeloAnio if row.idModeloAnio else None
-        result.append({
-            'idModeloAnio': idModeloAnio,
-            'nombre': row.nombre,
-            'anioRango': row.anioRango,
-            'numProductos': row.numProductos
+    modelos_list = []
+    for resultado in resultados:
+        modelos_list.append({
+            'IdMarca': resultado.idMarca,
+            'Id': resultado.idModelo,
+            'Nombre': resultado.nombreModelo,
+            'NumProductos': resultado.numeroProductos,
         })
 
-    return result
+    return modelos_list
+
+# CREAR UN NUEVO MODELO
+def crear_modelo(idMarca,nombre):
+    nuevo_modelo = Modelo(idMarca = idMarca, nombre=nombre)
+    db.session.add(nuevo_modelo)
+    db.session.commit()
+    return nuevo_modelo.idModelo
+
+# EDITAR UNA MARCA POR IDMARCA
+def editar_modelo(idMarca, nombre):
+    modelo = Modelo.query.get(idMarca)
+    modelo.nombre = nombre
+    db.session.commit()
+    return True
+
+# ELIMINAR UNA MARCA POR IDMARCA
+def eliminar_modelo(idModelo):
+    modelo = Marca.query.get(idModelo)
+    db.session.delete(modelo)
+    db.session.commit()
+    return True
 
 # -----------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------
 
-def relaciona_modelo_anio(idModelo, anio_inicio, anio_fin, anio_todo):
-    result = db.session.execute(f"CALL proc_modelo_anio({idModelo}, {anio_inicio}, {anio_fin}, {anio_todo})")
-    errors = result.fetchall()
-    return errors

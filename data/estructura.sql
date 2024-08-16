@@ -271,205 +271,12 @@ CREATE TABLE BitacoraVentas (
   fechaActualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- TIGGERS PARA LA BASE DE DATOS
+-- TIGGERS Y PROCEDIMIENTOS PARA LA BASE DE DATOS
 
--- ESTE PROCEDIMIENTO HACE LO SIGUIENTE: TABLA MODELO, ANIO Y ANIOMODELO
-
--- VERIFICA LO QUE VAS A INSERTAR (idModelo, anioInicio, anioFin, anioTodo)
--- modelo del vehiculo ID, rango año modelo por default 0 Inicio y Fin, TRUE para todos y FALSE si existe año o rango de años
-
--- Primero verifica si el año insertado existe en la tabla anios:
--- 1. Si existe obtiene el ID (manda mensaje)
--- 2. Si no existe lo crea y obtiene el ID (manda mensaje)
-
--- Despues verifica si existe una relacion en la tabla anioModelos con el ID Modelo insertado y el ID del Año Obtenido
--- 1. Si existe, no crea nada y manda mensaje
--- 2. Si no existe, crea una nueva relacion en la tabla
-
-DELIMITER //
-
-CREATE OR REPLACE PROCEDURE proc_modelo_anio(
-    IN proc_id_modelo INT,
-    IN proc_anio_inicio INT,
-    IN proc_anio_fin INT,
-    IN proc_anio_todo BOOL
-)
-BEGIN
-    DECLARE idAnio_select INT DEFAULT NULL;
-    DECLARE idAnio_existe BOOLEAN DEFAULT FALSE;
-    
-    DECLARE idModelo_select INT DEFAULT NULL;
-    DECLARE idModelo_existe BOOLEAN DEFAULT FALSE;
-    
-    DECLARE idModeloAnio_select INT DEFAULT NULL;
-
-    -- Verificar si hay un año existente en la tabla Anios
-    IF proc_anio_todo THEN
-        -- Verificar si ya existe un registro con todo_anio verdadero
-        SELECT idAnio INTO idAnio_select
-        FROM anios
-        WHERE anioInicio = 0 AND anioFin = 0 AND anioTodo = TRUE
-        LIMIT 1;
-    ELSE
-        -- Verificar si ya existe un registro con las mismas fechas
-        SELECT idAnio INTO idAnio_select
-        FROM anios
-        WHERE anioInicio = proc_anio_inicio AND anioFin = proc_anio_fin AND anioTodo = FALSE
-        LIMIT 1;
-    END IF;
-
-    -- Verifica si el año es existente (si es nulo), en caso contrario lo crea
-    IF idAnio_select IS NOT NULL THEN
-        -- Existe el año en la tabla Anios y manda ID
-        SET idAnio_existe = TRUE;
-        SELECT CONCAT('Existe el año en la tabla ANIOS ID: ', idAnio_select) AS mensaje;
-    ELSE
-        -- Insertar el año/rango en la tabla Anios
-        INSERT INTO anios (anioInicio, anioFin, anioTodo)
-        VALUES (proc_anio_inicio, proc_anio_fin, proc_anio_todo);
-
-        -- Obtener el idAnio recién insertado y manda ID
-        SET idAnio_select = LAST_INSERT_ID();
-        
-        SET idAnio_existe = FALSE;
-        
-        SELECT CONCAT('El año ha sido insertado correctamente en la tabla ANIOS ID: ', idAnio_select) AS mensaje;
-    END IF;
-
-    -- Verifica si el idModelo ingresado existe en la tabla Modelos
-    SELECT idModelo INTO idModelo_select
-    FROM modelos
-    WHERE idModelo = proc_id_modelo
-    LIMIT 1;
-    
-    -- Verifica si el modelo es existente (si es nulo), en caso contrario lo crea
-    IF idModelo_select IS NOT NULL THEN
-        -- Existe el modelo en la tabla Modelos y manda ID
-        SET idModelo_existe = TRUE;
-        SELECT CONCAT('Existe el modelo en la tabla MODELOS ID: ', idModelo_select) AS mensaje;
-    ELSE
-        -- No existe el modelo
-        SET idModelo_existe = FALSE;
-        SELECT CONCAT('El modelo no existe en la tabla modelo, IMPOSIBLE HACER UNA RELACION ') AS mensaje;
-    END IF;
-
-    -- Verifica si el modelo con el año es existente manda mensaje de exito, en caso contrario creala
-    IF idModelo_existe = FALSE THEN 
-        SELECT 'IMPOSIBLE RELACIONAR EL MODELO CON UN AÑO, POR QUE NO EXISTE EL MODELO. VERIFICA' AS mensaje2;
-    ELSE
-        -- Verificar si ya existe un registro en la tabla MODELOANIOS
-        SELECT idModeloAnio INTO idModeloAnio_select
-        FROM modeloAnios
-        WHERE idModelo = idModelo_select AND idAnio = idAnio_select
-        LIMIT 1;
-        
-        -- Si la relación existe, mostrar mensaje
-        IF idModeloAnio_select IS NOT NULL THEN
-            SELECT CONCAT('Existe la relación del modelo con el año en la tabla ANIO_MODELOS ID: ', idModeloAnio_select) AS mensaje2;
-        ELSE
-            -- Si no existe, insertar la relación
-            INSERT INTO modeloAnios (idModelo, idAnio)
-            VALUES (proc_id_modelo, idAnio_select);
-            
-            SET idModeloAnio_select = LAST_INSERT_ID();
-            
-            SELECT CONCAT('La relación ha sido insertada modelo con el año en la tabla ANIO_MODELOS ID: ', idModeloAnio_select) AS mensaje2;
-        END IF;
-    END IF;
-END //
-
-DELIMITER ;
-
-
--- ---------------------------- 
--- RELACONA LA TABLA MODELO AUTOPARTE CON EL MODELOANIO ... UTILIZADA
-DELIMITER //
-
-CREATE OR REPLACE PROCEDURE proc_modeloanio_autoparte(
-    IN proc_id_inventario INT,
-    IN proc_id_modeloAnio INT
-)
-BEGIN
-
-    DECLARE idInventario_select INT DEFAULT NULL;
-    DECLARE idInventario_existe BOOLEAN DEFAULT FALSE;
-    
-    DECLARE idModeloAnio_select INT DEFAULT NULL;
-    DECLARE idModeloAnio_existe BOOLEAN DEFAULT FALSE;
-    
-    DECLARE idModeloAutoparte_select INT DEFAULT NULL;
-    
-    -- INVENTARIO -------------------------------------------------------------------------------------------
-    -- Obtener el idInventario
-    IF proc_id_inventario IS NOT NULL THEN
-        SELECT idInventario INTO idInventario_select
-        FROM inventario
-        WHERE idInventario = proc_id_inventario;
-    END IF;
-    
-    -- Verifica si el idInventario es existente (si no es nulo)
-    IF idInventario_select IS NOT NULL THEN
-        -- Existe el ID del Inventario
-        SET idInventario_existe = TRUE;
-        SELECT CONCAT('Existe la parte en el INVENTARIO ID: ', idInventario_select) AS mensaje;
-    ELSE
-        -- No existe el ID en el inventario
-        SET idInventario_existe = FALSE;
-        SELECT CONCAT('No existe la parte en el INVENTARIO que desea relacionar ERROR: ', proc_id_inventario) AS mensaje;
-    END IF;
-    
-    -- MODELO ANIOS -------------------------------------------------------------------------------------------
-    -- Obtener el ID de ModeloAnios
-    IF proc_id_modeloAnio IS NOT NULL THEN
-        SELECT idModeloAnio INTO idModeloAnio_select
-        FROM modeloAnios
-        WHERE idModeloAnio = proc_id_modeloAnio;
-    END IF;
-    
-    -- Verifica si el idModeloAnio existe (si no es nulo)
-    IF idModeloAnio_select IS NOT NULL THEN
-        -- Existe el ID del idModeloAnio
-        SET idModeloAnio_existe = TRUE;
-        SELECT CONCAT('Existe el MODELOANIO ID: ', idModeloAnio_select) AS mensaje;
-    ELSE
-        -- No existe el ID del idModeloAnio
-        SET idModeloAnio_existe = FALSE;
-        SELECT CONCAT('No existe el MODELOANIO que desea relacionar ID: ', proc_id_modeloAnio) AS mensaje;
-    END IF;
-    
-    -- MODELO AUTOPARTES -------------------------------------------------------------------------------------------	 
-    -- Verifica si la relación existe en la tabla MODELOAUTOPARTES
-    IF idInventario_existe IS TRUE AND idModeloAnio_existe IS TRUE THEN
-        -- Realiza una consulta con los mismos datos existentes, si existe un registro ya existente
-        SELECT idModeloAutoparte INTO idModeloAutoparte_select
-        FROM modeloAutopartes
-        WHERE idModeloAnio = proc_id_modeloAnio 
-          AND idInventario = proc_id_inventario;
-          
-        -- Verifica si idModeloAutoparte_select obtuvo un id de registro existente
-        IF idModeloAutoparte_select IS NOT NULL THEN
-            SELECT CONCAT('La relación entre el autoparte y el modelo ya existe en MODELOAUTOPARTE ID: ', idModeloAutoparte_select) AS mensaje;
-        ELSE
-            -- Insertar la relación en modeloAutopartes si no existe
-            INSERT INTO modeloAutopartes (idModeloAnio, idInventario)
-            VALUES (proc_id_modeloAnio, proc_id_inventario);
-        
-            -- Obtener el id del registro previamente insertado
-            SET idModeloAutoparte_select = LAST_INSERT_ID();
-            SELECT CONCAT('La relación entre el autoparte y el modelo ha sido creada exitosamente en MODELOAUTOPARTE ID: ', idModeloAutoparte_select) AS mensaje;
-        END IF;
-    ELSE
-        SELECT 'ERROR: Verifica si el ID Inventario o ID ModeloAnios, si existen o si ambos existen.' AS mensaje;
-    END IF;
-END //
-
-DELIMITER ;
-
--- ////////////////////////////////////////////////////////////////////////////////////////
 -- procedimiento almacenado que inserta un nuevo producto en la tabla inventario, registra la relación en proveedorProductos, y también en registroProductos,
-DELIMITER //
+DELIMITER $$
 
-CREATE OR REPLACE PROCEDURE proc_insertar_producto (
+CREATE PROCEDURE proc_insertar_producto(
     IN p_idCategoria INT,
     IN p_idUnidadMedida INT,
     IN p_codigoBarras VARCHAR(50),
@@ -483,44 +290,220 @@ CREATE OR REPLACE PROCEDURE proc_insertar_producto (
     IN p_colocado FLOAT,
     IN p_idProveedor INT,
     IN p_idUsuario INT,
-    OUT p_v_idInventario INT
+    OUT p_idInventario INT
 )
 BEGIN
-    DECLARE v_idInventario INT;
-    DECLARE v_estado BOOL;
+    -- Inicializar el parámetro de salida
+    SET p_idInventario = NULL;
 
-    -- Verificar si el codigoBarras ya existe
-    SELECT idInventario, estado INTO v_idInventario, v_estado
-    FROM inventario
-    WHERE codigoBarras = p_codigoBarras;
-	
-	-- Si el codigoBarras existe, devolver un error.
-    IF v_idInventario IS NOT NULL THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'El producto con el código de barras especificado no puedes utilizarlo.';
-    -- Insertar un nuevo registro si el codigoBarras no existe
+    -- Verificar si el código de barras ya existe
+    IF EXISTS (SELECT 1 FROM inventario WHERE codigoBarras = p_codigoBarras) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Código de barras ya existe.';
     ELSE
-        INSERT INTO inventario (
-            idCategoria, idUnidadMedida, codigoBarras, nombre, descripcion,
-            cantidadActual, cantidadMinima, precioCompra, mayoreo, menudeo, colocado
-        ) VALUES (
-            p_idCategoria, p_idUnidadMedida, p_codigoBarras, p_nombre, p_descripcion,
-            p_cantidadActual, p_cantidadMinima, p_precioCompra, p_mayoreo, p_menudeo, p_colocado
-        );
+        -- Insertar el nuevo producto
+        INSERT INTO inventario (idCategoria, idUnidadMedida, codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, precioCompra, mayoreo, menudeo, colocado)
+        VALUES (p_idCategoria, p_idUnidadMedida, p_codigoBarras, p_nombre, p_descripcion, p_cantidadActual, p_cantidadMinima, p_precioCompra, p_mayoreo, p_menudeo, p_colocado);
+        
+        -- Obtener el idInventario recién insertado
+        SET p_idInventario = LAST_INSERT_ID();
 
-        SET v_idInventario = LAST_INSERT_ID();
-        	
-			-- Registrar en proveedorProductos
-    		INSERT INTO proveedorProductos (idProveedor, idInventario)
-    		VALUES (p_idProveedor, v_idInventario);
+        -- Insertar en proveedorProductos
+        INSERT INTO proveedorProductos (idProveedor, idInventario)
+        VALUES (p_idProveedor, p_idInventario);
 
-    		-- Registrar en registroProductos
-    		INSERT INTO registroProductos (idInventario, idUsuarioRegistro)
-    		VALUES (v_idInventario, p_idUsuario);
+        -- Insertar en registroProductos
+        INSERT INTO registroProductos (idInventario, idUsuarioRegistro)
+        VALUES (p_idInventario, p_idUsuario);
     END IF;
-    -- Asignar el id del inventario al parámetro de salida
-    SET p_v_idInventario = v_idInventario;
-END //
+END $$
+
+DELIMITER ;
+
+-- Procedimiento para insertar imagenes a un nuevo producto
+DELIMITER $$
+
+CREATE PROCEDURE proc_inserta_img_producto(
+    IN p_idInventario INT,
+    IN p_imgRepresentativa BOOL,
+    IN p_img2 BOOL,
+    IN p_img3 BOOL,
+    IN p_img4 BOOL,
+    IN p_img5 BOOL
+)
+BEGIN
+    -- Verificar si el producto existe
+    IF NOT EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El producto con el ID especificado no existe.';
+    ELSE
+        -- Insertar imágenes relacionadas con el producto
+        INSERT INTO imagenes (idInventario, imgRepresentativa, img2, img3, img4, img5)
+        VALUES (p_idInventario, p_imgRepresentativa, p_img2, p_img3, p_img4, p_img5);
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Procedimiento para insertar modelos a productos
+DELIMITER $$
+
+CREATE PROCEDURE proc_insertar_modelos_producto(
+    IN p_idModelo INT,
+    IN p_anioInicio INT,
+    IN p_anioFin INT,
+    IN p_anioTodo BOOL
+)
+BEGIN
+    DECLARE p_idAnio INT;
+    DECLARE p_idModeloAnio INT;
+    DECLARE p_idModeloAutoparte INT;
+
+    -- Verificar si el modelo existe
+    IF NOT EXISTS (SELECT 1 FROM modelos WHERE idModelo = p_idModelo) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El modelo con el ID especificado no existe.';
+    END IF;
+
+    -- Manejo de años
+    IF p_anioTodo = FALSE THEN
+        -- Buscar o insertar el rango de años
+        SELECT idAnio INTO p_idAnio
+        FROM anios
+        WHERE anioInicio = p_anioInicio AND anioFin = p_anioFin;
+        
+        IF p_idAnio IS NULL THEN
+            -- Insertar nuevo rango de años
+            INSERT INTO anios (anioInicio, anioFin, anioTodo)
+            VALUES (p_anioInicio, p_anioFin, FALSE);
+            SET p_idAnio = LAST_INSERT_ID();
+        END IF;
+    ELSE
+        -- Buscar o insertar registro para todos los años
+        SELECT idAnio INTO p_idAnio
+        FROM anios
+        WHERE anioTodo = TRUE;
+        
+        IF p_idAnio IS NULL THEN
+            -- Insertar nuevo registro para todos los años
+            INSERT INTO anios (anioInicio, anioFin, anioTodo)
+            VALUES (0, 0, TRUE);
+            SET p_idAnio = LAST_INSERT_ID();
+        END IF;
+    END IF;
+
+    -- Buscar o insertar la relación modelo-año
+    SELECT idModeloAnio INTO p_idModeloAnio
+    FROM modeloAnios
+    WHERE idModelo = p_idModelo AND idAnio = p_idAnio;
+    
+    IF p_idModeloAnio IS NULL THEN
+        -- Insertar nueva relación modelo-año
+        INSERT INTO modeloAnios (idModelo, idAnio)
+        VALUES (p_idModelo, p_idAnio);
+        SET p_idModeloAnio = LAST_INSERT_ID();
+    END IF;
+
+    -- Verificar si la relación modelo-año e inventario existe en modeloAutopartes
+    SELECT idModeloAutoparte INTO p_idModeloAutoparte
+    FROM modeloAutopartes
+    WHERE idModeloAnio = p_idModeloAnio AND idInventario = p_idInventario;
+    
+    IF p_idModeloAutoparte IS NULL THEN
+        -- Insertar nueva relación modelo-año e inventario
+        INSERT INTO modeloAutopartes (idModeloAnio, idInventario)
+        VALUES (p_idModeloAnio, p_idInventario);
+        SET p_idModeloAutoparte = LAST_INSERT_ID();
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+
+-- Editar un producto
+DELIMITER $$
+
+CREATE PROCEDURE proc_actualizar_producto(
+    IN p_idInventario INT,
+    IN p_idCategoria INT,
+    IN p_idUnidadMedida INT,
+    IN p_nombre VARCHAR(100),
+    IN p_descripcion VARCHAR(150),
+    IN p_cantidadActual FLOAT,
+    IN p_cantidadMinima FLOAT,
+    IN p_precioCompra FLOAT,
+    IN p_mayoreo FLOAT,
+    IN p_menudeo FLOAT,
+    IN p_colocado FLOAT
+)
+BEGIN
+    -- Verificar si el producto existe
+    IF NOT EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El producto con el ID especificado no existe.';
+    ELSE
+        -- Actualizar el producto
+        UPDATE inventario
+        SET idCategoria = p_idCategoria,
+            idUnidadMedida = p_idUnidadMedida,
+            nombre = p_nombre,
+            descripcion = p_descripcion,
+            cantidadActual = p_cantidadActual,
+            cantidadMinima = p_cantidadMinima,
+            precioCompra = p_precioCompra,
+            mayoreo = p_mayoreo,
+            menudeo = p_menudeo,
+            colocado = p_colocado
+        WHERE idInventario = p_idInventario;
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Ediar un producto en imagenes
+DELIMITER $$
+
+CREATE PROCEDURE proc_actualizar_imagenes_producto(
+    IN p_idInventario INT,
+    IN p_imgRepresentativa BOOL,
+    IN p_img2 BOOL,
+    IN p_img3 BOOL,
+    IN p_img4 BOOL,
+    IN p_img5 BOOL
+)
+BEGIN
+    -- Verificar si el producto existe
+    IF NOT EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El producto con el ID especificado no existe.';
+    ELSE
+        -- Actualizar las imágenes del producto
+        INSERT INTO imagenes (idInventario, imgRepresentativa, img2, img3, img4, img5)
+        VALUES (p_idInventario, p_imgRepresentativa, p_img2, p_img3, p_img4, p_img5)
+        ON DUPLICATE KEY UPDATE
+            imgRepresentativa = p_imgRepresentativa,
+            img2 = p_img2,
+            img3 = p_img3,
+            img4 = p_img4,
+            img5 = p_img5;
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Elimina relacion modeloautoparte 
+DELIMITER $$
+
+CREATE PROCEDURE proc_eliminar_modelo_autoparte(
+    IN p_idModeloAnio INT,
+    IN p_idInventario INT
+)
+BEGIN
+    -- Verificar si la relación existe
+    IF NOT EXISTS (SELECT 1 FROM modeloAutopartes WHERE idModeloAnio = p_idModeloAnio AND idInventario = p_idInventario) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'La relación especificada no existe en modeloAutopartes.';
+    ELSE
+        -- Eliminar la relación en modeloAutopartes
+        DELETE FROM modeloAutopartes
+        WHERE idModeloAnio = p_idModeloAnio AND idInventario = p_idInventario;
+    END IF;
+END $$
 
 DELIMITER ;
 

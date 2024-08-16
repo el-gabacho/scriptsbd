@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from sqlalchemy.exc import ProgrammingError
 from vehiculos.Application.funciones import get_marcas_count_modelos, get_modelos_count_productos, \
-    crear_marca, editar_marca, eliminar_marca, get_buscar_marcas_similar
+    crear_marca, editar_marca, eliminar_marca, get_buscar_marcas_similar, get_buscar_modelos_similar, crear_modelo
 from vehiculos import vehicles as routes
 
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -83,8 +83,8 @@ def delete_marca(id):
 @routes.route('/modelos_numero_productos/<int:id>', methods=['GET'])
 def get_modelos_with_productos_count(id):
     try:
-        marca = get_modelos_count_productos(id)
-        return jsonify(marca)
+        modelo = get_modelos_count_productos(id)
+        return jsonify(modelo)
     except ProgrammingError as e:
         return jsonify({'error': 'Error en la estructura de la base de datos', 'details': str(e)}), 500
     except Exception as e:
@@ -92,3 +92,33 @@ def get_modelos_with_productos_count(id):
 
 # -----------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------
+# CRUD DE MODELO: BUSCAR POR NOMBRE DEL MODELO, CREAR NUEVO MODELO, EDITAR MODELO Y ELIMINAR MODELO
+
+@routes.route('/buscar_modelo_similar/<int:id>/<string:nombremodelo>', methods=['GET'])
+def search_modelo_similar(id, nombremodelo):
+    try:
+        modelo = get_buscar_modelos_similar(id, nombremodelo)
+        
+        # Devuelve una lista vacía si no se encuentran productos similares
+        if modelo is None or len(modelo) == 0:
+            return jsonify([])
+        
+        # Devuelve la lista de productos similares
+        return jsonify(modelo)
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+# CREAR UN NUEVO MODELO
+@routes.route('/nuevo_modelo', methods=['POST'])
+def create_modelo():
+    try:
+        data = request.get_json()
+        idModelo = data.get('idMarca');
+        nombreModelo = data.get('nombre')
+
+        id_modelo = crear_modelo(idModelo, nombreModelo)
+        return jsonify({'Marca': id_modelo}), 201
+    except Exception as e:
+        return jsonify({'error':str(e)}), 500
+
