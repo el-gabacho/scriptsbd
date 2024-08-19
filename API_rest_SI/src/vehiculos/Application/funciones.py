@@ -121,8 +121,8 @@ def get_modelos_count_productos(idMarca):
             'IdMarca': resultado.idMarca,
             'Id': resultado.idModelo,
             'Nombre': resultado.nombreModelo,
-            'NumProductos': resultado.numeroProductos,
-        })
+            'NumProductos': resultado.numeroProductos
+            })
 
     return modelos_list
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -155,8 +155,8 @@ def get_buscar_modelos_similar(idMarca,nombremodelo):
             'IdMarca': resultado.idMarca,
             'Id': resultado.idModelo,
             'Nombre': resultado.nombreModelo,
-            'NumProductos': resultado.numeroProductos,
-        })
+            'NumProductos': resultado.numeroProductos
+            })
 
     return modelos_list
 
@@ -168,15 +168,15 @@ def crear_modelo(idMarca,nombre):
     return nuevo_modelo.idModelo
 
 # EDITAR UNA MARCA POR IDMARCA
-def editar_modelo(idMarca, nombre):
-    modelo = Modelo.query.get(idMarca)
+def editar_modelo(idModelo, nombre):
+    modelo = Modelo.query.get(idModelo)
     modelo.nombre = nombre
     db.session.commit()
     return True
 
 # ELIMINAR UNA MARCA POR IDMARCA
 def eliminar_modelo(idModelo):
-    modelo = Marca.query.get(idModelo)
+    modelo = Modelo.query.get(idModelo)
     db.session.delete(modelo)
     db.session.commit()
     return True
