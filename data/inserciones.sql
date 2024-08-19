@@ -21,9 +21,9 @@ INSERT INTO roles (nombre, descripcion) VALUES ("CAJERO","Solo es atender y real
 
 -- INSERCIONES A LA TABLA USUARIOS CON LOS ROLES
 
-INSERT INTO usuarios (idRol, nombreCompleto, usuario, contrasenia) VALUES (1, "Juan", "Juan123", "Juan123@");
-INSERT INTO usuarios (idRol, nombreCompleto, usuario, contrasenia) VALUES (2, "Francisco", "Francisco123", "Francisco123@");
-INSERT INTO usuarios (idRol, nombreCompleto, usuario, contrasenia) VALUES (3, "Alma", "Alma123", "Alma123@");
+INSERT INTO usuarios (idRol, nombreCompleto, usuario, contrasenia) VALUES (1, "Juan", "Juan123", "scrypt:32768:8:1$31Hkd7DnZxA0umbb$d9c96a90882805a5f41c4643675681494d832b2e68485577a877a3087bdd56958aba3f87ebefd608b9cb04432fa0062fc691ecbb766e55a6436ea2a28a9e4543");
+INSERT INTO usuarios (idRol, nombreCompleto, usuario, contrasenia) VALUES (2, "Francisco", "Francisco123", "scrypt:32768:8:1$A5OKM59G4i6CmMN8$8d58adfe7b3b587a350d879e2cde80b78321d239584fd6912bd181c7b3a37c859299c7897dc59adbd55346ee79bb38dc550bd74fe0f979aa694ec92d336e3586");
+INSERT INTO usuarios (idRol, nombreCompleto, usuario, contrasenia) VALUES (3, "Alma", "Alma123", "scrypt:32768:8:1$TGDW5VvLAcMcCHbF$822b1adc67f78d47cfa436eef9881cf74a3f88da3442a9fcb818458be15905744bc9c197aace0fb69cfcd0eada9480ddbf2821acc6fd1f6cc373a2720c48ccf5");
 
 -- INSERCIONES A LA TABLA CLIENTES
 INSERT INTO clientes (nombre) VALUES ('PUBLICO GENERAL');
@@ -2607,3 +2607,11 @@ CALL proc_finalizar_venta(1,2240.0,2300,'48f484c8f4c8f',TRUE,1,'NO APLICA');
 CALL proc_crear_venta(3,1,@v_idVenta);
 CALL proc_agregar_producto_venta(2,3,3,'MAYOREO',75.0,225.0);
 CALL proc_finalizar_venta(2,225.0,225.0,'c1c51cf51cr5h4',TRUE,2,'5s5f4g5h4d5h5j5v');
+
+CALL proc_crear_venta(1,1,@v_idVenta);
+CALL proc_agregar_producto_venta(3,4,1,'MENUDEO',280.0,280.0);
+CALL proc_finalizar_venta(3,280.0,280.0,'fhbcbxebbfrttgrw',TRUE,1,'NO APLICA');
+
+CALL proc_crear_venta(2,1,@v_idVenta);
+CALL proc_agregar_producto_venta(4,5,1,'COLOCADO',450.0,450.0);
+CALL proc_finalizar_venta(4,450.0,450.0,'qhjeudfhyskzfu',TRUE,2,'5s5f4g5h4d5h5j5v');

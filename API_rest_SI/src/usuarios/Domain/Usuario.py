@@ -1,4 +1,3 @@
-from itsdangerous import URLSafeTimedSerializer as Serializer
 from werkzeug.security import check_password_hash
 from init import db
 
@@ -17,7 +16,3 @@ class Usuario(db.Model):
     
     def check_password(self, password):
         return check_password_hash(self.contrasenia, password)
-    
-    def generate_token(self, secret_key):
-        s = Serializer(secret_key)
-        return s.dumps({'user_id': self.idUsuario})
