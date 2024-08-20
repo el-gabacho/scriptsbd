@@ -152,3 +152,11 @@ FROM ventas v
 JOIN usuarios u ON v.idUsuario = u.idUsuario
 WHERE DATE(v.fechaVenta) BETWEEN "2024-08-01" AND "2024-08-31"
 GROUP BY u.usuario;
+
+-- importar
+SELECT idCategoria FROM categorias WHERE nombre = "PARABRISAS";
+SELECT idProveedor FROM proveedores WHERE empresa = "RADEC";
+SELECT idMarca FROM marcas WHERE nombre = "SUZUKI";
+SELECT idModelo FROM modelos mo JOIN marcas ma ON mo.idMarca = ma.idMarca WHERE mo.nombre = "VITARA" AND mo.idMarca = 73;
+SELECT idAnio FROM anios WHERE anioInicio = "1989" AND anioFin = "1998"; 
+SELECT ma.idModeloAnio FROM modeloAnios ma JOIN modelos m ON ma.idModelo = m.idModelo WHERE ma.idAnio = 82 AND ma.idModelo = 1588;
