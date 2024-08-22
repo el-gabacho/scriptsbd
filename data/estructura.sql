@@ -98,7 +98,7 @@ CREATE TABLE tipoPagos (
 
 CREATE TABLE clientes (
 	idCliente INT AUTO_INCREMENT PRIMARY KEY,
-	nombre VARCHAR(30) NOT NULL
+	nombre VARCHAR(30) NOT NULL UNIQUE
 );
 
 -- CREACION DE LA TABLA MARCAS MODELOS Y AÑOS
@@ -273,12 +273,14 @@ CREATE TABLE BitacoraVentas (
 
 -- TIGGERS Y PROCEDIMIENTOS PARA LA BASE DE DATOS
 
--- procedimiento almacenado que inserta un nuevo producto en la tabla inventario, registra la relación en proveedorProductos, y también en registroProductos,
+--------------------------------------------------------------------------------------------------------------------------------------------
+-- procedimientos para insertar registros --------------------------------------------------------------------------------------------
+
 DELIMITER $$
 
 CREATE PROCEDURE proc_insertar_producto(
-    IN p_idCategoria INT,
-    IN p_idUnidadMedida INT,
+    IN p_idCategoria INT, -- CATEGORIA
+    IN p_idUnidadMedida INT, -- UNIDAD DE MEDIDA
     IN p_codigoBarras VARCHAR(50),
     IN p_nombre VARCHAR(100),
     IN p_descripcion VARCHAR(150),
@@ -288,8 +290,8 @@ CREATE PROCEDURE proc_insertar_producto(
     IN p_mayoreo FLOAT,
     IN p_menudeo FLOAT,
     IN p_colocado FLOAT,
-    IN p_idProveedor INT,
-    IN p_idUsuario INT,
+    IN p_idProveedor INT, -- PROVEEDOR
+    IN p_idUsuario INT, -- USUARIO
     OUT p_idInventario INT
 )
 BEGIN
@@ -318,7 +320,8 @@ BEGIN
 END $$
 
 DELIMITER ;
-
+----------------------------
+----------------------------
 -- Procedimiento para insertar imagenes a un nuevo producto
 DELIMITER $$
 
@@ -343,10 +346,12 @@ END $$
 
 DELIMITER ;
 
+------------------------------------------
+------------------------------------------
 -- Procedimiento para insertar modelos a productos
 DELIMITER $$
 
-CREATE PROCEDURE proc_insertar_modelos_producto(
+CREATE PROCEDURE proc_insertar_modelos(
     IN p_idModelo INT,
     IN p_anioInicio INT,
     IN p_anioFin INT,
@@ -355,7 +360,6 @@ CREATE PROCEDURE proc_insertar_modelos_producto(
 BEGIN
     DECLARE p_idAnio INT;
     DECLARE p_idModeloAnio INT;
-    DECLARE p_idModeloAutoparte INT;
 
     -- Verificar si el modelo existe
     IF NOT EXISTS (SELECT 1 FROM modelos WHERE idModelo = p_idModelo) THEN
@@ -398,33 +402,74 @@ BEGIN
         -- Insertar nueva relación modelo-año
         INSERT INTO modeloAnios (idModelo, idAnio)
         VALUES (p_idModelo, p_idAnio);
-        SET p_idModeloAnio = LAST_INSERT_ID();
-    END IF;
-
-    -- Verificar si la relación modelo-año e inventario existe en modeloAutopartes
-    SELECT idModeloAutoparte INTO p_idModeloAutoparte
-    FROM modeloAutopartes
-    WHERE idModeloAnio = p_idModeloAnio AND idInventario = p_idInventario;
-    
-    IF p_idModeloAutoparte IS NULL THEN
-        -- Insertar nueva relación modelo-año e inventario
-        INSERT INTO modeloAutopartes (idModeloAnio, idInventario)
-        VALUES (p_idModeloAnio, p_idInventario);
-        SET p_idModeloAutoparte = LAST_INSERT_ID();
     END IF;
 
 END $$
 
 DELIMITER ;
 
-
--- Editar un producto
+------------------------------------------
+------------------------------------------
+-- Procedimiento para relacionar un producto con un modeloanio
 DELIMITER $$
 
-CREATE PROCEDURE proc_actualizar_producto(
+DELIMITER $$
+
+CREATE PROCEDURE proc_relate_producto_modeloanios(
     IN p_idInventario INT,
-    IN p_idCategoria INT,
-    IN p_idUnidadMedida INT,
+    IN p_modelosAnios TEXT
+)
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE modeloAnioID INT;
+    DECLARE cur CURSOR FOR 
+        SELECT TRIM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(p_modelosAnios, ',', numbers.n), ',', -1) AS UNSIGNED)) AS modeloAnioID
+        FROM 
+            (SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 
+             UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 
+             UNION ALL SELECT 9 UNION ALL SELECT 10) numbers
+        WHERE numbers.n <= 1 + (LENGTH(p_modelosAnios) - LENGTH(REPLACE(p_modelosAnios, ',', ''))) / LENGTH(',');
+        
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO modeloAnioID;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Verificar si el idModeloAnio existe
+        IF NOT EXISTS (SELECT 1 FROM modeloAnios WHERE idModeloAnio = modeloAnioID) THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El idModeloAnio con el ID especificado no existe.';
+        ELSE
+            -- Verificar si la relación ya existe
+            IF NOT EXISTS (SELECT 1 FROM modeloAutopartes WHERE idModeloAnio = modeloAnioID AND idInventario = p_idInventario) THEN
+                -- Insertar la relación modeloAnio con el producto
+                INSERT INTO modeloAutopartes (idModeloAnio, idInventario)
+                VALUES (modeloAnioID, p_idInventario);
+            END IF;
+        END IF;
+
+    END LOOP;
+
+    CLOSE cur;
+END $$
+
+DELIMITER ;
+
+-- ------------------------------------------------------------------------------------------------------------------------------
+-- -----------------------------------------------------------------------------------------------------------------------------------
+
+-- Editar un producto
+
+DELIMITER $$
+
+CREATE PROCEDURE proc_actualizar_producto_con_comparacion(
+    IN p_idInventario INT, -- ID DEL PRODUCTO INVENTARIO
+    IN p_idCategoria INT, -- CATEGORIA
+    IN p_idUnidadMedida INT, -- UNIDAD DE MEDIDA
     IN p_nombre VARCHAR(100),
     IN p_descripcion VARCHAR(150),
     IN p_cantidadActual FLOAT,
@@ -432,80 +477,168 @@ CREATE PROCEDURE proc_actualizar_producto(
     IN p_precioCompra FLOAT,
     IN p_mayoreo FLOAT,
     IN p_menudeo FLOAT,
-    IN p_colocado FLOAT
+    IN p_colocado FLOAT,
+    IN p_idProveedor INT -- PROVEEDOR
 )
 BEGIN
-    -- Verificar si el producto existe
+    DECLARE v_idCategoria INT;
+    DECLARE v_idUnidadMedida INT;
+    DECLARE v_nombre VARCHAR(100);
+    DECLARE v_descripcion VARCHAR(150);
+    DECLARE v_cantidadActual FLOAT;
+    DECLARE v_cantidadMinima FLOAT;
+    DECLARE v_precioCompra FLOAT;
+    DECLARE v_mayoreo FLOAT;
+    DECLARE v_menudeo FLOAT;
+    DECLARE v_colocado FLOAT;
+
+    -- Verificar si el producto existe y obtener los valores actuales
     IF NOT EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El producto con el ID especificado no existe.';
     ELSE
-        -- Actualizar el producto
-        UPDATE inventario
-        SET idCategoria = p_idCategoria,
-            idUnidadMedida = p_idUnidadMedida,
-            nombre = p_nombre,
-            descripcion = p_descripcion,
-            cantidadActual = p_cantidadActual,
-            cantidadMinima = p_cantidadMinima,
-            precioCompra = p_precioCompra,
-            mayoreo = p_mayoreo,
-            menudeo = p_menudeo,
-            colocado = p_colocado
+        -- Obtener los valores actuales del producto
+        SELECT idCategoria, idUnidadMedida, nombre, descripcion, cantidadActual, cantidadMinima, 
+               precioCompra, mayoreo, menudeo, colocado
+        INTO v_idCategoria, v_idUnidadMedida, v_nombre, v_descripcion, v_cantidadActual, 
+             v_cantidadMinima, v_precioCompra, v_mayoreo, v_menudeo, v_colocado
+        FROM inventario
         WHERE idInventario = p_idInventario;
+
+        -- Solo actualizar los campos que hayan cambiado
+        IF p_idCategoria != v_idCategoria OR p_idUnidadMedida != v_idUnidadMedida OR p_nombre != v_nombre
+           OR p_descripcion != v_descripcion OR p_cantidadActual != v_cantidadActual OR p_cantidadMinima != v_cantidadMinima
+           OR p_precioCompra != v_precioCompra OR p_mayoreo != v_mayoreo OR p_menudeo != v_menudeo OR p_colocado != v_colocado THEN
+            UPDATE inventario
+            SET idCategoria = p_idCategoria,
+                idUnidadMedida = p_idUnidadMedida,
+                nombre = p_nombre,
+                descripcion = p_descripcion,
+                cantidadActual = p_cantidadActual,
+                cantidadMinima = p_cantidadMinima,
+                precioCompra = p_precioCompra,
+                mayoreo = p_mayoreo,
+                menudeo = p_menudeo,
+                colocado = p_colocado
+            WHERE idInventario = p_idInventario;
+        END IF;
+
+        -- Verificar si el proveedor ha cambiado
+        IF NOT EXISTS (SELECT 1 FROM proveedorProductos WHERE idProveedor = p_idProveedor AND idInventario = p_idInventario) THEN
+            -- Eliminar antiguo proveedor (si existe)
+            DELETE FROM proveedorProductos
+            WHERE idInventario = p_idInventario;
+
+            -- Insertar nuevo proveedor
+            INSERT INTO proveedorProductos (idProveedor, idInventario)
+            VALUES (p_idProveedor, p_idInventario);
+        END IF;
     END IF;
 END $$
 
 DELIMITER ;
+
+-----------------------------------------
+-----------------------------------------
 
 -- Ediar un producto en imagenes
 DELIMITER $$
 
 CREATE PROCEDURE proc_actualizar_imagenes_producto(
-    IN p_idInventario INT,
-    IN p_imgRepresentativa BOOL,
-    IN p_img2 BOOL,
-    IN p_img3 BOOL,
-    IN p_img4 BOOL,
-    IN p_img5 BOOL
+    IN p_idInventario INT,       -- ID DEL PRODUCTO INVENTARIO
+    IN p_imgRepresentativa BOOL, -- IMAGEN REPRESENTATIVA
+    IN p_img2 BOOL,              -- IMAGEN 2
+    IN p_img3 BOOL,              -- IMAGEN 3
+    IN p_img4 BOOL,              -- IMAGEN 4
+    IN p_img5 BOOL               -- IMAGEN 5
 )
 BEGIN
-    -- Verificar si el producto existe
+    -- Verificar si el producto existe en la tabla inventario
     IF NOT EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El producto con el ID especificado no existe.';
     ELSE
-        -- Actualizar las imágenes del producto
-        INSERT INTO imagenes (idInventario, imgRepresentativa, img2, img3, img4, img5)
-        VALUES (p_idInventario, p_imgRepresentativa, p_img2, p_img3, p_img4, p_img5)
-        ON DUPLICATE KEY UPDATE
-            imgRepresentativa = p_imgRepresentativa,
-            img2 = p_img2,
-            img3 = p_img3,
-            img4 = p_img4,
-            img5 = p_img5;
+        -- Verificar si ya existen imágenes para el producto
+        IF EXISTS (SELECT 1 FROM imagenes WHERE idInventario = p_idInventario) THEN
+            -- Actualizar las imágenes existentes
+            UPDATE imagenes
+            SET imgRepresentativa = p_imgRepresentativa,
+                img2 = p_img2,
+                img3 = p_img3,
+                img4 = p_img4,
+                img5 = p_img5
+            WHERE idInventario = p_idInventario;
+        ELSE
+            -- Insertar nuevas imágenes si no existen previamente
+            INSERT INTO imagenes (idInventario, imgRepresentativa, img2, img3, img4, img5)
+            VALUES (p_idInventario, p_imgRepresentativa, p_img2, p_img3, p_img4, p_img5);
+        END IF;
     END IF;
 END $$
 
 DELIMITER ;
 
--- Elimina relacion modeloautoparte 
+------------------------------------------
+------------------------------------------
+-- Editar relacion modeloautoparte
+
 DELIMITER $$
 
-CREATE PROCEDURE proc_eliminar_modelo_autoparte(
-    IN p_idModeloAnio INT,
-    IN p_idInventario INT
+CREATE PROCEDURE proc_editar_producto_modeloanios(
+    IN p_idInventario INT,
+    IN p_listaActualModelosAnios TEXT, -- Lista actual de modeloAnios del producto, separados por comas
+    IN p_nuevaListaModelosAnios TEXT   -- Nueva lista de modeloAnios para el producto, separados por comas
 )
 BEGIN
-    -- Verificar si la relación existe
-    IF NOT EXISTS (SELECT 1 FROM modeloAutopartes WHERE idModeloAnio = p_idModeloAnio AND idInventario = p_idInventario) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'La relación especificada no existe en modeloAutopartes.';
-    ELSE
-        -- Eliminar la relación en modeloAutopartes
-        DELETE FROM modeloAutopartes
-        WHERE idModeloAnio = p_idModeloAnio AND idInventario = p_idInventario;
-    END IF;
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE modeloAnioID INT;
+
+    -- Identificar las relaciones que se deben eliminar (presentes en la lista actual pero no en la nueva)
+    DELETE FROM modeloAutopartes
+    WHERE idInventario = p_idInventario
+    AND idModeloAnio NOT IN (
+        SELECT TRIM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(p_nuevaListaModelosAnios, ',', numbers.n), ',', -1) AS UNSIGNED)) AS modeloAnioID
+        FROM 
+            (SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 
+             UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 
+             UNION ALL SELECT 9 UNION ALL SELECT 10) numbers
+        WHERE numbers.n <= 1 + (LENGTH(p_nuevaListaModelosAnios) - LENGTH(REPLACE(p_nuevaListaModelosAnios, ',', ''))) / LENGTH(',')
+    );
+
+    -- Insertar las relaciones que no existían antes (presentes en la nueva lista pero no en la actual)
+    DECLARE cur CURSOR FOR 
+        SELECT TRIM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(p_nuevaListaModelosAnios, ',', numbers.n), ',', -1) AS UNSIGNED)) AS modeloAnioID
+        FROM 
+            (SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 
+             UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 
+             UNION ALL SELECT 9 UNION ALL SELECT 10) numbers
+        WHERE numbers.n <= 1 + (LENGTH(p_nuevaListaModelosAnios) - LENGTH(REPLACE(p_nuevaListaModelosAnios, ',', ''))) / LENGTH(',');
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO modeloAnioID;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Insertar la relación si no existe
+        IF NOT EXISTS (SELECT 1 FROM modeloAutopartes WHERE idInventario = p_idInventario AND idModeloAnio = modeloAnioID) THEN
+            INSERT INTO modeloAutopartes (idModeloAnio, idInventario)
+            VALUES (modeloAnioID, p_idInventario);
+        END IF;
+
+    END LOOP;
+
+    CLOSE cur;
+
 END $$
 
 DELIMITER ;
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 -- Este procedimiento asegurará que un producto solo se elimine físicamente si no tiene ninguna relación en ventaProductos, 
 -- mientras que en caso contrario, simplemente se deshabilitará (estado = FALSE) y se registrará la acción en registroProductos.
@@ -516,16 +649,23 @@ CREATE PROCEDURE proc_eliminar_producto (
     IN p_idUsuario INT
 )
 BEGIN
-    DECLARE v_count INT;
+    DECLARE v_countVP INT;
+    DECLARE v_countEP INT;
 
     -- Verificar si el producto tiene relaciones en ventaProductos
     SELECT COUNT(*)
-    INTO v_count
+    INTO v_countVP
     FROM ventaProductos
     WHERE idInventario = p_idInventario;
 
-    -- Si no hay relaciones en ventaProductos, permitir la eliminación
-    IF v_count = 0 THEN
+    -- Verificar si el producto tiene relaciones en entradaProductos
+    SELECT COUNT(*)
+    INTO v_countEP
+    FROM entradaProductos
+    WHERE idInventario = p_idInventario;
+
+    -- Si no hay relaciones en ambas tablas, eliminar el producto
+    IF v_countVP = 0 AND v_countEP = 0 THEN
         DELETE FROM inventario
         WHERE idInventario = p_idInventario;
     ELSE
@@ -544,9 +684,42 @@ END //
 
 DELIMITER ;
 
+-- -------------------------------------------------------------------------------------------------------------------------------------------------
+-- -------------------------------------------------------------------------------------------------------------------------------------------------
 
--- procedimiento almacenado que actualice el estado de un producto a FALSE en la tabla inventario 
--- y actualice el idUsuarioElimino y fechaElimino en la tabla registroProductos
+DELIMITER //
+
+CREATE PROCEDURE proc_reactivar_producto (
+    IN p_idInventario INT
+)
+BEGIN
+    -- Verificar si el producto existe
+    IF NOT EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El producto con el ID especificado no existe.';
+    ELSE
+        -- Verificar si el producto está en estado FALSE
+        IF EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario AND estado = FALSE) THEN
+            -- Restaurar el estado del producto a TRUE
+            UPDATE inventario
+            SET estado = TRUE
+            WHERE idInventario = p_idInventario;
+
+            -- Limpiar los campos idUsuarioElimino y fechaElimino en registroProductos
+            UPDATE registroProductos
+            SET idUsuarioElimino = NULL,
+                fechaElimino = NULL
+            WHERE idInventario = p_idInventario;
+        ELSE
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El producto no está en estado eliminado.';
+        END IF;
+    END IF;
+END //
+
+DELIMITER ;
+
+
+-- -------------------------------------------------------------------------------------------------------------------------------------------------
+-- -------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 -- ventas Paso 1: Crear una Venta

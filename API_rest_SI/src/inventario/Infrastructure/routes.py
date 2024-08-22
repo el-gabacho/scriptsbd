@@ -2,6 +2,9 @@ from flask import jsonify, request
 from inventario.Application.funciones import get_productos, get_producto_preciso, get_productos_similares, buscar_inventarios, obtener_stock_bajo,crear_producto, eliminar_producto
 from inventario import inventory as routes
 
+# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
+
 # TODOS LOS PRODUCTOS CON INFORMACION
 @routes.route('/info_productos', methods=['GET'])
 def get_info_productos():
@@ -82,6 +85,9 @@ def get_stock_bajo():
         return jsonify(stock_bajo)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
 
 # CREAR UN PRODUCTO
 @routes.route('/producto', methods=['POST'])
