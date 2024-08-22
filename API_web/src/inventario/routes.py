@@ -3,7 +3,7 @@ from inventario.funciones import get_productos, get_producto_preciso, get_produc
 from inventario import inventory as routes
 
 # TODOS LOS PRODUCTOS CON INFORMACION
-@routes.route('/info_productos', methods=['GET'])
+@routes.route('/productos', methods=['GET'])
 def get_info_productos():
     try:
         productos = get_productos()
