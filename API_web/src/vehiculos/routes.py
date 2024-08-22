@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from sqlalchemy.exc import ProgrammingError
 from vehiculos.funciones import get_marcas, get_buscar_marcas_similar, \
-    get_modelos_count_productos, get_buscar_modelos_similar
+    obtener_modelos, get_buscar_modelos_similar
 from vehiculos import vehicles as routes
 
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -45,14 +45,15 @@ def search_marca_similar(nombremarca):
 # -----------------------------------------------------------------------------------------------------------------------------------
 # CONSULTA SECUNDARIA DE VEHICULOS : MARCAS (ID) : MODELOS
 
-@routes.route('/modelos_numero_productos/<int:id>', methods=['GET'])
-def get_modelos_with_productos_count(id):
+@routes.route('/marcas/<int:id>/modelos', methods=['GET'])
+def get_models(id):
     try:
-        modelo = get_modelos_count_productos(id)
+        modelo = obtener_modelos(id)
         return jsonify(modelo)
     except ProgrammingError as e:
         return jsonify({'error': 'Error en la estructura de la base de datos', 'details': str(e)}), 500
     except Exception as e:
+        print(e)
         return jsonify({'error': 'Ocurrió un error inesperado', 'details': str(e)}), 500
 
 # -----------------------------------------------------------------------------------------------------------------------------------

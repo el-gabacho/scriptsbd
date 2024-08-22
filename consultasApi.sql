@@ -160,3 +160,23 @@ SELECT idMarca FROM marcas WHERE nombre = "SUZUKI";
 SELECT idModelo FROM modelos mo JOIN marcas ma ON mo.idMarca = ma.idMarca WHERE mo.nombre = "VITARA" AND mo.idMarca = 73;
 SELECT idAnio FROM anios WHERE anioInicio = "1989" AND anioFin = "1998"; 
 SELECT ma.idModeloAnio FROM modeloAnios ma JOIN modelos m ON ma.idModelo = m.idModelo WHERE ma.idAnio = 82 AND ma.idModelo = 1588;
+
+-- obtener modelos
+SELECT mo.idModelo, mo.nombre,
+	GROUP_CONCAT(CONCAT(COALESCE(a.anioInicio, ''), '-', COALESCE(a.anioFin, '')) SEPARATOR ', ') AS anos
+FROM modelos mo 
+JOIN marcas m ON mo.idMarca = m.idMarca
+LEFT JOIN modeloAnios ma ON mo.idModelo = ma.idModelo
+LEFT JOIN anios a ON ma.idAnio = a.idAnio
+WHERE m.idMarca = 11
+GROUP BY mo.idModelo;
+
+SELECT i.idInventario,
+    GROUP_CONCAT(CONCAT(mc.nombre, ' ', m.nombre, ' ', COALESCE(a.anioInicio, ''), '-', COALESCE(a.anioFin, '')) SEPARATOR ', ') AS Aplicaciones,
+FROM inventario i
+LEFT JOIN modeloautopartes mp ON i.idInventario = mp.idInventario
+LEFT JOIN modeloanios ma ON mp.idModeloAnio = ma.idModeloAnio
+LEFT JOIN modelos m ON ma.idModelo = m.idModelo
+LEFT JOIN marcas mc ON m.idMarca = mc.idMarca
+LEFT JOIN anios a ON ma.idAnio = a.idAnio
+GROUP BY i.idInventario;

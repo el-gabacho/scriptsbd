@@ -64,20 +64,17 @@ def get_buscar_marcas_similar(nombremarca):
 # -----------------------------------------------------------------------------------------------------------------------------------
 # CONSULTA SECUNDARIA DE VEHICULOS : MARCAS (ID) : MODELOS
 # OBTENER MODELOS CON NUMERO DE PRODUCTOS RELACIONADOS MEDIANTE ID DE LA MARCA
-def get_modelos_count_productos(idMarca):
+def obtener_modelos(idMarca):
     resultados = db.session.query(
-        Marca.idMarca,
         Modelo.idModelo,
         Modelo.nombre.label('nombreModelo'),
-        func.count(distinct(Inventario.idInventario)).label('numeroProductos')
+        func.group_concat(func.concat(func.coalesce(Anio.anioInicio, ''), '-', func.coalesce(Anio.anioFin, ''))).label('anios')
     ).join(
-        Modelo, Marca.idMarca == Modelo.idMarca
+        Marca, Marca.idMarca == Modelo.idMarca
     ).outerjoin(
         ModeloAnio, Modelo.idModelo == ModeloAnio.idModelo
     ).outerjoin(
-        ModeloAutoparte, ModeloAnio.idModeloAnio == ModeloAutoparte.idModeloAnio
-    ).outerjoin(
-        Inventario, ModeloAutoparte.idInventario == Inventario.idInventario
+        Anio, ModeloAnio.idAnio == Anio.idAnio
     ).filter(
         Marca.idMarca == idMarca
     ).group_by(
@@ -86,12 +83,16 @@ def get_modelos_count_productos(idMarca):
 
     modelos_list = []
     for resultado in resultados:
+        anios = resultado.anios
+        if anios == "-":
+            anios_list = []
+        else:
+            anios_list = anios.split(',')
         modelos_list.append({
-            'IdMarca': resultado.idMarca,
-            'Id': resultado.idModelo,
-            'Nombre': resultado.nombreModelo,
-            'NumProductos': resultado.numeroProductos
-            })
+            'id': resultado.idModelo,
+            'nombre': resultado.nombreModelo,
+            'anios': anios_list
+        })
 
     return modelos_list
 # -----------------------------------------------------------------------------------------------------------------------------------
