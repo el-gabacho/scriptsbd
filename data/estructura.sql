@@ -279,8 +279,8 @@ CREATE TABLE BitacoraVentas (
 DELIMITER $$
 
 CREATE PROCEDURE proc_insertar_producto(
-    IN p_idCategoria INT, -- CATEGORIA
-    IN p_idUnidadMedida INT, -- UNIDAD DE MEDIDA
+    IN p_idCategoria INT,       -- CATEGORIA
+    IN p_idUnidadMedida INT,    -- UNIDAD DE MEDIDA
     IN p_codigoBarras VARCHAR(50),
     IN p_nombre VARCHAR(100),
     IN p_descripcion VARCHAR(150),
@@ -290,22 +290,39 @@ CREATE PROCEDURE proc_insertar_producto(
     IN p_mayoreo FLOAT,
     IN p_menudeo FLOAT,
     IN p_colocado FLOAT,
-    IN p_idProveedor INT, -- PROVEEDOR
-    IN p_idUsuario INT, -- USUARIO
+    IN p_idProveedor INT,       -- PROVEEDOR
+    IN p_idUsuario INT,         -- USUARIO
     OUT p_idInventario INT
 )
 BEGIN
     -- Inicializar el parámetro de salida
     SET p_idInventario = NULL;
 
+    -- Verificar si la categoría existe
+    IF NOT EXISTS (SELECT 1 FROM categorias WHERE idCategoria = p_idCategoria) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'La categoría especificada no existe.';
+    
+    -- Verificar si la unidad de medida existe
+    ELSEIF NOT EXISTS (SELECT 1 FROM unidadMedidas WHERE idUnidadMedida = p_idUnidadMedida) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'La unidad de medida especificada no existe.';
+    
+    -- Verificar si el proveedor existe
+    ELSEIF NOT EXISTS (SELECT 1 FROM proveedores WHERE idProveedor = p_idProveedor) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El proveedor especificado no existe.';
+    
+    -- Verificar si el usuario existe
+    ELSEIF NOT EXISTS (SELECT 1 FROM usuarios WHERE idUsuario = p_idUsuario) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El usuario especificado no existe.';
+    
     -- Verificar si el código de barras ya existe
-    IF EXISTS (SELECT 1 FROM inventario WHERE codigoBarras = p_codigoBarras) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Código de barras ya existe.';
+    ELSEIF EXISTS (SELECT 1 FROM inventario WHERE codigoBarras = p_codigoBarras) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El código de barras ya existe.';
+    
     ELSE
-        -- Insertar el nuevo producto
+        -- Insertar el nuevo producto en inventario
         INSERT INTO inventario (idCategoria, idUnidadMedida, codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, precioCompra, mayoreo, menudeo, colocado)
         VALUES (p_idCategoria, p_idUnidadMedida, p_codigoBarras, p_nombre, p_descripcion, p_cantidadActual, p_cantidadMinima, p_precioCompra, p_mayoreo, p_menudeo, p_colocado);
-        
+
         -- Obtener el idInventario recién insertado
         SET p_idInventario = LAST_INSERT_ID();
 
@@ -320,6 +337,7 @@ BEGIN
 END $$
 
 DELIMITER ;
+
 ----------------------------
 ----------------------------
 -- Procedimiento para insertar imagenes a un nuevo producto
@@ -358,8 +376,8 @@ CREATE PROCEDURE proc_insertar_modelos(
     IN p_anioTodo BOOL
 )
 BEGIN
-    DECLARE p_idAnio INT;
-    DECLARE p_idModeloAnio INT;
+    DECLARE p_idAnio INT DEFAULT NULL;
+    DECLARE p_idModeloAnio INT DEFAULT NULL;
 
     -- Verificar si el modelo existe
     IF NOT EXISTS (SELECT 1 FROM modelos WHERE idModelo = p_idModelo) THEN
@@ -368,13 +386,13 @@ BEGIN
 
     -- Manejo de años
     IF p_anioTodo = FALSE THEN
-        -- Buscar o insertar el rango de años
+        -- Buscar el rango de años
         SELECT idAnio INTO p_idAnio
         FROM anios
         WHERE anioInicio = p_anioInicio AND anioFin = p_anioFin;
         
+        -- Si no existe, insertar nuevo rango de años
         IF p_idAnio IS NULL THEN
-            -- Insertar nuevo rango de años
             INSERT INTO anios (anioInicio, anioFin, anioTodo)
             VALUES (p_anioInicio, p_anioFin, FALSE);
             SET p_idAnio = LAST_INSERT_ID();
@@ -383,23 +401,23 @@ BEGIN
         -- Buscar o insertar registro para todos los años
         SELECT idAnio INTO p_idAnio
         FROM anios
-        WHERE anioTodo = TRUE;
+        WHERE anioInicio = 0 AND anioFin = 0 AND anioTodo = TRUE;
         
+        -- Si no existe, insertar nuevo registro para todos los años
         IF p_idAnio IS NULL THEN
-            -- Insertar nuevo registro para todos los años
             INSERT INTO anios (anioInicio, anioFin, anioTodo)
             VALUES (0, 0, TRUE);
             SET p_idAnio = LAST_INSERT_ID();
         END IF;
     END IF;
 
-    -- Buscar o insertar la relación modelo-año
+    -- Verificar la relación entre modelo y año
     SELECT idModeloAnio INTO p_idModeloAnio
     FROM modeloAnios
     WHERE idModelo = p_idModelo AND idAnio = p_idAnio;
     
+    -- Si no existe, insertar nueva relación modelo-año
     IF p_idModeloAnio IS NULL THEN
-        -- Insertar nueva relación modelo-año
         INSERT INTO modeloAnios (idModelo, idAnio)
         VALUES (p_idModelo, p_idAnio);
     END IF;
@@ -408,11 +426,10 @@ END $$
 
 DELIMITER ;
 
+
 ------------------------------------------
 ------------------------------------------
 -- Procedimiento para relacionar un producto con un modeloanio
-DELIMITER $$
-
 DELIMITER $$
 
 CREATE PROCEDURE proc_relate_producto_modeloanios(
@@ -429,35 +446,42 @@ BEGIN
              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 
              UNION ALL SELECT 9 UNION ALL SELECT 10) numbers
         WHERE numbers.n <= 1 + (LENGTH(p_modelosAnios) - LENGTH(REPLACE(p_modelosAnios, ',', ''))) / LENGTH(',');
-        
+
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
-    OPEN cur;
+    -- Verificar si el idInventario existe
+    IF NOT EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El idInventario especificado no existe.';
+    ELSE
+        OPEN cur;
 
-    read_loop: LOOP
-        FETCH cur INTO modeloAnioID;
-        IF done THEN
-            LEAVE read_loop;
-        END IF;
-
-        -- Verificar si el idModeloAnio existe
-        IF NOT EXISTS (SELECT 1 FROM modeloAnios WHERE idModeloAnio = modeloAnioID) THEN
-            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El idModeloAnio con el ID especificado no existe.';
-        ELSE
-            -- Verificar si la relación ya existe
-            IF NOT EXISTS (SELECT 1 FROM modeloAutopartes WHERE idModeloAnio = modeloAnioID AND idInventario = p_idInventario) THEN
-                -- Insertar la relación modeloAnio con el producto
-                INSERT INTO modeloAutopartes (idModeloAnio, idInventario)
-                VALUES (modeloAnioID, p_idInventario);
+        read_loop: LOOP
+            FETCH cur INTO modeloAnioID;
+            IF done THEN
+                LEAVE read_loop;
             END IF;
-        END IF;
 
-    END LOOP;
+            -- Verificar si el idModeloAnio existe
+            IF NOT EXISTS (SELECT 1 FROM modeloAnios WHERE idModeloAnio = modeloAnioID) THEN
+                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El idModeloAnio con el ID especificado no existe.';
+            ELSE
+                -- Verificar si la relación ya existe
+                IF NOT EXISTS (SELECT 1 FROM modeloAutopartes WHERE idModeloAnio = modeloAnioID AND idInventario = p_idInventario) THEN
+                    -- Insertar la relación modeloAnio con el producto
+                    INSERT INTO modeloAutopartes (idModeloAnio, idInventario)
+                    VALUES (modeloAnioID, p_idInventario);
+                END IF;
+            END IF;
 
-    CLOSE cur;
+        END LOOP;
+
+        CLOSE cur;
+    END IF;
+
 END $$
 
 DELIMITER ;
+
 
 -- ------------------------------------------------------------------------------------------------------------------------------
 -- -----------------------------------------------------------------------------------------------------------------------------------
