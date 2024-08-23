@@ -13,32 +13,12 @@ def get_productos():
         Inventario.nombre,
         Inventario.descripcion,
         Inventario.cantidadActual,
-        Inventario.cantidadMinima,
-        Inventario.precioCompra,
         Inventario.mayoreo,
         Inventario.menudeo,
         Inventario.colocado,
-        Inventario.estado,
         UnidadMedida.tipoMedida,
         func.coalesce(Categoria.nombre, 'SIN CATEGORIA').label('categoriaNombre'),
-        func.group_concat(
-            func.concat(
-                Marca.nombre, ' ', Modelo.nombre, ' ',
-                case(
-                    (Anio.anioTodo == 1, 'ALL YEARS'),
-                    else_=func.concat(
-                        func.right(func.coalesce(Anio.anioInicio, ''), 2),
-                        '-',
-                        func.right(func.coalesce(Anio.anioFin, ''), 2)
-                    )
-                )
-            ).distinct()
-        ).label('aplicaciones'),
         func.coalesce(Imagenes.imgRepresentativa, False).label('imgRepresentativa'),
-        func.coalesce(Imagenes.img2, False).label('img2'),
-        func.coalesce(Imagenes.img3, False).label('img3'),
-        func.coalesce(Imagenes.img4, False).label('img4'),
-        func.coalesce(Imagenes.img5, False).label('img5')
     ).outerjoin(
         Categoria, Inventario.idCategoria == Categoria.idCategoria
     ).join(
@@ -63,44 +43,27 @@ def get_productos():
 
     productos_list = []
     for producto in query:
-        aplicaciones = producto.aplicaciones
-        if not aplicaciones:
-            aplicaciones = ["SIN NINGUNA APLICACION"]
-        else:
-            aplicaciones = [app.strip() for app in aplicaciones.split(',') if app.strip()]
-
         # Construir la lista de imágenes
         base_path = "C:\\imagenes_el_gabacho\\productosInventario"
-        imagenes = []
+        imagen = ""
         if producto.imgRepresentativa:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_1.png")
-        if producto.img2:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_2.png")
-        if producto.img3:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_3.png")
-        if producto.img4:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_4.png")
-        if producto.img5:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_5.png")
+            imagen = f"{base_path}\\{producto.codigoBarras}_1.webp"
 
-        if not imagenes:
-            imagenes.append('SIN IMAGEN')
+        if not imagen:
+            imagen = ''
 
         productos_list.append({
-            'idInventario': producto.idInventario,
+            'id': producto.idInventario,
             'codigo': producto.codigoBarras,
             'nombre': producto.nombre,
             'descripcion': producto.descripcion,
             'existencias': producto.cantidadActual,
-            'cantidadMinima': producto.cantidadMinima,
-            'precioCompra': producto.precioCompra,
             'precioMayoreo': producto.mayoreo,
             'precioMenudeo': producto.menudeo,
             'precioColocado': producto.colocado,
             'tipoMedida': producto.tipoMedida,
             'categoria': producto.categoriaNombre,
-            'aplicaciones': aplicaciones,
-            'imagenes': imagenes
+            'imagen': imagen
         })
 
     return productos_list
@@ -113,12 +76,9 @@ def get_producto_preciso(codigo_barras):
         Inventario.nombre,
         Inventario.descripcion,
         Inventario.cantidadActual,
-        Inventario.cantidadMinima,
-        Inventario.precioCompra,
         Inventario.mayoreo,
         Inventario.menudeo,
         Inventario.colocado,
-        Inventario.estado,
         UnidadMedida.tipoMedida,
         func.coalesce(Categoria.nombre, 'SIN CATEGORIA').label('categoriaNombre'),
         func.group_concat(
@@ -187,19 +147,17 @@ def get_producto_preciso(codigo_barras):
         imagenes.append('SIN IMAGEN')
 
     producto = {
-        'idInventario': query.idInventario,
+        'id': query.idInventario,
         'codigo': query.codigoBarras,
-        'NombreProducto': query.nombre,
+        'nombre': query.nombre,
         'descripcion': query.descripcion,
-        'Existencias': query.cantidadActual,
-        'cantidadMinima': query.cantidadMinima,
-        'precioCompra': query.precioCompra,
+        'existencias': query.cantidadActual,
         'precioMayoreo': query.mayoreo,
         'precioMenudeo': query.menudeo,
         'precioColocado': query.colocado,
         'tipoMedida': query.tipoMedida,
         'categoria': query.categoriaNombre,
-        'Aplicaciones': aplicaciones,
+        'aplicaciones': aplicaciones,
         'imagenes': imagenes
     }
 

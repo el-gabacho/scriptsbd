@@ -13,7 +13,7 @@ def get_info_productos():
         return jsonify({'error': str(e)}), 500
 
 # UN PRODUCTO CON TODA INFORMACION CON CODIGO FIJO
-@routes.route('/info_productos_preciso/<codigo_barras>', methods=['GET'])
+@routes.route('/productos/<codigo_barras>', methods=['GET'])
 def get_info_productos_preciso_by(codigo_barras):
     try:
         producto_preciso = get_producto_preciso(codigo_barras)
