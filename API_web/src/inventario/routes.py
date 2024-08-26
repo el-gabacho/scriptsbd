@@ -3,10 +3,17 @@ from inventario.funciones import get_productos, get_producto_preciso, get_produc
 from inventario import inventory as routes
 
 # TODOS LOS PRODUCTOS CON INFORMACION
-@routes.route('/productos', methods=['GET'])
+@routes.route('/productos', methods=['GET', 'POST'])
 def get_info_productos():
     try:
-        productos = get_productos()
+        data = request.get_json()
+        idMarca = data.get('idMarca')
+        idModelo = data.get('idModelo')
+        anio = data.get('anio')
+        anioInicio = anio.split('-')[0] if anio else None
+        anioFin = anio.split('-')[1] if anio else None
+        print(idMarca, idModelo, anioInicio, anioFin)
+        productos = get_productos(idMarca, idModelo, anioInicio, anioFin)
         return jsonify(productos)
 
     except Exception as e:

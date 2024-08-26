@@ -6,7 +6,7 @@ from categorias.modelos import Categoria
 from vehiculos.modelos import ModeloAutoparte, ModeloAnio, Modelo, Marca, Anio
 
 # OBTENER INFORMACION DE TODOS LOS PRODUTOS ACTIVOS
-def get_productos():
+def get_productos(idMarca, idModelo, anioInicio, anioFin):
     query = db.session.query(
         Inventario.idInventario,
         Inventario.codigoBarras,
@@ -36,7 +36,11 @@ def get_productos():
     ).outerjoin(
         Imagenes, Inventario.idInventario == Imagenes.idInventario
     ).filter(
-        Inventario.estado == 1
+        Inventario.estado == 1,
+        Marca.idMarca == idMarca,
+        Modelo.idModelo == idModelo,
+        Anio.anioInicio == anioInicio,
+        Anio.anioFin == anioFin
     ).group_by(
         Inventario.idInventario
     ).all()
