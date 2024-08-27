@@ -2594,6 +2594,16 @@ CALL proc_inserta_img_producto( -- SOLO LO USE PARA EL PRIMERO
     FALSE,                       -- Imagen 4
     FALSE                        -- Imagen 5
 );
+CALL proc_inserta_img_producto(1,TRUE,TRUE, FALSE, FALSE, FALSE);
+CALL proc_inserta_img_producto(2,TRUE,FALSE, FALSE, FALSE, FALSE);
+CALL proc_inserta_img_producto(3,TRUE,TRUE, TRUE, TRUE, TRUE);
+CALL proc_inserta_img_producto(4,TRUE,TRUE, TRUE, TRUE, FALSE);
+CALL proc_inserta_img_producto(5,TRUE,FALSE, FALSE, FALSE, FALSE);
+CALL proc_inserta_img_producto(6,TRUE,FALSE, FALSE, FALSE, FALSE);
+CALL proc_inserta_img_producto(7,FALSE,FALSE, FALSE, FALSE, FALSE);
+CALL proc_inserta_img_producto(8,TRUE,FALSE, FALSE, FALSE, FALSE);
+CALL proc_inserta_img_producto(9,TRUE,FALSE, FALSE, FALSE, FALSE);
+CALL proc_inserta_img_producto(10,FALSE,FALSE, FALSE, FALSE, FALSE);
 
 -- Relacionar un modeloanio con un Autoparte del Inventario
 -- CALL proc_modeloanios_con_autoparte(proc_id_inventario, proc_id_modeloAnio)

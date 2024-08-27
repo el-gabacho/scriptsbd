@@ -615,6 +615,17 @@ BEGIN
     DECLARE done INT DEFAULT FALSE;
     DECLARE modeloAnioID INT;
 
+    -- Cursor para recorrer la nueva lista de modelosAnios
+    DECLARE cur CURSOR FOR 
+        SELECT TRIM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(p_nuevaListaModelosAnios, ',', numbers.n), ',', -1) AS UNSIGNED)) AS modeloAnioID
+        FROM 
+            (SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 
+             UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 
+             UNION ALL SELECT 9 UNION ALL SELECT 10) numbers
+        WHERE numbers.n <= 1 + (LENGTH(p_nuevaListaModelosAnios) - LENGTH(REPLACE(p_nuevaListaModelosAnios, ',', ''))) / LENGTH(',');
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
     -- Identificar las relaciones que se deben eliminar (presentes en la lista actual pero no en la nueva)
     DELETE FROM modeloAutopartes
     WHERE idInventario = p_idInventario
@@ -627,17 +638,7 @@ BEGIN
         WHERE numbers.n <= 1 + (LENGTH(p_nuevaListaModelosAnios) - LENGTH(REPLACE(p_nuevaListaModelosAnios, ',', ''))) / LENGTH(',')
     );
 
-    -- Insertar las relaciones que no existían antes (presentes en la nueva lista pero no en la actual)
-    DECLARE cur CURSOR FOR 
-        SELECT TRIM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(p_nuevaListaModelosAnios, ',', numbers.n), ',', -1) AS UNSIGNED)) AS modeloAnioID
-        FROM 
-            (SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 
-             UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 
-             UNION ALL SELECT 9 UNION ALL SELECT 10) numbers
-        WHERE numbers.n <= 1 + (LENGTH(p_nuevaListaModelosAnios) - LENGTH(REPLACE(p_nuevaListaModelosAnios, ',', ''))) / LENGTH(',');
-
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-
+    -- Abrir el cursor para insertar las nuevas relaciones
     OPEN cur;
 
     read_loop: LOOP
@@ -659,6 +660,7 @@ BEGIN
 END $$
 
 DELIMITER ;
+
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
