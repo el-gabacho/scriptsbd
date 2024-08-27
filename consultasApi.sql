@@ -180,3 +180,34 @@ LEFT JOIN modelos m ON ma.idModelo = m.idModelo
 LEFT JOIN marcas mc ON m.idMarca = mc.idMarca
 LEFT JOIN anios a ON ma.idAnio = a.idAnio
 GROUP BY i.idInventario;
+
+
+SELECT 
+    CONCAT(i.nombre, ' ', i.descripcion, ' ', c.nombre, ' ', GROUP_CONCAT(CONCAT(mc.nombre, ' ', m.nombre) SEPARATOR ', ')) AS productoCompleto,
+    i.idInventario,
+    i.codigoBarras,
+    i.nombre,
+    i.descripcion,
+    c.nombre,
+    im.imgRepresentativa
+FROM 
+    inventario i
+JOIN 
+    categorias c ON i.idCategoria = c.idCategoria
+LEFT JOIN 
+    modeloautopartes mp ON i.idInventario = mp.idInventario
+LEFT JOIN 
+    modeloanios ma ON mp.idModeloAnio = ma.idModeloAnio
+LEFT JOIN 
+    modelos m ON ma.idModelo = m.idModelo
+LEFT JOIN 
+    marcas mc ON m.idMarca = mc.idMarca
+LEFT JOIN 
+    anios a ON ma.idAnio = a.idAnio
+LEFT JOIN imagenes im ON i.idInventario = im.idInventario
+GROUP BY 
+    i.idInventario
+HAVING 
+    productoCompleto LIKE '%manija%'
+    AND productoCompleto LIKE '%interior%'
+    AND productoCompleto LIKE '%chevrolet%';
