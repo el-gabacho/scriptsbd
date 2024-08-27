@@ -50,13 +50,12 @@ def get_productos(idMarca, idModelo, anioInicio, anioFin):
     productos_list = []
     for producto in query:
         # Construir la lista de imágenes
-        base_path = "C:\\imagenes_el_gabacho\\productosInventario"
         imagen = ""
         if producto.imgRepresentativa:
-            imagen = f"{base_path}\\{producto.codigoBarras}_1.webp"
+            imagen = f"{producto.codigoBarras}_1.webp"
 
         if not imagen:
-            imagen = ''
+            imagen = None
 
         productos_list.append({
             'id': producto.idInventario,
@@ -136,21 +135,17 @@ def get_producto_preciso(codigo_barras):
         aplicaciones = ["SIN NINGUNA APLICACION"]
 
     # Construir la lista de imágenes
-    base_path = "C:\\imagenes_el_gabacho\\productosInventario"
     imagenes = []
     if query.imgRepresentativa:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_1.png")
+        imagenes.append(f"{query.codigoBarras}_1.webp")
     if query.img2:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_2.png")
+        imagenes.append(f"{query.codigoBarras}_2.webp")
     if query.img3:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_3.png")
+        imagenes.append(f"{query.codigoBarras}_3.webp")
     if query.img4:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_4.png")
+        imagenes.append(f"{query.codigoBarras}_4.webp")
     if query.img5:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_5.png")
-
-    if not imagenes:
-        imagenes.append('SIN IMAGEN')
+        imagenes.append(f"{query.codigoBarras}_5.webp")
 
     producto = {
         'id': query.idInventario,
@@ -212,11 +207,10 @@ def get_productos_similares(search_term):
     ).all()
 
     productos = []
-    base_path = "C:\\imagenes_el_gabacho\\productosInventario"
     for item in query:
         imagen = ""
         if item.imgRepresentativa:
-            imagen = f"{base_path}\\{item.codigoBarras}_1.webp"
+            imagen = f"{item.codigoBarras}_1.webp"
 
         if not imagen:
             imagen = ''
