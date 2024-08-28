@@ -1,5 +1,5 @@
 from .. import auth
-from flask import request, jsonify
+from flask import request, jsonify, make_response
 from auth.Application.funciones import iniciar_sesion
 
 @auth.route('/login', methods=['POST'])
@@ -10,9 +10,10 @@ def login():
         password = data.get('contrasena')
         
         if not username or not password:
-            return jsonify({'error': 'Missing username or password'}), 400
+            return jsonify({'error': 'Faltan el nombre de usuario o la contraseña'}), 400
         
-        sesion= iniciar_sesion(username, password)
+        # Llamar a la función para autenticar el usuario
+        sesion = iniciar_sesion(username, password)
         return sesion
     except Exception as e:
         print(e)

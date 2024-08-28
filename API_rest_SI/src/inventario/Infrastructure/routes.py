@@ -1,5 +1,6 @@
 from flask import jsonify, request
-from inventario.Application.funciones import get_productos, get_producto_preciso, get_productos_similares, buscar_inventarios, obtener_stock_bajo,crear_producto, eliminar_producto
+from inventario.Application.funciones import get_productos, get_producto_preciso, get_productos_similares, buscar_inventarios\
+    , obtener_stock_bajo,crear_producto, eliminar_producto
 from inventario import inventory as routes
 
 # ---------------------------------------------------------------------------------------------
@@ -90,31 +91,43 @@ def get_stock_bajo():
 # ---------------------------------------------------------------------------------------------
 
 # CREAR UN PRODUCTO
-@routes.route('/producto', methods=['POST'])
+@routes.route('/nuevo_producto', methods=['POST'])
 def create_producto():
     try:
         # Obtener los datos del producto del cuerpo de la solicitud POST
         data = request.get_json()
-        codigoBarras = data.get('codigoBarras')
-        nombre = data.get('nombre')
-        descripcion = data.get('descripcion')
-        cantidadActual = data.get('cantidadActual')
-        cantidadMinima = data.get('cantidadMinima')
-        precioCompra = data.get('precioCompra')
-        mayoreo = data.get('mayoreo')
-        menudeo = data.get('menudeo')
-        colocado = data.get('colocado')
-        idUnidadMedida = data.get('idUnidadMedida')
-        idCategoria = data.get('idCategoria')
-        idProveedor = data.get('idProveedor')
-        idUsuario = data.get('idUsuario')
-        id_modeloAnio = data.get('id_modeloAnio')
-
+        
+        # Extraer los datos del JSON
+        codigoBarras = data['codigo']
+        nombre = data['nombre']
+        descripcion = data['descripcion']
+        cantidadActual = data['existencias']
+        cantidadMinima = data['cantidadMinima']
+        precioCompra = data['precioCompra']
+        mayoreo = data['precioMayoreo']
+        menudeo = data['precioMenudeo']
+        colocado = data['precioColocado']
+        idUnidadMedida = data['idUnidadMedida']
+        idProveedor = data['idProveedor']
+        idCategoria = data['idCategoria']
+        idUsuario = data['idUsuario']
+        imagenes = data['imagenes']
+        aplicaciones = data['aplicaciones']
+        
         # Llamar a la función para crear el producto
-        producto = crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, precioCompra, mayoreo, menudeo, colocado, idUnidadMedida, idCategoria, idProveedor, idUsuario, id_modeloAnio)
-        return jsonify(producto), 201
+        producto = crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, 
+                                  precioCompra, mayoreo, menudeo, colocado, idUnidadMedida, idCategoria, 
+                                  idProveedor, idUsuario, imagenes, aplicaciones)
+
+        if isinstance(producto, dict) and 'error' in producto:
+            # Si hay un error en el proceso de creación del producto
+            return jsonify(producto), 400
+
+        return jsonify({'success': 'Producto creado con éxito', 'idInventario': producto}), 201
+
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        # Manejo de cualquier tipo de excepción inesperada
+        return jsonify({'error': 'Error interno del servidor', 'message': str(e)}), 500
 
 # MODIFICAR UN PRODUCTO
 

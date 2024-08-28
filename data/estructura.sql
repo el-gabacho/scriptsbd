@@ -340,25 +340,34 @@ DELIMITER ;
 
 ----------------------------
 ----------------------------
--- Procedimiento para insertar imagenes a un nuevo producto
+
 DELIMITER $$
 
-CREATE PROCEDURE proc_inserta_img_producto(
+CREATE OR REPLACE PROCEDURE proc_inserta_img_producto(
     IN p_idInventario INT,
-    IN p_imgRepresentativa BOOL,
-    IN p_img2 BOOL,
-    IN p_img3 BOOL,
-    IN p_img4 BOOL,
-    IN p_img5 BOOL
+    IN p_imagenes TEXT
 )
 BEGIN
+    DECLARE imgRepresentativa BOOL;
+    DECLARE img2 BOOL;
+    DECLARE img3 BOOL;
+    DECLARE img4 BOOL;
+    DECLARE img5 BOOL;
+
     -- Verificar si el producto existe
     IF NOT EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El producto con el ID especificado no existe.';
     ELSE
+        -- Extraer valores booleanos de la cadena p_imagenes
+        SET imgRepresentativa = TRIM(SUBSTRING_INDEX(p_imagenes, ',', 1)) = 'TRUE';
+        SET img2 = TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(p_imagenes, ',', 2), ',', -1)) = 'TRUE';
+        SET img3 = TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(p_imagenes, ',', 3), ',', -1)) = 'TRUE';
+        SET img4 = TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(p_imagenes, ',', 4), ',', -1)) = 'TRUE';
+        SET img5 = TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(p_imagenes, ',', 5), ',', -1)) = 'TRUE';
+
         -- Insertar imágenes relacionadas con el producto
         INSERT INTO imagenes (idInventario, imgRepresentativa, img2, img3, img4, img5)
-        VALUES (p_idInventario, p_imgRepresentativa, p_img2, p_img3, p_img4, p_img5);
+        VALUES (p_idInventario, imgRepresentativa, img2, img3, img4, img5);
     END IF;
 END $$
 
@@ -502,7 +511,7 @@ CREATE PROCEDURE proc_actualizar_producto_con_comparacion(
     IN p_mayoreo FLOAT,
     IN p_menudeo FLOAT,
     IN p_colocado FLOAT,
-    IN p_idProveedor INT -- PROVEEDOR
+    IN p_idProveedor INT -- PROVEEDOR	
 )
 BEGIN
     DECLARE v_idCategoria INT;
