@@ -14,6 +14,8 @@ CREATE OR REPLACE DATABASE el_gabacho;
 
 USE el_gabacho;
 
+SET GLOBAL innodb_lock_wait_timeout = 120;
+
 -- CREACION DE LA TABLA TELEFONOSEMPRESA
 
 CREATE TABLE telefonosEmpresa (
@@ -279,8 +281,8 @@ CREATE TABLE BitacoraVentas (
 DELIMITER $$
 
 CREATE PROCEDURE proc_insertar_producto(
-    IN p_idCategoria INT,       -- CATEGORIA
-    IN p_idUnidadMedida INT,    -- UNIDAD DE MEDIDA
+    IN p_idCategoria INT,
+    IN p_idUnidadMedida INT,
     IN p_codigoBarras VARCHAR(50),
     IN p_nombre VARCHAR(100),
     IN p_descripcion VARCHAR(150),
@@ -290,13 +292,13 @@ CREATE PROCEDURE proc_insertar_producto(
     IN p_mayoreo FLOAT,
     IN p_menudeo FLOAT,
     IN p_colocado FLOAT,
-    IN p_idProveedor INT,       -- PROVEEDOR
-    IN p_idUsuario INT,         -- USUARIO
+    IN p_idProveedor INT,
+    IN p_idUsuario INT,
     OUT p_idInventario INT
 )
 BEGIN
-    -- Inicializar el parámetro de salida
-    SET p_idInventario = NULL;
+    -- Inicializar el parámetro de salida a 0
+    SET p_idInventario = 0;
 
     -- Verificar si la categoría existe
     IF NOT EXISTS (SELECT 1 FROM categorias WHERE idCategoria = p_idCategoria) THEN
