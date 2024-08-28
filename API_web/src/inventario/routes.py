@@ -12,7 +12,6 @@ def get_info_productos():
         anio = data.get('anio')
         anioInicio = anio.split('-')[0] if anio else None
         anioFin = anio.split('-')[1] if anio else None
-        print(idMarca, idModelo, anioInicio, anioFin)
         productos = get_productos(idMarca, idModelo, anioInicio, anioFin)
         return jsonify(productos)
 
