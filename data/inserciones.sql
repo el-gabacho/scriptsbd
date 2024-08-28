@@ -2583,8 +2583,11 @@ CALL proc_insertar_producto(49, 1, '1660251','CILINDRO PUERTA','CON LLAVE',0,1,2
 CALL proc_insertar_producto(63, 1, '96419','ELEVADOR MANUAL','DELANTERA IZQUIERDA',20,1,417.0,600.0,680.0,760.0,16,3, @nuevo_idInventario);
 CALL proc_insertar_producto(64, 1, '018-2302-09','ESPEJO','ELECTRICO IZQUIERDO',2,1,545.95,700.0,750.0,820.0,23,3, @nuevo_idInventario);
 CALL proc_insertar_producto(98, 1, 'SV2540-M1459A','MOTOR LIMPIAPARABRISAS','',0,0,500.0,750.0,1800.0,1900.0,28,3, @nuevo_idInventario);
-CALL proc_insertar_producto(85, 2, '1660','HULE DE PUERTA','SIN CEJA',50.0,1,50.0,75.0,180.0,280.0,5,3, @nuevo_idInventario);
 
+CALL proc_insertar_producto(47, 1, '002-1301-16','ACTIVADOR HD','PUERTA 2 PINS 12VCC DELANTERA DER',10,1,276,300,400,500,23,1, @nuevo_idInventario);
+
+-- CALL proc_inserta_img_producto(p_idInventario, p_imagenes);
+CALL proc_inserta_img_producto(@nuevo_idInventario,'FALSE,FALSE,FALSE,FALSE,FALSE');
 
 CALL proc_inserta_img_producto( -- SOLO LO USE PARA EL PRIMERO
     @nuevo_idInventario,         -- ID del producto inventario (este debe ser el mismo que el obtenido del primer procedimiento)

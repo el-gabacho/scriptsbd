@@ -85,35 +85,35 @@ def get_productos():
         base_path = "C:\\imagenes_el_gabacho\\productosInventario"
         imagenes = []
         if producto.imgRepresentativa:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_1.png")
+            imagenes.append(f"{base_path}\\{producto.codigoBarras}_1.webp")
         if producto.img2:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_2.png")
+            imagenes.append(f"{base_path}\\{producto.codigoBarras}_2.webp")
         if producto.img3:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_3.png")
+            imagenes.append(f"{base_path}\\{producto.codigoBarras}_3.webp")
         if producto.img4:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_4.png")
+            imagenes.append(f"{base_path}\\{producto.codigoBarras}_4.webp")
         if producto.img5:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_5.png")
+            imagenes.append(f"{base_path}\\{producto.codigoBarras}_5.webp")
 
         if not imagenes:
             imagenes.append('SIN IMAGEN')
 
         productos_list.append({
-            'idInventario': producto.idInventario,
-            'codigo': producto.codigoBarras,
-            'nombre': producto.nombre,
-            'descripcion': producto.descripcion,
-            'existencias': producto.cantidadActual,
-            'cantidadMinima': producto.cantidadMinima,
-            'precioCompra': producto.precioCompra,
-            'precioMayoreo': producto.mayoreo,
-            'precioMenudeo': producto.menudeo,
-            'precioColocado': producto.colocado,
-            'tipoMedida': producto.tipoMedida,
-            'proveedor': producto.proveedorEmpresa,
-            'categoria': producto.categoriaNombre,
-            'aplicaciones': aplicaciones,
-            'imagenes': imagenes
+            'IdInventario': producto.idInventario,
+            'Codigo': producto.codigoBarras,
+            'Nombre': producto.nombre,
+            'Descripcion': producto.descripcion,
+            'Existencias': producto.cantidadActual,
+            'CantidadMinima': producto.cantidadMinima,
+            'PrecioCompra': producto.precioCompra,
+            'PrecioMayoreo': producto.mayoreo,
+            'PrecioMenudeo': producto.menudeo,
+            'PrecioColocado': producto.colocado,
+            'TipoMedida': producto.tipoMedida,
+            'Proveedor': producto.proveedorEmpresa,
+            'Categoria': producto.categoriaNombre,
+            'Aplicaciones': aplicaciones,
+            'Imagenes': imagenes
         })
 
     return productos_list
@@ -191,35 +191,35 @@ def get_producto_preciso(codigo_barras):
     base_path = "C:\\imagenes_el_gabacho\\productosInventario"
     imagenes = []
     if query.imgRepresentativa:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_1.png")
+        imagenes.append(f"{base_path}\\{query.codigoBarras}_1.webp")
     if query.img2:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_2.png")
+        imagenes.append(f"{base_path}\\{query.codigoBarras}_2.webp")
     if query.img3:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_3.png")
+        imagenes.append(f"{base_path}\\{query.codigoBarras}_3.webp")
     if query.img4:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_4.png")
+        imagenes.append(f"{base_path}\\{query.codigoBarras}_4.webp")
     if query.img5:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_5.png")
+        imagenes.append(f"{base_path}\\{query.codigoBarras}_5.webp")
 
     if not imagenes:
         imagenes.append('SIN IMAGEN')
 
     producto = {
-        'idInventario': query.idInventario,
-        'codigo': query.codigoBarras,
-        'NombreProducto': query.nombre,
-        'descripcion': query.descripcion,
+        'IdInventario': query.idInventario,
+        'Codigo': query.codigoBarras,
+        'Nombre': query.nombre,
+        'Descripcion': query.descripcion,
         'Existencias': query.cantidadActual,
-        'cantidadMinima': query.cantidadMinima,
-        'precioCompra': query.precioCompra,
-        'precioMayoreo': query.mayoreo,
-        'precioMenudeo': query.menudeo,
-        'precioColocado': query.colocado,
-        'tipoMedida': query.tipoMedida,
-        'proveedor': query.proveedorEmpresa,
-        'categoria': query.categoriaNombre,
+        'CantidadMinima': query.cantidadMinima,
+        'PrecioCompra': query.precioCompra,
+        'PrecioMayoreo': query.mayoreo,
+        'PrecioMenudeo': query.menudeo,
+        'PrecioColocado': query.colocado,
+        'TipoMedida': query.tipoMedida,
+        'Proveedor': query.proveedorEmpresa,
+        'Categoria': query.categoriaNombre,
         'Aplicaciones': aplicaciones,
-        'imagenes': imagenes
+        'Imagenes': imagenes
     }
 
     return producto
@@ -297,35 +297,35 @@ def get_productos_similares(codigo_barras):
 
         imagenes = []
         if item.imgRepresentativa:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_1.png")
+            imagenes.append(f"{base_path}\\{item.codigoBarras}_1.webp")
         if item.img2:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_2.png")
+            imagenes.append(f"{base_path}\\{item.codigoBarras}_2.webp")
         if item.img3:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_3.png")
+            imagenes.append(f"{base_path}\\{item.codigoBarras}_3.webp")
         if item.img4:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_4.png")
+            imagenes.append(f"{base_path}\\{item.codigoBarras}_4.webp")
         if item.img5:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_5.png")
+            imagenes.append(f"{base_path}\\{item.codigoBarras}_5.webp")
 
         if not imagenes:
             imagenes.append('SIN IMAGEN')
 
         productos.append({
-            'idInventario': item.idInventario,
-            'codigo': item.codigoBarras,
-            'nombre': item.nombre,
-            'descripcion': item.descripcion,
-            'existencias': item.cantidadActual,
-            'cantidadMinima': item.cantidadMinima,
-            'precioCompra': item.precioCompra,
-            'precioMayoreo': item.mayoreo,
-            'precioMenudeo': item.menudeo,
-            'precioColocado': item.colocado,
-            'tipoMedida': item.tipoMedida,
-            'proveedor': item.proveedorEmpresa,
-            'categoria': item.categoriaNombre,
-            'aplicaciones': aplicaciones,
-            'imagenes': imagenes
+            'IdInventario': item.idInventario,
+            'Codigo': item.codigoBarras,
+            'Nombre': item.nombre,
+            'Descripcion': item.descripcion,
+            'Existencias': item.cantidadActual,
+            'CantidadMinima': item.cantidadMinima,
+            'PrecioCompra': item.precioCompra,
+            'PrecioMayoreo': item.mayoreo,
+            'PrecioMenudeo': item.menudeo,
+            'PrecioColocado': item.colocado,
+            'TipoMedida': item.tipoMedida,
+            'Proveedor': item.proveedorEmpresa,
+            'Categoria': item.categoriaNombre,
+            'Aplicaciones': aplicaciones,
+            'Imagenes': imagenes
         })
 
     return productos
@@ -382,15 +382,15 @@ def buscar_inventarios(filtros):
     inventarios = []
     for resultado in resultados:
         inventarios.append({
-            'idInventario': resultado.idInventario,
-            'codigoBarras': resultado.codigoBarras,
-            'nombre': resultado.nombre,
-            'descripcion': resultado.descripcion,
-            'cantidadActual': resultado.cantidadActual,
-            'empresa': resultado.empresa,
-            'marca': resultado.marca,
-            'modelo': resultado.modelo,
-            'anioRango': resultado.anioRango,
+            'IdInventario': resultado.idInventario,
+            'CodigoBarras': resultado.codigoBarras,
+            'Nombre': resultado.nombre,
+            'Descripcion': resultado.descripcion,
+            'CantidadActual': resultado.cantidadActual,
+            'Empresa': resultado.empresa,
+            'Marca': resultado.marca,
+            'Modelo': resultado.modelo,
+            'AnioRango': resultado.anioRango,
         })
 
     return inventarios
@@ -485,46 +485,84 @@ def obtener_stock_bajo():
             imagenes.append('SIN IMAGEN')
 
         producto_bajo.append({
-            'idInventario': item.idInventario,
-            'codigo': item.codigoBarras,
-            'nombre': item.nombre,
-            'descripcion': item.descripcion,
-            'existencias': item.cantidadActual,
-            'cantidadMinima': item.cantidadMinima,
-            'precioCompra': item.precioCompra,
-            'precioMayoreo': item.mayoreo,
-            'precioMenudeo': item.menudeo,
-            'precioColocado': item.colocado,
-            'tipoMedida': item.tipoMedida,
-            'proveedor': item.proveedorEmpresa,
-            'categoria': item.categoriaNombre,
-            'aplicaciones': aplicaciones,
-            'imagenes': imagenes
+            'IdInventario': item.idInventario,
+            'Codigo': item.codigoBarras,
+            'Nombre': item.nombre,
+            'Descripcion': item.descripcion,
+            'Existencias': item.cantidadActual,
+            'CantidadMinima': item.cantidadMinima,
+            'PrecioCompra': item.precioCompra,
+            'PrecioMayoreo': item.mayoreo,
+            'PrecioMenudeo': item.menudeo,
+            'PrecioColocado': item.colocado,
+            'TipoMedida': item.tipoMedida,
+            'Proveedor': item.proveedorEmpresa,
+            'Categoria': item.categoriaNombre,
+            'Aplicaciones': aplicaciones,
+            'Imagenes': imagenes
         })
 
     return producto_bajo
 
 def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, precioCompra, mayoreo, 
-                   menudeo, colocado, idUnidadMedida, idCategoria, idProveedor, idUsuario, id_modeloAnio):
+                   menudeo, colocado, idUnidadMedida, idCategoria, idProveedor, idUsuario, imagenes, aplicaciones):
     try:
         # Llamar al procedimiento almacenado para insertar un producto en el inventario
-        db.session.execute(
-        f"CALL proc_insertar_producto({idCategoria}, {idUnidadMedida}, {codigoBarras}, {nombre}, {descripcion}, {cantidadActual}, {cantidadMinima}, {precioCompra}, {mayoreo}, {menudeo}, {colocado}, {idProveedor}, {idUsuario}, @v_idInventario)"
-        )
-        result = db.session.execute("SELECT @v_idInventario").first()
-        id_inventario = result[0]
+        with db.session.begin() as session:
+            session.execute(
+                "CALL proc_insertar_producto(:idCategoria, :idUnidadMedida, :codigoBarras, :nombre, :descripcion, "
+                ":cantidadActual, :cantidadMinima, :precioCompra, :mayoreo, :menudeo, :colocado, "
+                ":idProveedor, :idUsuario, @nuevo_idInventario)",
+                {
+                    'idCategoria': idCategoria,
+                    'idUnidadMedida': idUnidadMedida,
+                    'codigoBarras': codigoBarras,
+                    'nombre': nombre,
+                    'descripcion': descripcion,
+                    'cantidadActual': cantidadActual,
+                    'cantidadMinima': cantidadMinima,
+                    'precioCompra': precioCompra,
+                    'mayoreo': mayoreo,
+                    'menudeo': menudeo,
+                    'colocado': colocado,
+                    'idProveedor': idProveedor,
+                    'idUsuario': idUsuario
+                }
+            )
+            
+            result = session.execute("SELECT @nuevo_idInventario").first()
+            id_inventario = result[0]
 
-        # Llamar al procedimiento almacenado para relacionar un modeloanio con un Autoparte del Inventario
-        db.session.execute(f"CALL proc_modeloanio_autoparte({id_inventario}, {id_modeloAnio})")
+            # Llamar al procedimiento almacenado para insertar en la tabla imagenes con el idInventario previamente creado
+            session.execute(
+                "CALL proc_inserta_img_producto(:idInventario, :imagenes)",
+                {
+                    'idInventario': id_inventario,
+                    'imagenes': imagenes
+                }
+            )
 
-        # Confirmar los cambios en la base de datos
-        db.session.commit()
+            # LLamar al procedimiento almacenado para insertar relaciones de vehiculos con el idInventario previamente creado
+            session.execute(
+                "CALL proc_relate_producto_modeloanios(:idInventario, :aplicaciones)",
+                {
+                    'idInventario': id_inventario,
+                    'aplicaciones': aplicaciones
+                }
+            )
 
-        # Cerrar la sesión
-        db.session.close()
         return id_inventario
+
     except DBAPIError as e:
-        return str(e)
+        # Registrar el error o manejarlo de manera más específica
+        db.session.rollback()  # Revertir cualquier cambio en la sesión
+        return {"error": str(e)}
+
+    except Exception as e:
+        db.session.rollback()
+        return {"error": "Error inesperado: " + str(e)}
+
+
 
 def eliminar_producto(idInventario, idUsuario):
     # Llamar al procedimiento almacenado para eliminar un producto del inventario
