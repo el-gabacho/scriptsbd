@@ -14,6 +14,8 @@ CREATE OR REPLACE DATABASE el_gabacho;
 
 USE el_gabacho;
 
+SET GLOBAL innodb_lock_wait_timeout = 120;
+
 -- CREACION DE LA TABLA TELEFONOSEMPRESA
 
 CREATE TABLE telefonosEmpresa (
@@ -279,8 +281,8 @@ CREATE TABLE BitacoraVentas (
 DELIMITER $$
 
 CREATE PROCEDURE proc_insertar_producto(
-    IN p_idCategoria INT,       -- CATEGORIA
-    IN p_idUnidadMedida INT,    -- UNIDAD DE MEDIDA
+    IN p_idCategoria INT,
+    IN p_idUnidadMedida INT,
     IN p_codigoBarras VARCHAR(50),
     IN p_nombre VARCHAR(100),
     IN p_descripcion VARCHAR(150),
@@ -290,13 +292,13 @@ CREATE PROCEDURE proc_insertar_producto(
     IN p_mayoreo FLOAT,
     IN p_menudeo FLOAT,
     IN p_colocado FLOAT,
-    IN p_idProveedor INT,       -- PROVEEDOR
-    IN p_idUsuario INT,         -- USUARIO
+    IN p_idProveedor INT,
+    IN p_idUsuario INT,
     OUT p_idInventario INT
 )
 BEGIN
-    -- Inicializar el parámetro de salida
-    SET p_idInventario = NULL;
+    -- Inicializar el parámetro de salida a 0
+    SET p_idInventario = 0;
 
     -- Verificar si la categoría existe
     IF NOT EXISTS (SELECT 1 FROM categorias WHERE idCategoria = p_idCategoria) THEN
@@ -624,6 +626,17 @@ BEGIN
     DECLARE done INT DEFAULT FALSE;
     DECLARE modeloAnioID INT;
 
+    -- Cursor para recorrer la nueva lista de modelosAnios
+    DECLARE cur CURSOR FOR 
+        SELECT TRIM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(p_nuevaListaModelosAnios, ',', numbers.n), ',', -1) AS UNSIGNED)) AS modeloAnioID
+        FROM 
+            (SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 
+             UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 
+             UNION ALL SELECT 9 UNION ALL SELECT 10) numbers
+        WHERE numbers.n <= 1 + (LENGTH(p_nuevaListaModelosAnios) - LENGTH(REPLACE(p_nuevaListaModelosAnios, ',', ''))) / LENGTH(',');
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
     -- Identificar las relaciones que se deben eliminar (presentes en la lista actual pero no en la nueva)
     DELETE FROM modeloAutopartes
     WHERE idInventario = p_idInventario
@@ -636,17 +649,7 @@ BEGIN
         WHERE numbers.n <= 1 + (LENGTH(p_nuevaListaModelosAnios) - LENGTH(REPLACE(p_nuevaListaModelosAnios, ',', ''))) / LENGTH(',')
     );
 
-    -- Insertar las relaciones que no existían antes (presentes en la nueva lista pero no en la actual)
-    DECLARE cur CURSOR FOR 
-        SELECT TRIM(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(p_nuevaListaModelosAnios, ',', numbers.n), ',', -1) AS UNSIGNED)) AS modeloAnioID
-        FROM 
-            (SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 
-             UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 
-             UNION ALL SELECT 9 UNION ALL SELECT 10) numbers
-        WHERE numbers.n <= 1 + (LENGTH(p_nuevaListaModelosAnios) - LENGTH(REPLACE(p_nuevaListaModelosAnios, ',', ''))) / LENGTH(',');
-
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-
+    -- Abrir el cursor para insertar las nuevas relaciones
     OPEN cur;
 
     read_loop: LOOP
@@ -668,6 +671,7 @@ BEGIN
 END $$
 
 DELIMITER ;
+
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------------

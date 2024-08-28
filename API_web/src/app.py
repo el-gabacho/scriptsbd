@@ -4,6 +4,7 @@ from init import db, ma  # Importar db y ma para inicializarlos
 from categorias import categories
 from vehiculos import vehicles
 from inventario import inventory
+from configuracion import config
 from flask_cors import CORS
 
 #cambio
@@ -20,6 +21,7 @@ ma.init_app(app)
 app.register_blueprint(categories)
 app.register_blueprint(vehicles)
 app.register_blueprint(inventory)
+app.register_blueprint(config)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
