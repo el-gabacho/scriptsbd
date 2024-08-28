@@ -371,15 +371,16 @@ DELIMITER ;
 -- Procedimiento para insertar modelos a productos
 DELIMITER $$
 
-CREATE PROCEDURE proc_insertar_modelos(
+CREATE OR REPLACE PROCEDURE proc_insertar_modelos(
     IN p_idModelo INT,
     IN p_anioInicio INT,
     IN p_anioFin INT,
-    IN p_anioTodo BOOL
+    IN p_anioTodo BOOL,
+    OUT p_idModeloAnio INT
 )
 BEGIN
     DECLARE p_idAnio INT DEFAULT NULL;
-    DECLARE p_idModeloAnio INT DEFAULT NULL;
+    SET p_idModeloAnio = 0;
 
     -- Verificar si el modelo existe
     IF NOT EXISTS (SELECT 1 FROM modelos WHERE idModelo = p_idModelo) THEN
@@ -419,15 +420,15 @@ BEGIN
     WHERE idModelo = p_idModelo AND idAnio = p_idAnio;
     
     -- Si no existe, insertar nueva relación modelo-año
-    IF p_idModeloAnio IS NULL THEN
+    IF p_idModeloAnio IS NULL OR p_idModeloAnio = 0 THEN
         INSERT INTO modeloAnios (idModelo, idAnio)
         VALUES (p_idModelo, p_idAnio);
+        SET p_idModeloAnio = LAST_INSERT_ID();
     END IF;
 
 END $$
 
 DELIMITER ;
-
 
 ------------------------------------------
 ------------------------------------------
@@ -608,9 +609,8 @@ DELIMITER ;
 
 DELIMITER $$
 
-CREATE PROCEDURE proc_editar_producto_modeloanios(
+CREATE OR REPLACE PROCEDURE proc_editar_producto_modeloanios(
     IN p_idInventario INT,
-    IN p_listaActualModelosAnios TEXT, -- Lista actual de modeloAnios del producto, separados por comas
     IN p_nuevaListaModelosAnios TEXT   -- Nueva lista de modeloAnios para el producto, separados por comas
 )
 BEGIN

@@ -2546,22 +2546,22 @@ INSERT INTO anios (anioInicio, anioFin, anioTodo) VALUES
 
 -- Relacionar modelo con un año
 -- Parametros (idModelo, anioInicio, anioFin, todoAnio )
--- CALL proc_insertar_modelos(p_idModelo, p_anioInicio, p_anioFin, p_anioTodo)
-CALL proc_insertar_modelos(211, 1998, 2005, FALSE); -- astro: chevrolet
-CALL proc_insertar_modelos(210, 2001, 2006, FALSE); -- astra: chevrolet
-CALL proc_insertar_modelos(214, 2006, 2012, FALSE); -- aveo: chevrolet
-CALL proc_insertar_modelos(214, 2012, 2017, FALSE); -- aveo: chevrolet
-CALL proc_insertar_modelos(236, 2008, 2016, FALSE); -- captiva: chevrolet
-CALL proc_insertar_modelos(241, 1975, 1978, FALSE); -- chevy: chevrolet
-CALL proc_insertar_modelos(522, 1990, 1998, FALSE); -- aerostar: ford
-CALL proc_insertar_modelos(529, 1995, 1999, FALSE); -- contour: ford
-CALL proc_insertar_modelos(532, 1972, 1982, FALSE); -- courier: ford
-CALL proc_insertar_modelos(544, 1961, 1967, FALSE); -- econoline: ford
-CALL proc_insertar_modelos(1300, 1993, 1997, FALSE); -- altima: nissan
-CALL proc_insertar_modelos(1299, 2000, 2006, FALSE); -- almera: nissan
-CALL proc_insertar_modelos(1301, 2008, 2010, FALSE); -- aprio: nissan
-CALL proc_insertar_modelos(1310, 1981, 1983, FALSE); -- datsun: nissan
-CALL proc_insertar_modelos(1657, 0, 0, TRUE); -- camion: universal
+-- CALL proc_insertar_modelos(p_idModelo, p_anioInicio, p_anioFin, p_anioTodo, @p_idModeloAnio)
+CALL proc_insertar_modelos(211, 1998, 2005, FALSE, @p_idModeloAnio); -- astro: chevrolet
+CALL proc_insertar_modelos(210, 2001, 2006, FALSE, @p_idModeloAnio); -- astra: chevrolet
+CALL proc_insertar_modelos(214, 2006, 2012, FALSE, @p_idModeloAnio); -- aveo: chevrolet
+CALL proc_insertar_modelos(214, 2012, 2017, FALSE, @p_idModeloAnio); -- aveo: chevrolet
+CALL proc_insertar_modelos(236, 2008, 2016, FALSE, @p_idModeloAnio); -- captiva: chevrolet
+CALL proc_insertar_modelos(241, 1975, 1978, FALSE, @p_idModeloAnio); -- chevy: chevrolet
+CALL proc_insertar_modelos(522, 1990, 1998, FALSE, @p_idModeloAnio); -- aerostar: ford
+CALL proc_insertar_modelos(529, 1995, 1999, FALSE, @p_idModeloAnio); -- contour: ford
+CALL proc_insertar_modelos(532, 1972, 1982, FALSE, @p_idModeloAnio); -- courier: ford
+CALL proc_insertar_modelos(544, 1961, 1967, FALSE, @p_idModeloAnio); -- econoline: ford
+CALL proc_insertar_modelos(1300, 1993, 1997, FALSE, @p_idModeloAnio); -- altima: nissan
+CALL proc_insertar_modelos(1299, 2000, 2006, FALSE, @p_idModeloAnio); -- almera: nissan
+CALL proc_insertar_modelos(1301, 2008, 2010, FALSE, @p_idModeloAnio); -- aprio: nissan
+CALL proc_insertar_modelos(1310, 1981, 1983, FALSE, @p_idModeloAnio); -- datsun: nissan
+CALL proc_insertar_modelos(1657, 0, 0, TRUE, @p_idModeloAnio ); -- camion: universal
 
 -- insertar producto en inventario y relacionar con proveedorProductos y registroProductos
 -- CALL proc_insertar_producto
