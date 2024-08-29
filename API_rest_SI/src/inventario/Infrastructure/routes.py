@@ -1,7 +1,9 @@
 from flask import jsonify, request
 from inventario.Application.funciones import get_productos, get_producto_preciso, get_productos_similares, buscar_inventarios\
     , obtener_stock_bajo,crear_producto, eliminar_producto
+from inventario.Application.func_importar import importar_productos
 from inventario import inventory as routes
+import os
 
 # ---------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------
@@ -139,4 +141,30 @@ def delete_producto(id):
         eliminar_producto(id)
         return jsonify({'message': 'Producto eliminado correctamente'})
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+# ---------------------------------------------------------------------------------------------
+# IMPORTAR PRODUCTOS desde un archivo CSV
+@routes.route('/importar_productos', methods=['POST'])
+def importar_productos_csv():
+    try:
+        if 'file' not in request.files:
+            return jsonify({'message': 'No file part in the request'}), 400
+        print(request.files)
+        # Obtener el archivo CSV del cuerpo de la solicitud POST
+        archivo = request.files.get('file')
+        
+        if archivo.filename == '':
+            return jsonify({'message': 'No file selected for uploading'}), 400
+        
+        if archivo:
+            # Guardar el archivo en el directorio de archivos temporales
+            ruta_archivo = os.path.join('C:\\Users\\VALENCIA\\Documents\\proyectos\\el-gabacho\\files', archivo.filename)
+            archivo.save(ruta_archivo)
+            
+            resultado = importar_productos(ruta_archivo)
+        
+        return jsonify(resultado)
+    except Exception as e:
+        print(e)
         return jsonify({'error': str(e)}), 500
