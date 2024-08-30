@@ -6,4 +6,3 @@ PyMySQL
 python-dotenv
 gunicorn
 pandas
-mysql-connector-python

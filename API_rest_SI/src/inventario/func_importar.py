@@ -1,14 +1,15 @@
 import pandas as pd
 import re
 import time
-import mysql.connector
-from mysql.connector import DatabaseError
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from init import db
+from vehiculos.funciones import obtener_id_marca, obtener_id_modelo, obtener_id_anio, obtener_id_modelo_anio
+from inventario.funciones import obtener_id_inventario
+from categorias.funciones import obtener_id_categoria
 
 MAX_RETRIES = 3
-# Establecer conexión con la base de datos
-cnx = mysql.connector.connect(user='root', password='root', host='localhost', port=3307, database='el_gabacho', collation='utf8mb4_general_ci')
-# Crear un cursor para ejecutar las consultas SQL
-cursor = cnx.cursor()
+pd.set_option('future.no_silent_downcasting', True)
 
 errores_list = []
 
@@ -24,12 +25,6 @@ def validate_anio(anio):
                 converted_year += '20' + y + '-'
     return converted_year[:-1]
 
-def obtener_id(id_columna, tabla, columna, valor):
-    """Obtener ID genérico de una tabla dada."""
-    cursor.execute(f"SELECT {id_columna} FROM {tabla} WHERE {columna} = %s", (valor,))
-    resultado = cursor.fetchone()
-    return resultado[0] if resultado else None
-
 def manejar_error(fila, mensaje):
     """Agregar error a la lista de errores."""
     errores_list.append({'Fila': fila, 'Mensaje': mensaje})
@@ -38,37 +33,32 @@ def obtener_ids_modelo_anios(fila, vehiculos):
     """Obtener IDs de ModeloAnios para una lista de vehículos."""
     id_modelo_anios_list  = []
     for vehiculo in vehiculos:
-        id_marca = obtener_id('idMarca','marcas', 'nombre', vehiculo['marca'])
-        
+        id_marca = obtener_id_marca(vehiculo['marca'])        
         if id_marca is None:
             manejar_error(fila, f"No se encontró idMarca con la marca {vehiculo['marca']}")
             continue
 
-        # Retrieve the idModelo for the given model name "VITARA" and idMarca
-        cursor.execute('SELECT idModelo FROM modelos mo JOIN marcas ma ON mo.idMarca = ma.idMarca WHERE mo.nombre = %s AND mo.idMarca = %s', (vehiculo['modelo'],id_marca,))
-        modelo_result = cursor.fetchone()
-        idModelo = modelo_result[0] if modelo_result is not None else None
+        idModelo = obtener_id_modelo(id_marca, vehiculo['modelo'])
 
         if idModelo is None:
             manejar_error(fila, f"No se encontró idModelo con el modelo {vehiculo['modelo']}")
             continue
 
         anios = vehiculo['anio'].split('-')
-        cursor.execute(f'SELECT idAnio FROM anios WHERE anioInicio = "{anios[0]}" AND anioFin = "{anios[1]}"')
-        anio_result = cursor.fetchone()
-        idAnio = anio_result[0] if anio_result is not None else None
+        idAnio = obtener_id_anio(anios[0], anios[1])
         if idAnio is None:
             manejar_error(fila, f'No se encontró idAnio con el año {vehiculo["anio"]}')
             continue
 
-        cursor.execute('SELECT ma.idModeloAnio FROM modeloAnios ma JOIN modelos m ON ma.idModelo = m.idModelo WHERE ma.idAnio = %s AND ma.idModelo = %s', (idAnio, idModelo))
-        modelo_anio_result = cursor.fetchone()
-        idModeloAnio = modelo_anio_result[0] if modelo_anio_result is not None else None
+        idModeloAnio = obtener_id_modelo_anio(idModelo, idAnio)
         if idModeloAnio is None:
             try:
-                result_args = cursor.callproc('proc_insertar_modelos', [idModelo, anios[0], anios[1], False, 0])
-                idModeloAnio = result_args[-1]
-            except mysql.connector.DatabaseError as e:
+                db.session.execute(text(f"CALL proc_insertar_modelos({idModelo}, {anios[0]}, {anios[1]}, False, @idModeloAnio)"))
+                idModeloAnio = db.session.execute(text("SELECT @idModeloAnio")).scalar()
+            except SQLAlchemyError as e:
+                manejar_error(fila, str(e))
+                continue
+            except Exception as e:
                 manejar_error(fila, str(e))
                 continue
             
@@ -77,15 +67,17 @@ def obtener_ids_modelo_anios(fila, vehiculos):
     return ','.join(id_modelo_anios_list) if id_modelo_anios_list else None
 
 def procesar_producto(producto, usuarioId):
+    from proveedores.funciones import obtener_id_proveedor
+    
     actualizado = False
     registrado = False
     """Procesa un solo producto, actualizándolo o insertándolo según corresponda."""
-    id_categoria = obtener_id('idCategoria','categorias', 'nombre', producto['CATEGORIA'])
+    id_categoria = obtener_id_categoria(producto['CATEGORIA'])
     if id_categoria is None:
         manejar_error(producto['fila'], f"No se encontró idCategoria con la categoría {producto['CATEGORIA']}")
         return None, None
 
-    id_proveedor = obtener_id('idProveedor','proveedores', 'empresa', producto['PROVEEDOR'])
+    id_proveedor = obtener_id_proveedor(producto['PROVEEDOR'])
     if id_proveedor is None:
         manejar_error(producto['fila'], f"No se encontró idProveedor con el proveedor {producto['PROVEEDOR']}")
         return None, None
@@ -95,13 +87,13 @@ def procesar_producto(producto, usuarioId):
         manejar_error(producto['fila'], 'Valor inválido para TIPO_MED')
         return None, None
 
-    id_inventario = obtener_id('idInventario','inventario', 'codigoBarras', producto['CODIGO'])
+    id_inventario = obtener_id_inventario(producto['CODIGO'])
     
     if id_inventario:
         try:
-            cursor.callproc('proc_actualizar_producto_con_comparacion', [id_inventario, id_categoria, id_unidad_medida, producto['NOMBRE'], producto['DESCRIPCION'], producto['EXISTENCIAS'], producto['CANT_MIN'], producto['COMPRA'], producto['MAYOREO'], producto['LLEVAR'], producto['COLOCADO'], id_proveedor])
+            db.session.execute(text(f"CALL proc_actualizar_producto_con_comparacion({id_inventario}, {id_categoria}, {id_unidad_medida}, '{producto['NOMBRE']}', '{producto['DESCRIPCION']}', {producto['EXISTENCIAS']}, {producto['CANT_MIN']}, {producto['COMPRA']}, {producto['MAYOREO']}, {producto['LLEVAR']}, {producto['COLOCADO']}, {id_proveedor})"))
             actualizado = True
-        except DatabaseError as e:
+        except SQLAlchemyError as e:
             manejar_error(producto['fila'], str(e))
             return None, None
         
@@ -111,21 +103,20 @@ def procesar_producto(producto, usuarioId):
             return actualizado, None
 
         try:
-            cursor.callproc('proc_editar_producto_modeloanios', (id_inventario, id_modelo_anios_string))
-        except DatabaseError as e:
+            db.session.execute(text(f"CALL proc_editar_producto_modeloanios({id_inventario}, '{id_modelo_anios_string}')"))
+        except SQLAlchemyError as e:
             manejar_error(producto['fila'], str(e))
             return actualizado, None
         
         return actualizado, registrado
     else:
-        params = [id_categoria, id_unidad_medida, producto['CODIGO'], producto['NOMBRE'], producto['DESCRIPCION'], producto['EXISTENCIAS'], producto['CANT_MIN'], producto['COMPRA'], producto['MAYOREO'], producto['LLEVAR'], producto['COLOCADO'], id_proveedor, usuarioId, 0]
         for i in range(MAX_RETRIES):
             try:
-                result_args = cursor.callproc('proc_insertar_producto', params)
+                db.session.execute(text(f"CALL proc_insertar_producto({id_categoria}, {id_unidad_medida}, '{producto['CODIGO']}', '{producto['NOMBRE']}', '{producto['DESCRIPCION']}', {producto['EXISTENCIAS']}, {producto['CANT_MIN']}, {producto['COMPRA']}, {producto['MAYOREO']}, {producto['LLEVAR']}, {producto['COLOCADO']}, {id_proveedor}, {usuarioId}, @id_inventario)"))
+                id_inventario = db.session.execute(text("SELECT @id_inventario")).scalar()
                 registrado = True
-                id_inventario = result_args[-1]
                 break
-            except DatabaseError as e:
+            except SQLAlchemyError as e:
                 if 'Lock wait timeout exceeded' in str(e):
                     time.sleep(5)
                 else:
@@ -142,8 +133,8 @@ def procesar_producto(producto, usuarioId):
             return None, registrado
 
         try:
-            cursor.callproc('proc_relate_producto_modeloanios', (id_inventario, id_modelo_anios_string))
-        except DatabaseError as e:
+            db.session.execute(text(f"CALL proc_relate_producto_modeloanios({id_inventario}, {id_modelo_anios_string})"))
+        except SQLAlchemyError as e:
             manejar_error(producto['fila'], str(e))
             return None, registrado
         
@@ -170,16 +161,16 @@ def procesar_csv(file_path):
     # Check and convert the columns COMPRA, MAYOREO, LLEVAR, COLOCADO
     for column in ['COMPRA', 'MAYOREO', 'LLEVAR', 'COLOCADO']:
         # Remove the $ symbol and commas, and convert to float
-        filtered_df[column] = filtered_df[column].replace({'\$': '', ',': ''}, regex=True)
+        filtered_df.loc[:, column] = filtered_df[column].replace({'\$': '', ',': ''}, regex=True)
         
         # Check if the column contains non-numeric values
         non_numeric_values = pd.to_numeric(filtered_df[column], errors='coerce').isna()
         
         # Convert the column to numeric, setting non-numeric values to NaN
-        filtered_df[column] = pd.to_numeric(filtered_df[column], errors='coerce')
+        filtered_df.loc[:, column] = pd.to_numeric(filtered_df[column], errors='coerce')
         
         # Replace NaN values with 0
-        filtered_df[column] = filtered_df[column].fillna(0)
+        filtered_df.loc[:, column] = filtered_df[column].fillna(0)
         
         # Store the rows with non-numeric values in the errores_list
         error_rows = filtered_df[non_numeric_values].index.tolist()
@@ -187,15 +178,15 @@ def procesar_csv(file_path):
             manejar_error(row, f"La columna {column} tiene valores no numéricos o esta vacio")
             
     # Convert EXISTENCIAS and CANT_MIN to float and handle NaN values
-    filtered_df['EXISTENCIAS'] = pd.to_numeric(filtered_df['EXISTENCIAS'], errors='coerce').fillna(0)
-    filtered_df['CANT_MIN'] = pd.to_numeric(filtered_df['CANT_MIN'], errors='coerce').fillna(0)
+    filtered_df.loc[:, 'EXISTENCIAS'] = pd.to_numeric(filtered_df['EXISTENCIAS'], errors='coerce').fillna(0)
+    filtered_df.loc[:, 'CANT_MIN'] = pd.to_numeric(filtered_df['CANT_MIN'], errors='coerce').fillna(0)
 
     # Convert TIPO_MED, PROVEEDOR, CATEGORIA, MARCA1, MODELO1 to uppercase
-    filtered_df['TIPO_MED'] = filtered_df['TIPO_MED'].str.upper()
-    filtered_df['PROVEEDOR'] = filtered_df['PROVEEDOR'].str.upper()
-    filtered_df['CATEGORIA'] = filtered_df['CATEGORIA'].str.upper()
-    filtered_df['MARCA1'] = filtered_df['MARCA1'].str.upper()
-    filtered_df['MODELO1'] = filtered_df['MODELO1'].str.upper()
+    filtered_df.loc[:, 'TIPO_MED'] = filtered_df['TIPO_MED'].str.upper()
+    filtered_df.loc[:, 'PROVEEDOR'] = filtered_df['PROVEEDOR'].str.upper()
+    filtered_df.loc[:, 'CATEGORIA'] = filtered_df['CATEGORIA'].str.upper()
+    filtered_df.loc[:, 'MARCA1'] = filtered_df['MARCA1'].str.upper()
+    filtered_df.loc[:, 'MODELO1'] = filtered_df['MODELO1'].str.upper()
 
     # Check and validate values in TIPO_MED column
     invalid_tipo_med = ~filtered_df['TIPO_MED'].isin(['PZA', 'M'])
@@ -265,11 +256,10 @@ def importar_productos(file_path, usuarioId):
                 total_insertados += 1
 
         # Confirmar los cambiosx
-        cnx.commit()
+        db.session.commit()
     finally:
         # Cerrar el cursor y la conexión
-        cursor.close()
-        cnx.close()
+        db.session.close()
 
     errores_list.sort(key=lambda x: x['Fila'])
     resultado = {'TotalInsertados': total_insertados, 'TotalActualizados': total_actualizados, 'Errores': errores_list}

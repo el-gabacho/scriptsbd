@@ -595,3 +595,13 @@ def eliminar_producto(idInventario, idUsuario):
 
     # Cerrar la sesión
     db.session.close()
+
+
+### FUNCION PARA LA FUNCION DE IMPORTAR PRODUCTOS
+def obtener_id_inventario(codigo):
+    resultado = db.session.query(
+        Inventario.idInventario
+    ).filter(
+        Inventario.codigoBarras == codigo
+    ).first()
+    return resultado[0] if resultado else None

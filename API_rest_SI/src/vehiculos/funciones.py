@@ -179,4 +179,38 @@ def eliminar_modelo(idModelo):
 
 # -----------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------------------------------------------
+# Para la funcion de importar productos 
 
+def obtener_id_marca(marca):
+    resultado = db.session.query(
+        Marca.idMarca
+    ).filter(
+        Marca.nombre == marca
+    ).first()
+    return resultado[0] if resultado else None
+
+def obtener_id_modelo(id_marca, modelo):
+    resultado = db.session.query(
+        Modelo.idModelo
+    ).join(
+        Marca, Modelo.idMarca == Marca.idMarca
+    ).filter(
+        Modelo.nombre == modelo, Modelo.idMarca == id_marca
+    ).first()
+    return resultado[0] if resultado else None
+
+def obtener_id_anio(anio_inicio, anio_fin):
+    resultado = db.session.query(
+        Anio.idAnio
+    ).filter(
+        Anio.anioInicio == anio_inicio, Anio.anioFin == anio_fin
+    ).first()
+    return resultado[0] if resultado else None
+
+def obtener_id_modelo_anio(id_modelo, id_anio):
+    resultado = db.session.query(
+        ModeloAnio.idModeloAnio
+    ).filter(
+        ModeloAnio.idModelo == id_modelo, ModeloAnio.idAnio == id_anio
+    ).first()
+    return resultado[0] if resultado else None

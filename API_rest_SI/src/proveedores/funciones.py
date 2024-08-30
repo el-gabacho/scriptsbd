@@ -51,3 +51,11 @@ def actualizar_proveedor(idProveedor, empresa, nombreEncargado, telefono, correo
     proveedor.correo = correo
     db.session.commit()
     return True
+
+def obtener_id_proveedor(proveedor):
+    resultado = db.session.query(
+        Proveedor.idProveedor
+    ).filter(
+        Proveedor.empresa == proveedor
+    ).first()
+    return resultado[0] if resultado else None
