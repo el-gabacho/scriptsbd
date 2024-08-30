@@ -2574,21 +2574,41 @@ SET @nuevo_idInventario = NULL;
 -- Verificar el nuevo ID del inventario
 SELECT @nuevo_idInventario AS idInventario;
 
-CALL proc_insertar_producto(93, 1, '8341','MANIJA INTERIOR','PUERTA CORREDIZA DERECHO',3,1,155.0,260.0,340.0,420.0,16,3, @nuevo_idInventario);
-CALL proc_insertar_producto(100, 1, 'DW01443GTN','PARABRISAS','SD/HB 2 Y 4 PTAS',5,1,1200.0,1300.0,1400.0,1600.0,23,3, @nuevo_idInventario);
-CALL proc_insertar_producto(45, 1, '017-0604-12','CALAVERA','S/ARNES DERECHA',10,1,50.0,75.0,180.0,280.0,23,3, @nuevo_idInventario);
-CALL proc_insertar_producto(68, 1, '019-0604-03','FARO','4P IZQUIERDO',4,1,150.0,175.0,280.0,380.0,23,3, @nuevo_idInventario);
-CALL proc_insertar_producto(7, 1, '90481270','AMORTIGUADOR','5TA PUERTA Y PUERTA TRASERA',8,1,249.0,350.0,400.0,450.0,4,3, @nuevo_idInventario);
-CALL proc_insertar_producto(49, 1, '1660251','CILINDRO PUERTA','CON LLAVE',0,1,224.0,360.0,490.0,650.0,16,3, @nuevo_idInventario);
-CALL proc_insertar_producto(63, 1, '96419','ELEVADOR MANUAL','DELANTERA IZQUIERDA',20,1,417.0,600.0,680.0,760.0,16,3, @nuevo_idInventario);
-CALL proc_insertar_producto(64, 1, '018-2302-09','ESPEJO','ELECTRICO IZQUIERDO',2,1,545.95,700.0,750.0,820.0,23,3, @nuevo_idInventario);
-CALL proc_insertar_producto(98, 1, 'SV2540-M1459A','MOTOR LIMPIAPARABRISAS','',0,0,500.0,750.0,1800.0,1900.0,28,3, @nuevo_idInventario);
+CALL proc_insertar_producto(93, 1, '8341','MANIJA INTERIOR','PUERTA CORREDIZA DERECHO',3,1,155.0,260.0,340.0,420.0,16,3, @p_idInventario);
+CALL proc_insertar_producto(100, 1, 'DW01443GTN','PARABRISAS','SD/HB 2 Y 4 PTAS',5,1,1200.0,1300.0,1400.0,1600.0,23,3, @p_idInventario);
+CALL proc_insertar_producto(45, 1, '017-0604-12','CALAVERA','S/ARNES DERECHA',10,1,50.0,75.0,180.0,280.0,23,3, @p_idInventario);
+CALL proc_insertar_producto(68, 1, '019-0604-03','FARO','4P IZQUIERDO',4,1,150.0,175.0,280.0,380.0,23,3, @p_idInventario);
+CALL proc_insertar_producto(7, 1, '90481270','AMORTIGUADOR','5TA PUERTA Y PUERTA TRASERA',8,1,249.0,350.0,400.0,450.0,4,3, @p_idInventario);
+CALL proc_insertar_producto(49, 1, '1660251','CILINDRO PUERTA','CON LLAVE',0,1,224.0,360.0,490.0,650.0,16,3, @p_idInventario);
+CALL proc_insertar_producto(63, 1, '96419','ELEVADOR MANUAL','DELANTERA IZQUIERDA',20,1,417.0,600.0,680.0,760.0,16,3, @p_idInventario);
+CALL proc_insertar_producto(64, 1, '018-2302-09','ESPEJO','ELECTRICO IZQUIERDO',2,1,545.95,700.0,750.0,820.0,23,3, @p_idInventario);
+CALL proc_insertar_producto(98, 1, 'SV2540-M1459A','MOTOR LIMPIAPARABRISAS','',0,0,500.0,750.0,1800.0,1900.0,28,3, @p_idInventario);
 
-CALL proc_insertar_producto(47, 1, '002-1301-16','ACTIVADOR HD','PUERTA 2 PINS 12VCC DELANTERA DER',10,1,276,300,400,500,23,1, @nuevo_idInventario);
+CALL proc_insertar_producto(47, 1, '002-1301-16','ACTIVADOR HD','PUERTA 2 PINS 12VCC DELANTERA DER',10,1,276,300,400,500,23,1, @p_idInventario);
 
 -- CALL proc_inserta_img_producto(p_idInventario, p_imagenes);
-CALL proc_inserta_img_producto(@nuevo_idInventario,'FALSE,FALSE,FALSE,FALSE,FALSE');
+CALL proc_inserta_img_producto(@p_idInventario,'FALSE,FALSE,FALSE,FALSE,FALSE');
 
+<<<<<<< HEAD
+CALL proc_inserta_img_producto( -- SOLO LO USE PARA EL PRIMERO
+    @p_idInventario,         -- ID del producto inventario (este debe ser el mismo que el obtenido del primer procedimiento)
+    TRUE,                        -- Imagen representativa
+    FALSE,                       -- Imagen 2
+    FALSE,                       -- Imagen 3
+    FALSE,                       -- Imagen 4
+    FALSE                        -- Imagen 5
+);
+CALL proc_inserta_img_producto(1,TRUE,TRUE, FALSE, FALSE, FALSE);
+CALL proc_inserta_img_producto(2,TRUE,FALSE, FALSE, FALSE, FALSE);
+CALL proc_inserta_img_producto(3,TRUE,TRUE, TRUE, TRUE, TRUE);
+CALL proc_inserta_img_producto(4,TRUE,TRUE, TRUE, TRUE, FALSE);
+CALL proc_inserta_img_producto(5,TRUE,FALSE, FALSE, FALSE, FALSE);
+CALL proc_inserta_img_producto(6,TRUE,FALSE, FALSE, FALSE, FALSE);
+CALL proc_inserta_img_producto(7,FALSE,FALSE, FALSE, FALSE, FALSE);
+CALL proc_inserta_img_producto(8,TRUE,FALSE, FALSE, FALSE, FALSE);
+CALL proc_inserta_img_producto(9,TRUE,FALSE, FALSE, FALSE, FALSE);
+CALL proc_inserta_img_producto(10,FALSE,FALSE, FALSE, FALSE, FALSE);
+=======
 CALL proc_inserta_img_producto(1,'TRUE,TRUE,FALSE,FALSE,FALSE');
 CALL proc_inserta_img_producto(2,'TRUE,FALSE,FALSE,FALSE,FALSE');
 CALL proc_inserta_img_producto(3,'TRUE,TRUE,TRUE,TRUE,TRUE');
@@ -2599,6 +2619,7 @@ CALL proc_inserta_img_producto(7,'FALSE,FALSE,FALSE,FALSE,FALSE');
 CALL proc_inserta_img_producto(8,'TRUE,FALSE,FALSE,FALSE,FALSE');
 CALL proc_inserta_img_producto(9,'TRUE,FALSE,FALSE,FALSE,FALSE');
 CALL proc_inserta_img_producto(10,'FALSE,FALSE,FALSE,FALSE,FALSE');
+>>>>>>> 2365bbedcafd078144d80794ae3c43efaf787523
 
 -- Relacionar un modeloanio con un Autoparte del Inventario
 -- CALL proc_modeloanios_con_autoparte(proc_id_inventario, proc_id_modeloAnio)

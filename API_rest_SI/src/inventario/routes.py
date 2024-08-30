@@ -100,36 +100,36 @@ def create_producto():
         data = request.get_json()
         
         # Extraer los datos del JSON
-        codigoBarras = data['codigo']
-        nombre = data['nombre']
-        descripcion = data['descripcion']
-        cantidadActual = data['existencias']
-        cantidadMinima = data['cantidadMinima']
-        precioCompra = data['precioCompra']
-        mayoreo = data['precioMayoreo']
-        menudeo = data['precioMenudeo']
-        colocado = data['precioColocado']
-        idUnidadMedida = data['idUnidadMedida']
-        idProveedor = data['idProveedor']
-        idCategoria = data['idCategoria']
-        idUsuario = data['idUsuario']
-        imagenes = data['imagenes']
-        aplicaciones = data['aplicaciones']
+        codigoBarras = data.get('codigo')
+        nombre = data.get('nombre')
+        descripcion = data.get('descripcion')
+        cantidadActual = data.get('existencias')
+        cantidadMinima = data.get('cantidadMinima')
+        precioCompra = data.get('precioCompra')
+        mayoreo = data.get('precioMayoreo')
+        menudeo = data.get('precioMenudeo')
+        colocado = data.get('precioColocado')
+        idUnidadMedida = data.get('idUnidadMedida')
+        idProveedor = data.get('idProveedor')
+        idCategoria = data.get('idCategoria')
+        idUsuario = data.get('idUsuario')
+        imagenes = data.get('imagenes')
+        
+        # Extraer la lista de vehículos
+        vehiculos = data.get('vehiculos', [])
         
         # Llamar a la función para crear el producto
-        producto = crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, 
-                                  precioCompra, mayoreo, menudeo, colocado, idUnidadMedida, idCategoria, 
-                                  idProveedor, idUsuario, imagenes, aplicaciones)
+        crear_producto(
+            codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima,
+            precioCompra, mayoreo, menudeo, colocado, idUnidadMedida, idCategoria,
+            idProveedor, idUsuario, imagenes, vehiculos)
 
-        if isinstance(producto, dict) and 'error' in producto:
-            # Si hay un error en el proceso de creación del producto
-            return jsonify(producto), 400
-
-        return jsonify({'success': 'Producto creado con éxito', 'idInventario': producto}), 201
+        return jsonify({'success': 'Producto creado con éxito'}), 201
 
     except Exception as e:
         # Manejo de cualquier tipo de excepción inesperada
         return jsonify({'error': 'Error interno del servidor', 'message': str(e)}), 500
+    
 
 # MODIFICAR UN PRODUCTO
 

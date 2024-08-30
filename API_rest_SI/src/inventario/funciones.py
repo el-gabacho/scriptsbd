@@ -1,5 +1,5 @@
 from sqlalchemy import func, case, or_
-from sqlalchemy.exc import DBAPIError
+from sqlalchemy.exc import DBAPIError, SQLAlchemyError
 from init import db
 from inventario.modelos import Inventario, UnidadMedida, Imagenes
 from categorias.modelos import Categoria
@@ -499,14 +499,15 @@ def obtener_stock_bajo():
     return producto_bajo
 
 def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, precioCompra, mayoreo, 
-                   menudeo, colocado, idUnidadMedida, idCategoria, idProveedor, idUsuario, imagenes, aplicaciones):
+                   menudeo, colocado, idUnidadMedida, idCategoria, idProveedor, idUsuario, imagenes, vehiculos):
+    session = db.session
     try:
-        # Llamar al procedimiento almacenado para insertar un producto en el inventario
-        with db.session.begin() as session:
+        with session.begin():  # Iniciar la transacción
+            # Procedimiento 1: Insertar producto y obtener idInventario
             session.execute(
                 "CALL proc_insertar_producto(:idCategoria, :idUnidadMedida, :codigoBarras, :nombre, :descripcion, "
                 ":cantidadActual, :cantidadMinima, :precioCompra, :mayoreo, :menudeo, :colocado, "
-                ":idProveedor, :idUsuario, @nuevo_idInventario)",
+                ":idProveedor, :idUsuario, @p_idInventario)",
                 {
                     'idCategoria': idCategoria,
                     'idUnidadMedida': idUnidadMedida,
@@ -523,39 +524,66 @@ def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMi
                     'idUsuario': idUsuario
                 }
             )
-            
-            result = session.execute("SELECT @nuevo_idInventario").first()
-            id_inventario = result[0]
 
-            # Llamar al procedimiento almacenado para insertar en la tabla imagenes con el idInventario previamente creado
+            # Obtener el ID del producto insertado
+            result = session.execute("SELECT @p_idInventario").first()
+            id_inventario = result[0]
+            
+            if not id_inventario:
+                raise Exception("No se obtuvo el ID del inventario después de insertar el producto.")
+            
+            # Procedimiento 2: Insertar imágenes para el producto
             session.execute(
                 "CALL proc_inserta_img_producto(:idInventario, :imagenes)",
                 {
                     'idInventario': id_inventario,
-                    'imagenes': imagenes
+                    'imagenes': imagenes  # Pasar la cadena de imágenes como string
                 }
             )
 
-            # LLamar al procedimiento almacenado para insertar relaciones de vehiculos con el idInventario previamente creado
+            # Procedimiento 3: Procesar cada vehículo, recolectar los IDs generados
+            modelo_anios_ids = []
+            for vehiculo in vehiculos:
+                session.execute(
+                    "CALL proc_insertar_modelos(:idModelo, :anioInicio, :anioFin, :anioTodo, @p_idModeloAnio)",
+                    {
+                        'idModelo': vehiculo['idModelo'],
+                        'anioInicio': vehiculo['añoInicio'],
+                        'anioFin': vehiculo['añoFin'],
+                        'anioTodo': vehiculo['todoAño']
+                    }
+                )
+                
+                # Obtener el ID del modelo-año generado
+                result = session.execute("SELECT @p_idModeloAnio").first()
+                modelo_anio_id = result[0]
+                
+                if modelo_anio_id:
+                    modelo_anios_ids.append(modelo_anio_id)
+
+            # Convertir la lista de IDs a una cadena separada por comas
+            modelo_anios_ids_str = ','.join(map(str, modelo_anios_ids))
+
+            # Procedimiento 4: Relacionar el producto con los IDs de los modelos-años
             session.execute(
-                "CALL proc_relate_producto_modeloanios(:idInventario, :aplicaciones)",
+                "CALL proc_relate_producto_modeloanios(:idInventario, :modelosAnios)",
                 {
                     'idInventario': id_inventario,
-                    'aplicaciones': aplicaciones
+                    'modelosAnios': modelo_anios_ids_str
                 }
             )
 
+        # Si llegamos aquí, todo salió bien, y se hace commit automáticamente
         return id_inventario
 
-    except DBAPIError as e:
-        # Registrar el error o manejarlo de manera más específica
-        db.session.rollback()  # Revertir cualquier cambio en la sesión
+    except SQLAlchemyError as e:
+        # Manejo de errores, hacer rollback
+        session.rollback()
         return {"error": str(e)}
-
     except Exception as e:
-        db.session.rollback()
-        return {"error": "Error inesperado: " + str(e)}
-
+        # Captura de otros errores
+        session.rollback()
+        return {"error": str(e)}
 
 
 def eliminar_producto(idInventario, idUsuario):
