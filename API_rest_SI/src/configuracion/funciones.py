@@ -26,10 +26,6 @@ def obtenerConfiguracion():
     return resultado
 
 def actualizarConfiguracion(correo, direccion, encabezado, footer):
-    print(correo)
-    print(direccion)
-    print(encabezado)
-    print(footer)
     # Consulta para obtener los datos de configuracion
     config = Configuracion.query.get(1)
     

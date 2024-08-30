@@ -26,7 +26,6 @@ def get_usuario(id):
 def create_usuario():
     try:
         data = request.get_json()
-        print(data)
         nombre = data.get('nombreCompleto')
         usuario = data.get('nombreUsuario')
         contrasena = data.get('contrasena')
@@ -34,7 +33,6 @@ def create_usuario():
         id_usuario = crear_usuario(nombre, usuario, contrasena, idRol)
         return jsonify({'idUsuario': id_usuario}), 201
     except Exception as e:
-        print(e)
         return jsonify({'error': str(e)}), 500
 
 @routes.route('/usuarios/<int:id>', methods=['DELETE'])
