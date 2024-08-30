@@ -2589,6 +2589,7 @@ CALL proc_insertar_producto(47, 1, '002-1301-16','ACTIVADOR HD','PUERTA 2 PINS 1
 -- CALL proc_inserta_img_producto(p_idInventario, p_imagenes);
 CALL proc_inserta_img_producto(@p_idInventario,'FALSE,FALSE,FALSE,FALSE,FALSE');
 
+<<<<<<< HEAD
 CALL proc_inserta_img_producto( -- SOLO LO USE PARA EL PRIMERO
     @p_idInventario,         -- ID del producto inventario (este debe ser el mismo que el obtenido del primer procedimiento)
     TRUE,                        -- Imagen representativa
@@ -2607,6 +2608,18 @@ CALL proc_inserta_img_producto(7,FALSE,FALSE, FALSE, FALSE, FALSE);
 CALL proc_inserta_img_producto(8,TRUE,FALSE, FALSE, FALSE, FALSE);
 CALL proc_inserta_img_producto(9,TRUE,FALSE, FALSE, FALSE, FALSE);
 CALL proc_inserta_img_producto(10,FALSE,FALSE, FALSE, FALSE, FALSE);
+=======
+CALL proc_inserta_img_producto(1,'TRUE,TRUE,FALSE,FALSE,FALSE');
+CALL proc_inserta_img_producto(2,'TRUE,FALSE,FALSE,FALSE,FALSE');
+CALL proc_inserta_img_producto(3,'TRUE,TRUE,TRUE,TRUE,TRUE');
+CALL proc_inserta_img_producto(4,'TRUE,TRUE,TRUE,TRUE,FALSE');
+CALL proc_inserta_img_producto(5,'TRUE,FALSE,FALSE,FALSE,FALSE');
+CALL proc_inserta_img_producto(6,'TRUE,FALSE,FALSE,FALSE,FALSE');
+CALL proc_inserta_img_producto(7,'FALSE,FALSE,FALSE,FALSE,FALSE');
+CALL proc_inserta_img_producto(8,'TRUE,FALSE,FALSE,FALSE,FALSE');
+CALL proc_inserta_img_producto(9,'TRUE,FALSE,FALSE,FALSE,FALSE');
+CALL proc_inserta_img_producto(10,'FALSE,FALSE,FALSE,FALSE,FALSE');
+>>>>>>> 2365bbedcafd078144d80794ae3c43efaf787523
 
 -- Relacionar un modeloanio con un Autoparte del Inventario
 -- CALL proc_modeloanios_con_autoparte(proc_id_inventario, proc_id_modeloAnio)
