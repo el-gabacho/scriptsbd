@@ -76,7 +76,7 @@ def obtener_ids_modelo_anios(fila, vehiculos):
 
     return ','.join(id_modelo_anios_list) if id_modelo_anios_list else None
 
-def procesar_producto(producto):
+def procesar_producto(producto, usuarioId):
     actualizado = False
     registrado = False
     """Procesa un solo producto, actualizándolo o insertándolo según corresponda."""
@@ -118,7 +118,7 @@ def procesar_producto(producto):
         
         return actualizado, registrado
     else:
-        params = [id_categoria, id_unidad_medida, producto['CODIGO'], producto['NOMBRE'], producto['DESCRIPCION'], producto['EXISTENCIAS'], producto['CANT_MIN'], producto['COMPRA'], producto['MAYOREO'], producto['LLEVAR'], producto['COLOCADO'], id_proveedor, 3, 0]
+        params = [id_categoria, id_unidad_medida, producto['CODIGO'], producto['NOMBRE'], producto['DESCRIPCION'], producto['EXISTENCIAS'], producto['CANT_MIN'], producto['COMPRA'], producto['MAYOREO'], producto['LLEVAR'], producto['COLOCADO'], id_proveedor, usuarioId, 0]
         for i in range(MAX_RETRIES):
             try:
                 result_args = cursor.callproc('proc_insertar_producto', params)
@@ -247,7 +247,7 @@ def procesar_csv(file_path):
                 
     return productos_list
                 
-def importar_productos(file_path):
+def importar_productos(file_path, usuarioId):
     # Contadores para productos insertados y actualizados
     total_insertados = 0
     total_actualizados = 0
@@ -256,7 +256,7 @@ def importar_productos(file_path):
 
         # Procesar cada producto en la lista de productos
         for producto in productos_list:
-            actualizado, registrado = procesar_producto(producto)
+            actualizado, registrado = procesar_producto(producto, usuarioId)
             if actualizado is None and registrado is None:
                 continue
             if actualizado:
