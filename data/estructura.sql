@@ -280,7 +280,7 @@ CREATE TABLE BitacoraVentas (
 
 DELIMITER $$
 
-CREATE PROCEDURE proc_insertar_producto(
+CREATE OR REPLACE PROCEDURE proc_insertar_producto(
     IN p_idCategoria INT,
     IN p_idUnidadMedida INT,
     IN p_codigoBarras VARCHAR(50),
@@ -444,7 +444,7 @@ DELIMITER ;
 -- Procedimiento para relacionar un producto con un modeloanio
 DELIMITER $$
 
-CREATE PROCEDURE proc_relate_producto_modeloanios(
+CREATE OR REPLACE PROCEDURE proc_relate_producto_modeloanios(
     IN p_idInventario INT,
     IN p_modelosAnios TEXT
 )
