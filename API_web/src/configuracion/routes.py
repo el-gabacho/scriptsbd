@@ -6,7 +6,6 @@ from configuracion import config as routes
 def getConfiguracion():
     try:
         resultado = obtener_configuracion()
-        print(resultado)
         return jsonify(resultado)
     except Exception as e:
         return jsonify({'error': 'Error al obtener la configuracion','detalles':str(e)}), 500

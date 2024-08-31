@@ -68,7 +68,6 @@ def reverse_venta(id):
         revertir_venta(id)
         return jsonify({'message': 'Venta eliminada correctamente'})
     except Exception as e:
-        print(e)
         return jsonify({'error': str(e)}), 500
 
 @routes.route('/ventas/<int:ventaId>/productos/<int:productoId>', methods=['DELETE'])

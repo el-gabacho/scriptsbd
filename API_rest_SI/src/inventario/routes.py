@@ -185,12 +185,11 @@ def delete_producto(id):
     
 # ---------------------------------------------------------------------------------------------
 # IMPORTAR PRODUCTOS desde un archivo CSV
-@routes.route('/importar_productos', methods=['POST'])
-def importar_productos_csv():
+@routes.route('/importar_productos/<int:usuarioId>', methods=['POST'])
+def importar_productos_csv(usuarioId):
     try:
         if 'file' not in request.files:
             return jsonify({'message': 'No file part in the request'}), 400
-        print(request.files)
         # Obtener el archivo CSV del cuerpo de la solicitud POST
         archivo = request.files.get('file')
         
@@ -202,9 +201,8 @@ def importar_productos_csv():
             ruta_archivo = os.path.join('C:\\Users\\VALENCIA\\Documents\\proyectos\\el-gabacho\\files', archivo.filename)
             archivo.save(ruta_archivo)
             
-            resultado = importar_productos(ruta_archivo)
+            resultado = importar_productos(ruta_archivo, usuarioId)
         
         return jsonify(resultado)
     except Exception as e:
-        print(e)
         return jsonify({'error': str(e)}), 500

@@ -7,7 +7,8 @@ services:
       MARIADB_ROOT_PASSWORD: root
       MARIADB_DATABASE: el_gabacho
     volumes:
-      - ./data:/docker-entrypoint-initdb.d
+      - ./data:/var/lib/mysql                  # Volumen persistente para los datos de la base de datos
+      - ./initdb:/docker-entrypoint-initdb.d   # Carpeta para archivos SQL iniciales, solo para la primera vez
 
   adminer:
     image: adminer

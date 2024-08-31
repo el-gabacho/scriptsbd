@@ -1,7 +1,7 @@
 from categorias.modelos import db, Categoria
-from inventario.modelos import Inventario
 
 def obtener_categorias():
+    from inventario.modelos import Inventario
     categorias = Categoria.query \
         .join(Inventario, Categoria.idCategoria == Inventario.idCategoria, isouter=True) \
         .with_entities(Categoria.idCategoria, Categoria.nombre, db.func.count(Inventario.idInventario).label('numProductos')) \
@@ -36,3 +36,11 @@ def actualizar_categoria(idCategoria, nombre):
     categoria.nombre = nombre
     db.session.commit()
     return True
+
+def obtener_id_categoria(categoria):
+    resultado = db.session.query(
+        Categoria.idCategoria
+    ).filter(
+        Categoria.nombre == categoria
+    ).first()
+    return resultado[0] if resultado else None

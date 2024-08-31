@@ -45,6 +45,5 @@ def upload_files():
                 filename = secure_filename(file.filename)
                 file.save(os.path.join('C:\\Users\\VALENCIA\\Documents\\proyectos\\el-gabacho\\images', filename))
     except Exception as e:
-        print(e)
         return jsonify({'message': 'Allowed file types are .webp'}), 400
     return jsonify({'message': 'Files successfully uploaded'}), 200
