@@ -1,4 +1,4 @@
-from sqlalchemy import func, case, or_
+from sqlalchemy import func, case, or_, text, and_
 from sqlalchemy.exc import DBAPIError, SQLAlchemyError
 from init import db
 from inventario.modelos import Inventario, UnidadMedida, Imagenes
@@ -324,20 +324,40 @@ def get_productos_similares(codigo_barras):
 
     return productos
 
-# OBTENER INFORMACION DE PRODUCTOS ACTIVOS MEDIANTE DICHA INFORMACION DE MODO SIMILITUD
-def buscar_inventarios(filtros):
+# OBTENER INFORMACION DE PRODUCTOS ACTIVOS MEDIANTE DICHA INFORMACION DE MODO SIMILITUD MUCHOS PARAMETROS
+def get_productos_avanzada(filtros):
     query = db.session.query(
         Inventario.idInventario,
         Inventario.codigoBarras,
         Inventario.nombre,
         Inventario.descripcion,
         Inventario.cantidadActual,
-        Proveedor.empresa,
-        Marca.nombre.label('marca'),
-        Modelo.nombre.label('modelo'),
-        func.concat(func.coalesce(Anio.anioInicio, ''), '-', func.coalesce(Anio.anioFin, '')).label('anioRango')
-    ).join(
+        Inventario.cantidadMinima,
+        Inventario.precioCompra,
+        Inventario.mayoreo,
+        Inventario.menudeo,
+        Inventario.colocado,
+        Inventario.estado,
+        UnidadMedida.tipoMedida,
+        func.coalesce(Categoria.nombre, 'SIN CATEGORIA').label('categoriaNombre'),
+        Proveedor.empresa.label('proveedorEmpresa'),
+        func.group_concat(
+            func.concat(
+                Marca.nombre, ' ', Modelo.nombre, ' ',
+                case(
+                    (Anio.anioTodo == 1, 'ALL YEARS'),
+                    else_=func.concat(
+                        func.right(func.coalesce(Anio.anioInicio, ''), 2),
+                        '-',
+                        func.right(func.coalesce(Anio.anioFin, ''), 2)
+                    )
+                )
+            ).distinct()
+        ).label('aplicaciones')
+    ).outerjoin(
         Categoria, Inventario.idCategoria == Categoria.idCategoria
+    ).join(
+        UnidadMedida, Inventario.idUnidadMedida == UnidadMedida.idUnidadMedida
     ).join(
         ProveedorProducto, Inventario.idInventario == ProveedorProducto.idInventario
     ).join(
@@ -352,10 +372,13 @@ def buscar_inventarios(filtros):
         Marca, Modelo.idMarca == Marca.idMarca
     ).outerjoin(
         Anio, ModeloAnio.idAnio == Anio.idAnio
+    ).filter(
+        Inventario.estado == 1
     )
-
-    if filtros.get('codigoBarras'):
-        query = query.filter(Inventario.codigoBarras.like(f"%{filtros['codigoBarras']}%"))
+    
+    # Aplicar filtros si existen
+    if filtros.get('codigo'):
+        query = query.filter(Inventario.codigoBarras.like(f"%{filtros['codigo']}%"))
     if filtros.get('nombre'):
         query = query.filter(Inventario.nombre.like(f"%{filtros['nombre']}%"))
     if filtros.get('descripcion'):
@@ -368,27 +391,59 @@ def buscar_inventarios(filtros):
         query = query.filter(Marca.nombre.like(f"%{filtros['marca']}%"))
     if filtros.get('modelo'):
         query = query.filter(Modelo.nombre.like(f"%{filtros['modelo']}%"))
-    if filtros.get('anio'):
-        query = query.filter(func.concat(func.coalesce(Anio.anioInicio, ''), '-', func.coalesce(Anio.anioFin, '')) == filtros['anio'])
+    
+    # Filtros por fecha y booleano
+    if filtros.get('fecha_inicio') and filtros.get('fecha_fin'):
+        fecha_inicio = filtros['fecha_inicio']
+        fecha_fin = filtros['fecha_fin']
+        try:
+            fecha_inicio = int(fecha_inicio)
+            fecha_fin = int(fecha_fin)
+            query = query.filter(
+                and_(
+                    Anio.anioInicio >= fecha_inicio,
+                    Anio.anioFin <= fecha_fin
+                )
+            )
+        except ValueError:
+            pass  # Manejar el caso en que las fechas no son válidas
 
-    resultados = query.all()
+    if filtros.get('anio_todo') is not None:
+        query = query.filter(Anio.anioTodo == filtros['anio_todo'])
+    
+    query = query.group_by(
+        Inventario.idInventario
+    ).all()
 
-    inventarios = []
-    for resultado in resultados:
-        inventarios.append({
-            'IdInventario': resultado.idInventario,
-            'CodigoBarras': resultado.codigoBarras,
-            'Nombre': resultado.nombre,
-            'Descripcion': resultado.descripcion,
-            'CantidadActual': resultado.cantidadActual,
-            'Empresa': resultado.empresa,
-            'Marca': resultado.marca,
-            'Modelo': resultado.modelo,
-            'AnioRango': resultado.anioRango,
+    productos = []
+    for item in query:
+        aplicaciones = item.aplicaciones
+        if aplicaciones:
+            aplicaciones = [app.strip() for app in aplicaciones.split(',') if app.strip()]
+        else:
+            aplicaciones = ["SIN NINGUNA APLICACION"]
+
+        productos.append({
+            'IdInventario': item.idInventario,
+            'Codigo': item.codigoBarras,
+            'Nombre': item.nombre,
+            'Descripcion': item.descripcion,
+            'Existencias': item.cantidadActual,
+            'CantidadMinima': item.cantidadMinima,
+            'PrecioCompra': item.precioCompra,
+            'PrecioMayoreo': item.mayoreo,
+            'PrecioMenudeo': item.menudeo,
+            'PrecioColocado': item.colocado,
+            'TipoMedida': item.tipoMedida,
+            'Proveedor': item.proveedorEmpresa,
+            'Categoria': item.categoriaNombre,
+            'Aplicaciones': aplicaciones
         })
 
-    return inventarios
+    return productos
 
+
+# OBTENER INFORMACION DE PRODUCTOS ACTIVOS PERO BAJOS EN STOCK
 def obtener_stock_bajo():
     query = db.session.query(
         Inventario.idInventario,
@@ -498,65 +553,68 @@ def obtener_stock_bajo():
 
     return producto_bajo
 
+
+# CREAR UN NUEVO PRODUCTO MEDIANTE VARIOS PROCEDIMIENTOS ALMACENADOS
 def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, precioCompra, mayoreo, 
                    menudeo, colocado, idUnidadMedida, idCategoria, idProveedor, idUsuario, imagenes, vehiculos):
     session = db.session
+
     try:
         with session.begin():  # Iniciar la transacción
+
             # Procedimiento 1: Insertar producto y obtener idInventario
-            session.execute(
-                "CALL proc_insertar_producto(:idCategoria, :idUnidadMedida, :codigoBarras, :nombre, :descripcion, "
-                ":cantidadActual, :cantidadMinima, :precioCompra, :mayoreo, :menudeo, :colocado, "
-                ":idProveedor, :idUsuario, @p_idInventario)",
-                {
-                    'idCategoria': idCategoria,
-                    'idUnidadMedida': idUnidadMedida,
-                    'codigoBarras': codigoBarras,
-                    'nombre': nombre,
-                    'descripcion': descripcion,
-                    'cantidadActual': cantidadActual,
-                    'cantidadMinima': cantidadMinima,
-                    'precioCompra': precioCompra,
-                    'mayoreo': mayoreo,
-                    'menudeo': menudeo,
-                    'colocado': colocado,
-                    'idProveedor': idProveedor,
-                    'idUsuario': idUsuario
-                }
-            )
+            sql = text("""
+                CALL proc_insertar_producto(:idCategoria, :idUnidadMedida, :codigoBarras, :nombre, :descripcion, 
+                :cantidadActual, :cantidadMinima, :precioCompra, :mayoreo, :menudeo, :colocado, 
+                :idProveedor, :idUsuario, @p_idInventario)
+            """)
+            session.execute(sql, {
+                'idCategoria': idCategoria,
+                'idUnidadMedida': idUnidadMedida,
+                'codigoBarras': codigoBarras,
+                'nombre': nombre,
+                'descripcion': descripcion,
+                'cantidadActual': cantidadActual,
+                'cantidadMinima': cantidadMinima,
+                'precioCompra': precioCompra,
+                'mayoreo': mayoreo,
+                'menudeo': menudeo,
+                'colocado': colocado,
+                'idProveedor': idProveedor,
+                'idUsuario': idUsuario
+            })
 
             # Obtener el ID del producto insertado
-            result = session.execute("SELECT @p_idInventario").first()
+            result = session.execute(text("SELECT @p_idInventario")).first()
             id_inventario = result[0]
-            
-            if not id_inventario:
-                raise Exception("No se obtuvo el ID del inventario después de insertar el producto.")
-            
+            print(f"ID de inventario obtenido: {id_inventario}")  # Agregar para depuración
+
             # Procedimiento 2: Insertar imágenes para el producto
-            session.execute(
-                "CALL proc_inserta_img_producto(:idInventario, :imagenes)",
-                {
-                    'idInventario': id_inventario,
-                    'imagenes': imagenes  # Pasar la cadena de imágenes como string
-                }
-            )
+            sql = text("""
+                CALL proc_inserta_img_producto(:idInventario, :imagenes)
+            """)
+            session.execute(sql, {
+                'idInventario': id_inventario,
+                'imagenes': imagenes
+            })
 
             # Procedimiento 3: Procesar cada vehículo, recolectar los IDs generados
             modelo_anios_ids = []
             for vehiculo in vehiculos:
-                session.execute(
-                    "CALL proc_insertar_modelos(:idModelo, :anioInicio, :anioFin, :anioTodo, @p_idModeloAnio)",
-                    {
-                        'idModelo': vehiculo['idModelo'],
-                        'anioInicio': vehiculo['añoInicio'],
-                        'anioFin': vehiculo['añoFin'],
-                        'anioTodo': vehiculo['todoAño']
-                    }
-                )
-                
+                sql = text("""
+                    CALL proc_insertar_modelos(:idModelo, :anioInicio, :anioFin, :anioTodo, @p_idModeloAnio)
+                """)
+                session.execute(sql, {
+                    'idModelo': vehiculo['idModelo'],
+                    'anioInicio': vehiculo['anioInicio'],
+                    'anioFin': vehiculo['anioFin'],
+                    'anioTodo': vehiculo['todoAnio']
+                })
+
                 # Obtener el ID del modelo-año generado
-                result = session.execute("SELECT @p_idModeloAnio").first()
+                result = session.execute(text("SELECT @p_idModeloAnio")).first()
                 modelo_anio_id = result[0]
+                print(f"ID de modelo-año obtenido: {modelo_anio_id}")  # Agregar para depuración
                 
                 if modelo_anio_id:
                     modelo_anios_ids.append(modelo_anio_id)
@@ -565,13 +623,13 @@ def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMi
             modelo_anios_ids_str = ','.join(map(str, modelo_anios_ids))
 
             # Procedimiento 4: Relacionar el producto con los IDs de los modelos-años
-            session.execute(
-                "CALL proc_relate_producto_modeloanios(:idInventario, :modelosAnios)",
-                {
-                    'idInventario': id_inventario,
-                    'modelosAnios': modelo_anios_ids_str
-                }
-            )
+            sql = text("""
+                CALL proc_relate_producto_modeloanios(:idInventario, :modelosAnios)
+            """)
+            session.execute(sql, {
+                'idInventario': id_inventario,
+                'modelosAnios': modelo_anios_ids_str
+            })
 
         # Si llegamos aquí, todo salió bien, y se hace commit automáticamente
         return id_inventario
@@ -579,12 +637,9 @@ def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMi
     except SQLAlchemyError as e:
         # Manejo de errores, hacer rollback
         session.rollback()
+        print(f"Error: {str(e)}")  # Agregar para depuración
         return {"error": str(e)}
-    except Exception as e:
-        # Captura de otros errores
-        session.rollback()
-        return {"error": str(e)}
-
+    
 
 def eliminar_producto(idInventario, idUsuario):
     # Llamar al procedimiento almacenado para eliminar un producto del inventario

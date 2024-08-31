@@ -1,9 +1,10 @@
 from flask import jsonify, request
-from inventario.funciones import get_productos, get_producto_preciso, get_productos_similares, buscar_inventarios\
-    , obtener_stock_bajo,crear_producto, eliminar_producto
+from inventario.funciones import get_productos, get_producto_preciso, get_productos_similares, get_productos_avanzada,\
+    obtener_stock_bajo, crear_producto, eliminar_producto
 from inventario.func_importar import importar_productos
 from inventario import inventory as routes
 import os
+from werkzeug.utils import secure_filename
 
 # ---------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------
@@ -43,7 +44,7 @@ def get_info_productos_similar_by(codigo_barras):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# TODOS LOS PRODUCTOS CON INFORMACION CON INFORMACION DE CIERTOS CAMPOS SIMILAR
+# TODOS LOS PRODUCTOS CON INFORMACION DE CIERTO CAMPOS SIMILARES
 @routes.route('/productos_busqueda_avanzada', methods=['GET'])
 def get_productos_busqueda_avanzada():
     try:
@@ -55,25 +56,42 @@ def get_productos_busqueda_avanzada():
         proveedor = request.args.get('proveedor', None)
         marca = request.args.get('marca', None)
         modelo = request.args.get('modelo', None)
-        anio = request.args.get('anio', None)
+        fecha_inicio = request.args.get('fecha_inicio', None)
+        fecha_fin = request.args.get('fecha_fin', None)
+        anio_todo = request.args.get('anio_todo', None)
+
+        # Convertir anio_todo a tipo booleano si es necesario
+        if anio_todo is not None:
+            try:
+                anio_todo = bool(int(anio_todo))  # Asumiendo que anio_todo es 0 o 1
+            except ValueError:
+                anio_todo = None  # Manejar el caso en que anio_todo no se puede convertir
 
         # Crear un diccionario de filtros
         filtros = {
-            'codigoBarras': codigoBarras,
+            'codigo': codigoBarras,
             'nombre': nombre,
             'descripcion': descripcion,
             'categoria': categoria,
             'proveedor': proveedor,
             'marca': marca,
             'modelo': modelo,
-            'anio': anio
+            'fecha_inicio': fecha_inicio,
+            'fecha_fin': fecha_fin,
+            'anio_todo': anio_todo
         }
 
         # Llamar a la función de búsqueda con los filtros
-        inventarios = buscar_inventarios(filtros)
-        return jsonify(inventarios)
+        inventario_avanzado = get_productos_avanzada(filtros)
+
+        # Devuelve una lista vacía si no se encuentran productos similares
+        if inventario_avanzado is None or len(inventario_avanzado) == 0:
+            return jsonify([])
+
+        return jsonify(inventario_avanzado)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
 
 # TODOS LOS PRODUCTOS CON INFORMACION CON STOCK BAJO    
 @routes.route('/productos_bajo', methods=['GET'])
@@ -98,6 +116,7 @@ def create_producto():
     try:
         # Obtener los datos del producto del cuerpo de la solicitud POST
         data = request.get_json()
+        print("Datos recibidos:", data)  # Agregar para depuración
         
         # Extraer los datos del JSON
         codigoBarras = data.get('codigo')
@@ -116,20 +135,41 @@ def create_producto():
         imagenes = data.get('imagenes')
         
         # Extraer la lista de vehículos
-        vehiculos = data.get('vehiculos', [])
-        
+        vehiculos = data.get('vehiculos', [])  # Definir valor por defecto vacío en caso de que no se proporcione
+        print("Vehículos recibidos:", vehiculos)  # Agregar para depuración
+
         # Llamar a la función para crear el producto
-        crear_producto(
+        id_inventario = crear_producto(
             codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima,
             precioCompra, mayoreo, menudeo, colocado, idUnidadMedida, idCategoria,
             idProveedor, idUsuario, imagenes, vehiculos)
 
-        return jsonify({'success': 'Producto creado con éxito'}), 201
+        if isinstance(id_inventario, dict) and 'error' in id_inventario:
+            return jsonify({'error': id_inventario['error']}), 500
 
+        return jsonify({'idInventario': id_inventario}), 201
     except Exception as e:
-        # Manejo de cualquier tipo de excepción inesperada
-        return jsonify({'error': 'Error interno del servidor', 'message': str(e)}), 500
-    
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/nuevo_producto/imagenes', methods=['POST'])
+def upload_files():
+    try:
+        if 'files' not in request.files:
+            return jsonify({'message': 'No file part in the request'}), 400
+
+        files = request.files.getlist('files')
+
+        for file in files:
+            if file.filename == '':
+                return jsonify({'message': 'No file selected for uploading'}), 400
+
+            if file:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join('C:\\imagenes_el_gabacho\\productosInventario', filename))
+    except Exception as e:
+        print(e)
+        return jsonify({'message': 'Allowed file types are .webp'}), 400
+    return jsonify({'message': 'Files successfully uploaded'}), 200
 
 # MODIFICAR UN PRODUCTO
 

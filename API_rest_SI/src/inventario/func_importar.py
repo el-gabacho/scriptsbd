@@ -6,7 +6,7 @@ from mysql.connector import DatabaseError
 
 MAX_RETRIES = 3
 # Establecer conexión con la base de datos
-cnx = mysql.connector.connect(user='root', password='root', host='localhost', port=3307, database='el_gabacho', collation='utf8mb4_general_ci')
+cnx = mysql.connector.connect(user='root', password='root', host='localhost', port=3306, database='el_gabacho', collation='utf8mb4_general_ci')
 # Crear un cursor para ejecutar las consultas SQL
 cursor = cnx.cursor()
 
