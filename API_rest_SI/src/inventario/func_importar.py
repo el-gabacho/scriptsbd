@@ -1,6 +1,8 @@
 import pandas as pd
 import re
 import time
+import mysql.connector
+from mysql.connector import DatabaseError
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from init import db
