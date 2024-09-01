@@ -45,7 +45,7 @@ def get_info_productos_similar_by(codigo_barras):
         return jsonify({'error': str(e)}), 500
 
 # TODOS LOS PRODUCTOS CON INFORMACION DE CIERTO CAMPOS SIMILARES
-@routes.route('/productos_busqueda_avanzada', methods=['GET'])
+@routes.route('/productos_busqueda_avanzada/', methods=['GET'])
 def get_productos_busqueda_avanzada():
     try:
         # Obtener los parámetros de consulta de la solicitud GET

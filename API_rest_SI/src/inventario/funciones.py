@@ -445,110 +445,33 @@ def get_productos_avanzada(filtros):
 
 # OBTENER INFORMACION DE PRODUCTOS ACTIVOS PERO BAJOS EN STOCK
 def obtener_stock_bajo():
+    # Realizar la consulta para obtener los productos activos y bajos en stock
     query = db.session.query(
         Inventario.idInventario,
         Inventario.codigoBarras,
         Inventario.nombre,
         Inventario.descripcion,
         Inventario.cantidadActual,
-        Inventario.cantidadMinima,
-        Inventario.precioCompra,
-        Inventario.mayoreo,
-        Inventario.menudeo,
-        Inventario.colocado,
-        Inventario.estado,
-        UnidadMedida.tipoMedida,
-        func.coalesce(Categoria.nombre, 'SIN CATEGORIA').label('categoriaNombre'),
-        Proveedor.empresa.label('proveedorEmpresa'),
-        func.group_concat(
-            func.concat(
-                Marca.nombre, ' ', Modelo.nombre, ' ',
-                case(
-                    (Anio.anioTodo == 1, 'ALL YEARS'),
-                    else_=func.concat(
-                        func.right(func.coalesce(Anio.anioInicio, ''), 2),
-                        '-',
-                        func.right(func.coalesce(Anio.anioFin, ''), 2)
-                    )
-                )
-            ).distinct()
-        ).label('aplicaciones'),
-        func.coalesce(Imagenes.imgRepresentativa, False).label('imgRepresentativa'),
-        func.coalesce(Imagenes.img2, False).label('img2'),
-        func.coalesce(Imagenes.img3, False).label('img3'),
-        func.coalesce(Imagenes.img4, False).label('img4'),
-        func.coalesce(Imagenes.img5, False).label('img5')
-    ).outerjoin(
-        Categoria, Inventario.idCategoria == Categoria.idCategoria
-    ).join(
-        UnidadMedida, Inventario.idUnidadMedida == UnidadMedida.idUnidadMedida
-    ).join(
-        ProveedorProducto, Inventario.idInventario == ProveedorProducto.idInventario
-    ).join(
-        Proveedor, ProveedorProducto.idProveedor == Proveedor.idProveedor
-    ).outerjoin(
-        ModeloAutoparte, Inventario.idInventario == ModeloAutoparte.idInventario
-    ).outerjoin(
-        ModeloAnio, ModeloAutoparte.idModeloAnio == ModeloAnio.idModeloAnio
-    ).outerjoin(
-        Modelo, ModeloAnio.idModelo == Modelo.idModelo
-    ).outerjoin(
-        Marca, Modelo.idMarca == Marca.idMarca
-    ).outerjoin(
-        Anio, ModeloAnio.idAnio == Anio.idAnio
-    ).outerjoin(
-        Imagenes, Inventario.idInventario == Imagenes.idInventario
+        Inventario.cantidadMinima
     ).filter(
-        Inventario.estado == 1,
+        Inventario.estado == 1,  # Productos activos
         or_(
-            Inventario.cantidadMinima > Inventario.cantidadActual,
-            Inventario.cantidadMinima == Inventario.cantidadActual
+            Inventario.cantidadMinima > Inventario.cantidadActual,  # Stock bajo
+            Inventario.cantidadMinima == Inventario.cantidadActual  # Stock igual al mínimo
         )
-    ).group_by(
-        Inventario.idInventario
     ).all()
 
     producto_bajo = []
-    base_path = "C:\\imagenes_el_gabacho\\productosInventario"
 
+    # Iterar sobre los resultados de la consulta
     for item in query:
-        aplicaciones = item.aplicaciones
-        if aplicaciones:
-            aplicaciones = [app.strip() for app in aplicaciones.split(',') if app.strip()]
-        else:
-            aplicaciones = ["SIN NINGUNA APLICACION"]
-
-        imagenes = []
-        if item.imgRepresentativa:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_1.png")
-        if item.img2:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_2.png")
-        if item.img3:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_3.png")
-        if item.img4:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_4.png")
-        if item.img5:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_5.png")
-
-        if not imagenes:
-            imagenes.append('SIN IMAGEN')
-
         producto_bajo.append({
             'IdInventario': item.idInventario,
             'Codigo': item.codigoBarras,
             'Nombre': item.nombre,
             'Descripcion': item.descripcion,
             'Existencias': item.cantidadActual,
-            'CantidadMinima': item.cantidadMinima,
-            'PrecioCompra': item.precioCompra,
-            'PrecioMayoreo': item.mayoreo,
-            'PrecioMenudeo': item.menudeo,
-            'PrecioColocado': item.colocado,
-            'TipoMedida': item.tipoMedida,
-            'Proveedor': item.proveedorEmpresa,
-            'Categoria': item.categoriaNombre,
-            'Aplicaciones': aplicaciones,
-            'Imagenes': imagenes
+            'CantidadMinima': item.cantidadMinima
         })
 
     return producto_bajo
