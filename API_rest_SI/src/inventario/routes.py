@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from inventario.funciones import get_productos, get_producto_preciso, get_productos_similares, get_productos_avanzada,\
-    obtener_stock_bajo, crear_producto, eliminar_producto
+    obtener_stock_bajo, get_productos_eliminados, crear_producto, eliminar_producto, reactivar_producto
 from inventario.func_importar import importar_productos
 from inventario import inventory as routes
 import os
@@ -107,6 +107,21 @@ def get_stock_bajo():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+# TODOS LOS PRODUCTOS CON INFORMACION CON STOCK BAJO    
+@routes.route('/productos_eliminados', methods=['GET'])
+def get_producto_eliminado():
+    try:
+        eliminado_producto = get_productos_eliminados()
+
+        # Devuelve una lista vacía si no se encuentran productos similares
+        if eliminado_producto is None or len(eliminado_producto) == 0:
+            return jsonify([])
+        
+        return jsonify(eliminado_producto)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
 # ---------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------
 
@@ -173,16 +188,39 @@ def upload_files():
 
 # MODIFICAR UN PRODUCTO
 
-# ELIMINAR UN PRODUCTO MEDIANTE SU ID
-@routes.route('/productos/<int:id>', methods=['DELETE'])
-def delete_producto(id):
+@routes.route('/eliminar_producto', methods=['DELETE'])
+def eliminar_producto_route():
     try:
+        # Obtener datos del cuerpo de la solicitud JSON
+        data = request.get_json()
+        print(f"Received data: {data}")  # Verifica los datos recibidos
+        # Extraer 'idInventario' y 'idUsuario' del cuerpo de la solicitud
+        idInventario = data.get('IdInventario')
+        print(f"primer parametro ={idInventario}")
+        idUsuario = data.get('IdUsuario')
+        print(f"segundo parametro ={idUsuario}")
         # Llamar a la función para eliminar el producto
-        eliminar_producto(id)
-        return jsonify({'message': 'Producto eliminado correctamente'})
+        resultado = eliminar_producto(idInventario, idUsuario)
+        return jsonify(resultado), 200
     except Exception as e:
+        print(f"Error en eliminar_producto_route: {str(e)}")
         return jsonify({'error': str(e)}), 500
     
+
+# REACTIVAR UN PRODUCTO MEDIANTE SU ID
+@routes.route('/reactivar_producto', methods=['PUT'])
+def reactive_producto():
+    try:
+        data = request.get_json()
+        print(f"Received data: {data}")  # Verifica los datos recibidos
+        idInventario = data.get('IdInventario')
+        print(f"primer parametro ={idInventario}")
+        # Llamar a la función para reactivar el producto
+        resultado = reactivar_producto(idInventario)
+        return jsonify(resultado), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # ---------------------------------------------------------------------------------------------
 # IMPORTAR PRODUCTOS desde un archivo CSV
 @routes.route('/importar_productos/<int:usuarioId>', methods=['POST'])

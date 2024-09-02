@@ -476,6 +476,38 @@ def obtener_stock_bajo():
 
     return producto_bajo
 
+# OBTENER INFO DE LOS PRODUCTOS DESACTIVADOS O PREVIAMENTE ELIMINADOS PERO DESACTIVADOS
+def get_productos_eliminados():
+    query = db.session.query(
+        Inventario.idInventario,
+        Inventario.codigoBarras,
+        Inventario.nombre,
+        Inventario.descripcion,
+        Inventario.cantidadActual,
+        Proveedor.empresa.label('proveedorEmpresa')
+    ).join(
+        ProveedorProducto, Inventario.idInventario == ProveedorProducto.idInventario
+    ).join(
+        Proveedor, ProveedorProducto.idProveedor == Proveedor.idProveedor
+    ).filter(
+        Inventario.estado == 0
+    ).all()
+
+    producto_eliminado = []
+
+    # Iterar sobre los resultados de la consulta
+    for item in query:
+        producto_eliminado.append({
+            'IdInventario': item.idInventario,
+            'Codigo': item.codigoBarras,
+            'Nombre': item.nombre,
+            'Descripcion': item.descripcion,
+            'Existencias': item.cantidadActual,
+            'Proveedor': item.proveedorEmpresa
+        })
+
+    return producto_eliminado
+
 
 # CREAR UN NUEVO PRODUCTO MEDIANTE VARIOS PROCEDIMIENTOS ALMACENADOS
 def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, precioCompra, mayoreo, 
@@ -562,17 +594,47 @@ def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMi
         session.rollback()
         print(f"Error: {str(e)}")  # Agregar para depuración
         return {"error": str(e)}
-    
 
+# FUNCION PARA EDITAR UN PRODUCTO ACTIVO
+
+# FUNCIÓN PARA ELIMINAR UN PRODUCTO ACTIVO
 def eliminar_producto(idInventario, idUsuario):
-    # Llamar al procedimiento almacenado para eliminar un producto del inventario
-    db.session.execute(f"CALL proc_eliminar_producto({idInventario},{idUsuario})")
+    session = db.session  # Obtener la sesión de la base de datos
 
-    # Confirmar los cambios en la base de datos
-    db.session.commit()
+    try:
+        with session.begin():  # Iniciar una transacción
+            # Llamar al procedimiento almacenado usando `text` para prevenir inyección SQL
+            sql = text("CALL proc_eliminar_producto(:idInventario, :idUsuario)")
+            session.execute(sql, {'idInventario': idInventario, 'idUsuario': idUsuario})
 
-    # Cerrar la sesión
-    db.session.close()
+        # Si se llega aquí, la transacción se completa con éxito (commit automático con `with session.begin()`)
+        return {'message': 'Producto eliminado o desactivado correctamente'}
+
+    except SQLAlchemyError as e:
+        # Manejo de errores, hacer rollback explícito
+        session.rollback()
+        print(f"Error al eliminar el producto en eliminar_producto: {str(e)}")
+        return {"error": str(e)}
+
+
+# FUNCION PARA REACTIVAR UN PRODUCTO QUE FUE ELIMINADO Y SU ESTADO ESTA EN FALSE
+def reactivar_producto(idInventario):
+    session = db.session  # Obtener la sesión de base de datos
+
+    try:
+        with session.begin():  # Iniciar la transacción
+            # Llamar al procedimiento almacenado usando text para pasar el parámetro de manera segura
+            sql = text("CALL proc_reactivar_producto(:idInventario)")
+            session.execute(sql, {'idInventario': idInventario})
+
+        # Si llegamos aquí, la transacción se completa con éxito (commit automático con `with session.begin()`)
+        return {'message': 'Producto reactivado correctamente'}
+
+    except SQLAlchemyError as e:
+        # Manejo de errores, hacer rollback
+        session.rollback()
+        print(f"Error: {str(e)}")  # Agregar para depuración
+        return {"error": str(e)}
 
 
 ### FUNCION PARA LA FUNCION DE IMPORTAR PRODUCTOS
