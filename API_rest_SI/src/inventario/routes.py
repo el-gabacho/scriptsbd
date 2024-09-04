@@ -1,6 +1,7 @@
 from flask import jsonify, request
 from inventario.funciones import get_productos, get_producto_preciso, get_productos_similares, get_productos_avanzada,\
-    obtener_stock_bajo, get_productos_eliminados, crear_producto, eliminar_producto, reactivar_producto
+    obtener_stock_bajo, get_productos_eliminados, crear_producto, eliminar_producto, reactivar_producto,\
+    agregar_existencias_producto
 from inventario.func_importar import importar_productos
 from inventario import inventory as routes
 import os
@@ -188,6 +189,10 @@ def upload_files():
 
 # MODIFICAR UN PRODUCTO
 
+
+
+# ELIMINAR UN PRODUCTO
+
 @routes.route('/eliminar_producto', methods=['DELETE'])
 def eliminar_producto_route():
     try:
@@ -219,6 +224,39 @@ def reactive_producto():
         resultado = reactivar_producto(idInventario)
         return jsonify(resultado), 200
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# AGREGAR MAS EXISTENCIAS A UN PRODUCTO ACTIVO
+@routes.route('/agregar_existencias_producto', methods=['POST'])
+def agregar_existencias_producto_route():
+    try:    
+        # Obtener datos del cuerpo de la solicitud JSON
+        data = request.get_json()
+        idUsuario = data.get('idUsuario')
+        idInventario = data.get('idInventario')
+        cantidadNueva = data.get('cantidadNueva')
+        precioCompra = data.get('precioCompra')
+        mayoreo = data.get('mayoreo')
+        menudeo = data.get('menudeo')
+        colocado = data.get('colocado')
+
+        # Verificación de los parámetros necesarios
+        if not all([idUsuario, idInventario, cantidadNueva, precioCompra, mayoreo, menudeo, colocado]):
+            return jsonify({'error': 'Todos los campos son requeridos'}), 400
+
+        # Llamar a la función para agregar existencias
+        result = agregar_existencias_producto(idUsuario, idInventario, cantidadNueva, precioCompra, mayoreo, menudeo, colocado)
+
+        # Verificar si hubo un error durante la operación
+        if 'error' in result:
+            return jsonify(result), 500
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        # Manejo de cualquier excepción no esperada
+        print(f"Error en agregar_existencias_producto_route: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 # ---------------------------------------------------------------------------------------------

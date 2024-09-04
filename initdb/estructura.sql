@@ -768,7 +768,56 @@ END //
 
 DELIMITER ;
 
+-- -------------------------------------------------------------------------------------------------------------------------------------------------
+-- -------------------------------------------------------------------------------------------------------------------------------------------------
 
+-- procedimiento almacenado que inserte datos en la tabla entradaProductos y actualice la tabla inventario con los precios de compra, mayoreo, menudeo y colocado
+DELIMITER //
+
+CREATE OR REPLACE PROCEDURE proc_insertar_entrada_producto(
+    IN p_idUsuario INT,
+    IN p_idInventario INT,
+    IN p_cantidadNueva FLOAT,
+    IN p_precioCompra FLOAT,
+    IN p_mayoreo FLOAT,
+    IN p_menudeo FLOAT,
+    IN p_colocado FLOAT
+)
+BEGIN
+    -- Verificar si el idUsuario existe
+    IF NOT EXISTS (SELECT 1 FROM usuarios WHERE idUsuario = p_idUsuario) THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Error: El idUsuario proporcionado no existe.';
+    END IF;
+    
+    -- Verificar si el idInventario existe
+    IF NOT EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario) THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Error: El idInventario proporcionado no existe.';
+    END IF;
+
+    -- Verificar si el idInventario está activo
+    IF EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario AND estado = FALSE) THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Error: El idInventario proporcionado está inactivo.';
+    END IF;
+
+    -- Insertar el nuevo registro en entradaProductos
+    INSERT INTO entradaProductos (idUsuario, idInventario, cantidadNueva, precioCompra)
+    VALUES (p_idUsuario, p_idInventario, p_cantidadNueva, p_precioCompra);
+    
+    -- Actualizar la tabla inventario con los nuevos precios y cantidad actual
+    UPDATE inventario
+    SET 
+        cantidadActual = cantidadActual + p_cantidadNueva,
+        precioCompra = p_precioCompra,
+        mayoreo = p_mayoreo,
+        menudeo = p_menudeo,
+        colocado = p_colocado
+    WHERE idInventario = p_idInventario;
+END //
+
+DELIMITER ;
 -- -------------------------------------------------------------------------------------------------------------------------------------------------
 -- -------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1005,35 +1054,6 @@ END //
 
 DELIMITER ;
 
--- procedimiento almacenado que inserte datos en la tabla entradaProductos y actualice la tabla inventario con los precios de compra, mayoreo, menudeo y colocado
-DELIMITER //
-
-CREATE PROCEDURE proc_insertar_entrada_producto(
-    IN p_idUsuario INT,
-    IN p_idInventario INT,
-    IN p_cantidadNueva FLOAT,
-    IN p_precioCompra FLOAT,
-    IN p_mayoreo FLOAT,
-    IN p_menudeo FLOAT,
-    IN p_colocado FLOAT
-)
-BEGIN
-    -- Insertar el nuevo registro en entradaProductos
-    INSERT INTO entradaProductos (idUsuario, idInventario, cantidadNueva, precioCompra)
-    VALUES (p_idUsuario, p_idInventario, p_cantidadNueva, p_precioCompra);
-    
-    -- Actualizar la tabla inventario con los nuevos precios y cantidad actual
-    UPDATE inventario
-    SET 
-        cantidadActual = cantidadActual + p_cantidadNueva,
-        precioCompra = p_precioCompra,
-        mayoreo = p_mayoreo,
-        menudeo = p_menudeo,
-        colocado = p_colocado
-    WHERE idInventario = p_idInventario;
-END //
-
-DELIMITER ;
 
 -- trigger para cuando se elimina un registro en la tabla ventaProductos
 DELIMITER //

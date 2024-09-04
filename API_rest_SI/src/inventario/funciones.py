@@ -636,6 +636,33 @@ def reactivar_producto(idInventario):
         print(f"Error: {str(e)}")  # Agregar para depuración
         return {"error": str(e)}
 
+### FUNCION PARA AGREGAR EXISTENCIAS A UN PRODUCTO
+def agregar_existencias_producto(idUsuario, idInventario, cantidadNueva, precioCompra, mayoreo, menudeo, colocado):
+    session = db.session  # Obtener la sesión de la base de datos
+
+    try:
+        with session.begin():  # Iniciar una transacción
+            # Llamar al procedimiento almacenado usando `text` para prevenir inyección SQL
+            sql = text("CALL proc_insertar_entrada_producto(:idUsuario, :idInventario, :cantidadNueva, :precioCompra, :mayoreo, :menudeo, :colocado)")
+            session.execute(sql, {
+                'idUsuario': idUsuario,
+                'idInventario': idInventario,
+                'cantidadNueva': cantidadNueva,
+                'precioCompra': precioCompra,
+                'mayoreo': mayoreo,
+                'menudeo': menudeo,
+                'colocado': colocado
+            })
+
+        # Si se llega aquí, la transacción se completa con éxito (commit automático con `with session.begin()`)
+        return {'message': 'Existencias agregadas al producto correctamente'}
+
+    except SQLAlchemyError as e:
+        # Manejo de errores, hacer rollback explícito
+        session.rollback()
+        print(f"Error al agregar existencias a un producto: {str(e)}")
+        return {"error": str(e)}
+
 
 ### FUNCION PARA LA FUNCION DE IMPORTAR PRODUCTOS
 def obtener_id_inventario(codigo):
