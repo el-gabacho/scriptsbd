@@ -533,163 +533,77 @@ INSERT INTO modelos (idMarca, nombre) VALUES (10, 'CS55 PLUS');
 
 -- Inserts para la marca CHEVROLET en la tabla modelos
 
-INSERT INTO modelos (idMarca, nombre) VALUES (11, '1500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, '2500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, '2500 HD');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, '400 SS');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'ACHIEVA');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'APACHE');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'ASTRA');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'ASTRO');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'ASTRO VAN');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'AVALANCHE');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'AVEO');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'AVEO 5');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'BEAT');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'BELAIR');
+INSERT INTO modelos (idMarca, nombre) VALUES (11, 'BEL AIR');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'BERETTA');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'BISCAYNE');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'BLAZER');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'BLAZER (S-10)');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'BLAZER (S10)');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'BONNEVILLE');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'C10');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'C15');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'C1500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'C20');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'C2000');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'C25');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'C2500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'C30');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'C35');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'C3500');
+INSERT INTO modelos (idMarca, nombre) VALUES (11, 'C-10');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CAMARO');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CAPRICE');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CAPTIVA');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CARGO VAN');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CAVALIER');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CELEBRITY');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CENTURY');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CHEVY');
+INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CHEVY II');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CHEVY C3');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CHEVY MONZA');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CHEVY PICK UP');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CHEVY POP');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CHEVY PU');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CHEVY SWING');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CHEVY VAN');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CHEYENNE');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CITATION');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CITY EXPRESS');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CK-1500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CK-2500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CK-3500');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CLASSIC');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'COBALT');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'COLORADO');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CORSA');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CORSICA');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CORVETTE');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CRUZE');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CUSTOM');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'CUTLASS');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'EL CAMINO');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'ENVOY');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'EPICA');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'EQUINOX');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'EXPRESS');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'EXPRESS 2500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'EXPRESS 3500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'EXPRESS 4500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'EXPRESS VAN');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'EXPRESS VAN 2500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'EXPRESS VAN 3500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'EXPRESS VAN 4500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'G10');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'G1500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'G20');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'G2500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'G30');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'G3500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'GEO METRO');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'GEO PRIZM');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'GEO TRACKER');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'GROOVE');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'HEAVY DUTY');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'HHR');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'IMPALA');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'K10');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'K1500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'K2500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'K30');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'K3500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'KODIAK');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'LESABRE');
+INSERT INTO modelos (idMarca, nombre) VALUES (11, 'JOY');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'LUMINA');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'LUMINA APV');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'LUV');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'MALIBU');
+INSERT INTO modelos (idMarca, nombre) VALUES (11, 'MATIZ');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'MERIVA');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'METRO');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'MONTE CARLO');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'MONTECARLO');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'MONZA');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'NOVA');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'NUBIRA');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'ONIX');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'OPTRA');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'ORLANDO');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'P10');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'P30');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'P3500');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'PICK UP');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'PICK UP 1500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'PICK UP 2500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'PICK UP 3500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'PRIZM');
+INSERT INTO modelos (idMarca, nombre) VALUES (11, 'PRIZMA');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'S-10');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'S-15');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'S10');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SATURN');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SATURN VUE');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SAVANA');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SAVANA 2500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SAVANA 3500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SEVILLE');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SILHOUETTE');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SILVERADO');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SILVERADO 1500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SILVERADO 2500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SILVERADO 2500 HD');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SILVERADO 3500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SILVERADO 3500 HD');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SONIC');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SONOMA');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SONORA');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SPARK');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SPRINT');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SSR');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SUBURBAN');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SUBURBAN 1500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SUBURBAN 2500');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SUBURBAN 3500');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'SWING');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'TAHOE');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'TIGRA');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'TORNADO');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'TORNADO VAN');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'TRACKER');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'TRAIL BLAZER');
+INSERT INTO modelos (idMarca, nombre) VALUES (11, 'TRAILBLAZER');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'TRAVERSE');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'TRAX');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'UPLANDER');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'VAN');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'VAN EXPRESS');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'VARIOS');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'VECTRA');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'VENTURE');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'VOLT');
-INSERT INTO modelos (idMarca, nombre) VALUES (11, 'Z28');
 INSERT INTO modelos (idMarca, nombre) VALUES (11, 'ZAFIRA');
 
 -- Inserts para la marca CHIREY en la tabla modelos
@@ -708,15 +622,11 @@ INSERT INTO modelos (idMarca, nombre) VALUES (12, 'TIGGO 8 PRO MAX');
 
 INSERT INTO modelos (idMarca, nombre) VALUES (13, '200');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, '300');
-INSERT INTO modelos (idMarca, nombre) VALUES (13, '200 C');
-INSERT INTO modelos (idMarca, nombre) VALUES (13, '300 C');
-INSERT INTO modelos (idMarca, nombre) VALUES (13, '300 M');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, '300C');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, '300M');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, 'ASPEN');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, 'CARAVAN');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, 'CIRRUS');
-INSERT INTO modelos (idMarca, nombre) VALUES (13, 'CONCORD');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, 'CONCORDE');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, 'CORDOBA');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, 'CROSSFIRE');
@@ -739,7 +649,6 @@ INSERT INTO modelos (idMarca, nombre) VALUES (13, 'PACIFICA');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, 'PHANTOM');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, 'PLYMOUTH');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, 'PT CRUISER');
-INSERT INTO modelos (idMarca, nombre) VALUES (13, 'PT CRUSIER');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, 'RAMBLER');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, 'SEBRING');
 INSERT INTO modelos (idMarca, nombre) VALUES (13, 'SHADOW');
@@ -988,6 +897,7 @@ INSERT INTO modelos (idMarca, nombre) VALUES (21, 'PU');
 INSERT INTO modelos (idMarca, nombre) VALUES (21, 'RANGER');
 INSERT INTO modelos (idMarca, nombre) VALUES (21, 'RAPTOR');
 INSERT INTO modelos (idMarca, nombre) VALUES (21, 'SABLE');
+INSERT INTO modelos (idMarca, nombre) VALUES (21, 'SEDAN');
 INSERT INTO modelos (idMarca, nombre) VALUES (21, 'SPORT TRAC');
 INSERT INTO modelos (idMarca, nombre) VALUES (21, 'STERLING');
 INSERT INTO modelos (idMarca, nombre) VALUES (21, 'SUPER DUTY');
@@ -1013,6 +923,7 @@ INSERT INTO modelos (idMarca, nombre) VALUES (21, 'TRANSIT 350 HD');
 INSERT INTO modelos (idMarca, nombre) VALUES (21, 'TRANSIT CONNECT');
 INSERT INTO modelos (idMarca, nombre) VALUES (21, 'TRANSITT');
 INSERT INTO modelos (idMarca, nombre) VALUES (21, 'VILLAGER');
+INSERT INTO modelos (idMarca, nombre) VALUES (21, 'WAGON');
 INSERT INTO modelos (idMarca, nombre) VALUES (21, 'WINDSTAR');
 
 
@@ -1443,6 +1354,7 @@ INSERT INTO modelos (idMarca, nombre) VALUES
 (40, 'UX200'),
 (40, 'UX250H');
 
+# LINCOLN
 INSERT INTO modelos (idMarca, nombre) VALUES
 (41, 'AVIATOR'),
 (41, 'BLACKWOOD'),
@@ -1661,6 +1573,7 @@ INSERT INTO modelos (idMarca, nombre) VALUES
 (46, 'VIANO'),
 (46, 'VITO');
 
+# MERCURY
 INSERT INTO modelos (idMarca, nombre) VALUES
 (47, 'BOBCAT'),
 (47, 'COLONY PARK'),
@@ -1670,6 +1583,7 @@ INSERT INTO modelos (idMarca, nombre) VALUES
 (47, 'GRAND MARQUIS'),
 (47, 'MARAUDER'),
 (47, 'MARINER'),
+(47, 'MARQUIS'),
 (47, 'MILAN'),
 (47, 'MONARCH'),
 (47, 'MONTAINEER'),
@@ -2091,67 +2005,38 @@ VALUES (73, 'AERIO'),
 INSERT INTO modelos (idMarca, nombre)
 VALUES (74, 'MODEL 3');
 
+# TOTOTA
 INSERT INTO modelos (idMarca, nombre)
-VALUES ('75', '86'),
-	('75', '027FDF20'), 
-	('75', '0427FDF20'), 
-	('75', '4 RUNNER'),
-    ('75', '627FDF20'),  
-    ('75', '7FDAU50'),  
-    ('75', '7FDAU5013Z'), 
-    ('75', '7FDKU40'), 
-    ('75', '7FDU151DZ'), 
-    ('75', '7FDU181DZ'),
-    ('75', '7FDU35'), 
-    ('75', '7FDU45'), 
-    ('75', '7FGU25'), 
-    ('75', '7FGU25-30'),
-    ('75', '7FGU30'), 
-    ('75', '7FGU32'),  
-    ('75', '7FGU45GM6270'), 
+VALUES ('75', '4RUNNER'), # 4RUNNER 
     ('75', 'AURION'),
     ('75', 'AVALON'),
     ('75', 'AVANZA'),
     ('75', 'CAMRY'),
     ('75', 'CELICA'),
-    ('75', 'CH-R'),
+    ('75', 'C-HR'),
     ('75', 'COROLLA'),
     ('75', 'COROLLA CROSS'),
-    ('75', 'CORONA'),
-    ('75', 'CRESSIDA'),
     ('75', 'ECHO'),
     ('75', 'FJ CRUISER'), --
     ('75', 'HIACE'),
     ('75', 'HIGHLANDER'),
     ('75', 'HILUX'),
-    ('75', 'LAND CRUISE PRADO'),
     ('75', 'LAND CRUISER'),
     ('75', 'MATRIX'),
     ('75', 'PASEO'),
     ('75', 'PICK UP'),
-    ('75', 'PRERUNNER'),
     ('75', 'PREVIA'),
     ('75', 'PRIUS'),
     ('75', 'PRIUS C'),
-    ('75', 'R34'),
-    ('75', 'RAIZE'),
     ('75', 'RAV4'),
-    ('75', 'REGIUS ACE'),
-    ('75', 'RUNNER'),
-    ('75', 'SCION'),
     ('75', 'SEQUOIA'),
     ('75', 'SIENNA'),
-    ('75', 'SOLARA'),
     ('75', 'SUPRA'),
     ('75', 'T100'),
     ('75', 'TACOMA'),
-    ('75', 'TC 04'),
-    ('75', 'TERCEL'),
     ('75', 'TUNDRA'),
-    ('75', 'VENZA'),
     ('75', 'VIOS'),
-    ('75', 'YARIS'),
-    ('75', 'YARIS R');
+    ('75', 'YARIS');
     
 INSERT INTO modelos (idMarca, nombre)
 VALUES (76, '6052'),

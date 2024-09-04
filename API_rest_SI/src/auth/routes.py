@@ -16,7 +16,6 @@ def login():
         sesion = iniciar_sesion(username, password)
         return sesion
     except Exception as e:
-        print(e)
         return jsonify({'error': 'Error en el login'}), 500
 
 # @auth.route('/signup', methods=['POST'])
