@@ -681,28 +681,42 @@ DELIMITER ;
 -- mientras que en caso contrario, simplemente se deshabilitará (estado = FALSE) y se registrará la acción en registroProductos.
 DELIMITER //
 
-CREATE PROCEDURE proc_eliminar_producto (
+CREATE OR REPLACE PROCEDURE proc_eliminar_producto (
     IN p_idInventario INT,
     IN p_idUsuario INT
 )
 BEGIN
-    DECLARE v_countVP INT;
-    DECLARE v_countEP INT;
+    DECLARE v_existsVP INT;
+    DECLARE v_existsEP INT;
 
     -- Verificar si el producto tiene relaciones en ventaProductos
     SELECT COUNT(*)
-    INTO v_countVP
+    INTO v_existsVP
     FROM ventaProductos
     WHERE idInventario = p_idInventario;
 
     -- Verificar si el producto tiene relaciones en entradaProductos
     SELECT COUNT(*)
-    INTO v_countEP
+    INTO v_existsEP
     FROM entradaProductos
     WHERE idInventario = p_idInventario;
 
     -- Si no hay relaciones en ambas tablas, eliminar el producto
-    IF v_countVP = 0 AND v_countEP = 0 THEN
+    IF v_existsVP = 0 AND v_existsEP = 0 THEN
+        -- Eliminar relaciones en otras tablas que dependan de inventario
+        DELETE FROM imagenes 
+        WHERE idInventario = p_idInventario;
+
+        DELETE FROM modeloAutopartes
+        WHERE idInventario = p_idInventario;
+
+        DELETE FROM proveedorProductos 
+        WHERE idInventario = p_idInventario;
+
+        DELETE FROM registroProductos
+        WHERE idInventario = p_idInventario;
+
+        -- Finalmente, eliminar el producto de inventario
         DELETE FROM inventario
         WHERE idInventario = p_idInventario;
     ELSE
@@ -726,7 +740,7 @@ DELIMITER ;
 
 DELIMITER //
 
-CREATE PROCEDURE proc_reactivar_producto (
+CREATE OR REPLACE PROCEDURE proc_reactivar_producto (
     IN p_idInventario INT
 )
 BEGIN
