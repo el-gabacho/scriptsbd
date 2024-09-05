@@ -596,6 +596,86 @@ def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMi
         return {"error": str(e)}
 
 # FUNCION PARA EDITAR UN PRODUCTO ACTIVO
+def modificar_producto(idInventario, codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, precioCompra, mayoreo, 
+                   menudeo, colocado, idUnidadMedida, idCategoria, idProveedor, imagenes, vehiculos):
+    session = db.session
+
+    try:
+        with session.begin():  # Iniciar la transacción
+
+            # Procedimiento 1: Modificar un producto mediante su ID
+            sql = text("""
+                CALL proc_actualizar_producto_con_comparacion(:idInventario, :idCategoria, :idUnidadMedida, :codigoBarras, 
+                :nombre, :descripcion, :cantidadActual, :cantidadMinima, :precioCompra, :mayoreo, :menudeo, :colocado, 
+                :idProveedor)
+            """)
+            session.execute(sql, {
+                'idInventario':idInventario,
+                'idCategoria': idCategoria,
+                'idUnidadMedida': idUnidadMedida,
+                'codigoBarras': codigoBarras,
+                'nombre': nombre,
+                'descripcion': descripcion,
+                'cantidadActual': cantidadActual,
+                'cantidadMinima': cantidadMinima,
+                'precioCompra': precioCompra,
+                'mayoreo': mayoreo,
+                'menudeo': menudeo,
+                'colocado': colocado,
+                'idProveedor': idProveedor
+            })
+
+            # Procedimiento 2: Modificar imágenes para el producto
+            sql = text("""
+                CALL proc_actualiza_img_producto(:idInventario, :imagenes)
+            """)
+            session.execute(sql, {
+                'idInventario': idInventario,
+                'imagenes': imagenes
+            })
+
+            # Procedimiento 3: Procesar cada vehículo, recolectar los IDs generados en Editar
+            modelo_anios_ids = []
+            for vehiculo in vehiculos:
+                sql = text("""
+                    CALL proc_insertar_modelos(:idModelo, :anioInicio, :anioFin, :anioTodo, @p_idModeloAnio)
+                """)
+                session.execute(sql, {
+                    'idModelo': vehiculo['idModelo'],
+                    'anioInicio': vehiculo['anioInicio'],
+                    'anioFin': vehiculo['anioFin'],
+                    'anioTodo': vehiculo['todoAnio']
+                })
+
+                # Obtener el ID del modelo-año generado
+                result = session.execute(text("SELECT @p_idModeloAnio")).first()
+                modelo_anio_id = result[0]
+                print(f"ID de modelo-año obtenido: {modelo_anio_id}")  # Agregar para depuración
+                
+                if modelo_anio_id:
+                    modelo_anios_ids.append(modelo_anio_id)
+
+            # Convertir la lista de IDs a una cadena separada por comas
+            modelo_anios_ids_str = ','.join(map(str, modelo_anios_ids))
+
+            # Procedimiento 4: Relacionar el producto con los IDs de los modelos-años
+            sql = text("""
+                CALL proc_editar_producto_modeloanios(:idInventario, :nuevaListaModelosAnios)
+            """)
+            session.execute(sql, {
+                'idInventario': idInventario,
+                'nuevaListaModelosAnios': modelo_anios_ids_str
+            })
+
+        # Si llegamos aquí, todo salió bien, y se hace commit automáticamente
+        return idInventario
+
+    except SQLAlchemyError as e:
+        # Manejo de errores, hacer rollback
+        session.rollback()
+        print(f"Error: {str(e)}")  # Agregar para depuración
+        return {"error": str(e)}
+
 
 # FUNCIÓN PARA ELIMINAR UN PRODUCTO ACTIVO
 def eliminar_producto(idInventario, idUsuario):

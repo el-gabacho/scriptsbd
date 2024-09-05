@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from inventario.funciones import get_productos, get_producto_preciso, get_productos_similares, get_productos_avanzada,\
-    obtener_stock_bajo, get_productos_eliminados, crear_producto, eliminar_producto, reactivar_producto,\
+    obtener_stock_bajo, get_productos_eliminados, crear_producto, modificar_producto, eliminar_producto, reactivar_producto,\
     agregar_existencias_producto
 from inventario.func_importar import importar_productos
 from inventario import inventory as routes
@@ -188,7 +188,45 @@ def upload_files():
     return jsonify({'message': 'Files successfully uploaded'}), 200
 
 # MODIFICAR UN PRODUCTO
+@routes.route('/modificar_producto', methods=['PUT'])
+def modificar_producto_route():
+    try:
+        # Obtener los datos enviados en el cuerpo de la solicitud
+        data = request.get_json()
+        print("Datos recibidos:", data)  # Agregar para depuración
 
+        # Extraer los valores necesarios del JSON recibido
+        idInventario = data.get('idInventario')
+        codigoBarras = data.get('codigoBarras')
+        nombre = data.get('nombre')
+        descripcion = data.get('descripcion')
+        cantidadActual = data.get('cantidadActual')
+        cantidadMinima = data.get('cantidadMinima')
+        precioCompra = data.get('precioCompra')
+        mayoreo = data.get('mayoreo')
+        menudeo = data.get('menudeo')
+        colocado = data.get('colocado')
+        idUnidadMedida = data.get('idUnidadMedida')
+        idCategoria = data.get('idCategoria')
+        idProveedor = data.get('idProveedor')
+        imagenes = data.get('imagenes')
+        vehiculos = data.get('vehiculos')
+
+        # Validar que el ID del producto esté presente
+        if not idInventario:
+            return jsonify({'error': 'ID del producto no proporcionado'}), 400
+
+        # Llamar a la función que realiza la modificación del producto
+        resultado = modificar_producto(idInventario, codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima,
+                                       precioCompra, mayoreo, menudeo, colocado, idUnidadMedida, idCategoria,
+                                       idProveedor, imagenes, vehiculos)
+
+        # Retornar una respuesta con el ID del producto modificado
+        return jsonify({'message': 'Producto modificado correctamente', 'idInventario': resultado}), 200
+
+    except Exception as e:
+        # En caso de un error, devolver una respuesta con el error
+        return jsonify({'error': str(e)}), 500
 
 
 # ELIMINAR UN PRODUCTO

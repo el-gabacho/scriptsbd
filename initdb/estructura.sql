@@ -357,7 +357,7 @@ BEGIN
     DECLARE img5 BOOL;
 
     -- Verificar si el producto existe
-    IF NOT EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario) THEN
+    IF NOT EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario AND estado = 1) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El producto con el ID especificado no existe.';
     ELSE
         -- Extraer valores booleanos de la cadena p_imagenes
@@ -502,10 +502,11 @@ DELIMITER ;
 
 DELIMITER $$
 
-CREATE PROCEDURE proc_actualizar_producto_con_comparacion(
+CREATE OR REPLACE PROCEDURE proc_actualizar_producto_con_comparacion(
     IN p_idInventario INT, -- ID DEL PRODUCTO INVENTARIO
     IN p_idCategoria INT, -- CATEGORIA
     IN p_idUnidadMedida INT, -- UNIDAD DE MEDIDA
+    IN p_codigoBarras VARCHAR(50),
     IN p_nombre VARCHAR(100),
     IN p_descripcion VARCHAR(150),
     IN p_cantidadActual FLOAT,
@@ -514,12 +515,13 @@ CREATE PROCEDURE proc_actualizar_producto_con_comparacion(
     IN p_mayoreo FLOAT,
     IN p_menudeo FLOAT,
     IN p_colocado FLOAT,
-    IN p_idProveedor INT -- PROVEEDOR	
+    IN p_idProveedor INT -- PROVEEDOR
 )
 BEGIN
     DECLARE v_idCategoria INT;
     DECLARE v_idUnidadMedida INT;
     DECLARE v_nombre VARCHAR(100);
+    DECLARE v_codigoBarras VARCHAR(50);
     DECLARE v_descripcion VARCHAR(150);
     DECLARE v_cantidadActual FLOAT;
     DECLARE v_cantidadMinima FLOAT;
@@ -527,26 +529,33 @@ BEGIN
     DECLARE v_mayoreo FLOAT;
     DECLARE v_menudeo FLOAT;
     DECLARE v_colocado FLOAT;
+    DECLARE v_idProveedorActual INT;
 
-    -- Verificar si el producto existe y obtener los valores actuales
-    IF NOT EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El producto con el ID especificado no existe.';
+    -- Validar si el código de barras es único para otro producto
+    IF EXISTS (SELECT 1 FROM inventario WHERE codigoBarras = p_codigoBarras AND idInventario != p_idInventario) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El código de barras ya existe para otro producto.';
+    END IF;
+
+    -- Verificar si el producto existe y si su estado es 1 (activo)
+    IF NOT EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario AND estado = 1) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El producto con el ID especificado no existe o no está activo.';
     ELSE
         -- Obtener los valores actuales del producto
-        SELECT idCategoria, idUnidadMedida, nombre, descripcion, cantidadActual, cantidadMinima, 
+        SELECT idCategoria, idUnidadMedida, codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, 
                precioCompra, mayoreo, menudeo, colocado
-        INTO v_idCategoria, v_idUnidadMedida, v_nombre, v_descripcion, v_cantidadActual, 
+        INTO v_idCategoria, v_idUnidadMedida, v_codigoBarras, v_nombre, v_descripcion, v_cantidadActual, 
              v_cantidadMinima, v_precioCompra, v_mayoreo, v_menudeo, v_colocado
         FROM inventario
         WHERE idInventario = p_idInventario;
 
         -- Solo actualizar los campos que hayan cambiado
-        IF p_idCategoria != v_idCategoria OR p_idUnidadMedida != v_idUnidadMedida OR p_nombre != v_nombre
+        IF p_idCategoria != v_idCategoria OR p_idUnidadMedida != v_idUnidadMedida OR p_codigoBarras != v_codigoBarras OR p_nombre != v_nombre
            OR p_descripcion != v_descripcion OR p_cantidadActual != v_cantidadActual OR p_cantidadMinima != v_cantidadMinima
            OR p_precioCompra != v_precioCompra OR p_mayoreo != v_mayoreo OR p_menudeo != v_menudeo OR p_colocado != v_colocado THEN
             UPDATE inventario
             SET idCategoria = p_idCategoria,
                 idUnidadMedida = p_idUnidadMedida,
+                codigoBarras = p_codigoBarras,
                 nombre = p_nombre,
                 descripcion = p_descripcion,
                 cantidadActual = p_cantidadActual,
@@ -558,15 +567,21 @@ BEGIN
             WHERE idInventario = p_idInventario;
         END IF;
 
-        -- Verificar si el proveedor ha cambiado
-        IF NOT EXISTS (SELECT 1 FROM proveedorProductos WHERE idProveedor = p_idProveedor AND idInventario = p_idInventario) THEN
-            -- Eliminar antiguo proveedor (si existe)
-            DELETE FROM proveedorProductos
-            WHERE idInventario = p_idInventario;
+        -- Obtener el proveedor actual del producto
+        SELECT idProveedor INTO v_idProveedorActual 
+        FROM proveedorProductos 
+        WHERE idInventario = p_idInventario LIMIT 1;
 
-            -- Insertar nuevo proveedor
+        -- Verificar si el proveedor ha cambiado o si no hay registro actual
+        IF v_idProveedorActual IS NULL THEN
+            -- No existe registro de proveedor, insertar uno nuevo
             INSERT INTO proveedorProductos (idProveedor, idInventario)
             VALUES (p_idProveedor, p_idInventario);
+        ELSEIF v_idProveedorActual != p_idProveedor THEN
+            -- Actualizar el proveedor si ha cambiado
+            UPDATE proveedorProductos
+            SET idProveedor = p_idProveedor
+            WHERE idInventario = p_idInventario;
         END IF;
     END IF;
 END $$
@@ -579,39 +594,54 @@ DELIMITER ;
 -- Ediar un producto en imagenes
 DELIMITER $$
 
-CREATE PROCEDURE proc_actualizar_imagenes_producto(
-    IN p_idInventario INT,       -- ID DEL PRODUCTO INVENTARIO
-    IN p_imgRepresentativa BOOL, -- IMAGEN REPRESENTATIVA
-    IN p_img2 BOOL,              -- IMAGEN 2
-    IN p_img3 BOOL,              -- IMAGEN 3
-    IN p_img4 BOOL,              -- IMAGEN 4
-    IN p_img5 BOOL               -- IMAGEN 5
+CREATE OR REPLACE PROCEDURE proc_actualiza_img_producto(
+    IN p_idInventario INT,
+    IN p_imagenes TEXT
 )
 BEGIN
-    -- Verificar si el producto existe en la tabla inventario
-    IF NOT EXISTS (SELECT 1 FROM inventario WHERE idInventario = p_idInventario) THEN
+    DECLARE imgRepresentativa BOOL;
+    DECLARE img2 BOOL;
+    DECLARE img3 BOOL;
+    DECLARE img4 BOOL;
+    DECLARE img5 BOOL;
+    DECLARE v_estado INT;
+
+    -- Verificar si el producto existe y está activo
+    SELECT estado INTO v_estado 
+    FROM inventario 
+    WHERE idInventario = p_idInventario;
+
+    IF v_estado IS NULL THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El producto con el ID especificado no existe.';
+    ELSEIF v_estado != 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El producto no está activo y no se pueden actualizar imágenes.';
     ELSE
-        -- Verificar si ya existen imágenes para el producto
+        -- Extraer valores booleanos de la cadena p_imagenes
+        SET imgRepresentativa = TRIM(SUBSTRING_INDEX(p_imagenes, ',', 1)) = 'TRUE';
+        SET img2 = TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(p_imagenes, ',', 2), ',', -1)) = 'TRUE';
+        SET img3 = TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(p_imagenes, ',', 3), ',', -1)) = 'TRUE';
+        SET img4 = TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(p_imagenes, ',', 4), ',', -1)) = 'TRUE';
+        SET img5 = TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(p_imagenes, ',', 5), ',', -1)) = 'TRUE';
+
+        -- Verificar si ya existen imágenes asociadas al producto
         IF EXISTS (SELECT 1 FROM imagenes WHERE idInventario = p_idInventario) THEN
-            -- Actualizar las imágenes existentes
+            -- Actualizar las imágenes del producto
             UPDATE imagenes
-            SET imgRepresentativa = p_imgRepresentativa,
-                img2 = p_img2,
-                img3 = p_img3,
-                img4 = p_img4,
-                img5 = p_img5
+            SET imgRepresentativa = imgRepresentativa,
+                img2 = img2,
+                img3 = img3,
+                img4 = img4,
+                img5 = img5
             WHERE idInventario = p_idInventario;
         ELSE
-            -- Insertar nuevas imágenes si no existen previamente
+            -- Insertar nuevas imágenes asociadas al producto
             INSERT INTO imagenes (idInventario, imgRepresentativa, img2, img3, img4, img5)
-            VALUES (p_idInventario, p_imgRepresentativa, p_img2, p_img3, p_img4, p_img5);
+            VALUES (p_idInventario, imgRepresentativa, img2, img3, img4, img5);
         END IF;
     END IF;
 END $$
 
 DELIMITER ;
-
 ------------------------------------------
 ------------------------------------------
 -- Editar relacion modeloautoparte
