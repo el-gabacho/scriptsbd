@@ -1,8 +1,6 @@
 import pandas as pd
 import re
 import time
-import mysql.connector
-from mysql.connector import DatabaseError
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from init import db
@@ -11,10 +9,6 @@ from inventario.funciones import obtener_id_inventario
 from categorias.funciones import obtener_id_categoria
 
 MAX_RETRIES = 3
-# Establecer conexión con la base de datos
-cnx = mysql.connector.connect(user='root', password='root', host='localhost', port=3306, database='el_gabacho', collation='utf8mb4_general_ci')
-# Crear un cursor para ejecutar las consultas SQL
-cursor = cnx.cursor()
 
 errores_list = []
 
@@ -263,9 +257,9 @@ def importar_productos(file_path, usuarioId):
         # Confirmar los cambiosx
         db.session.commit()
     finally:
-        # Cerrar el cursor y la conexión
         db.session.close()
 
+    errores_list = [{'Fila': x['Fila'] + 2} if 'Fila' in x else x for x in errores_list]
     errores_list.sort(key=lambda x: x['Fila'])
     resultado = {'TotalInsertados': total_insertados, 'TotalActualizados': total_actualizados, 'Errores': errores_list}
     return resultado

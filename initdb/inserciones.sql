@@ -673,6 +673,8 @@ INSERT INTO modelos (idMarca, nombre) VALUES
 INSERT INTO modelos (idMarca, nombre) VALUES 
 (16, '800'),
 (16, 'CAMION'),
+(16, 'D-600'),
+(16, 'D-861'),
 (16, 'VARIOS');
 
 -- Inserts para la marca DODGE en la tabla modelos
@@ -699,6 +701,7 @@ INSERT INTO modelos (idMarca, nombre) VALUES (17, 'D200');
 INSERT INTO modelos (idMarca, nombre) VALUES (17, 'D250');
 INSERT INTO modelos (idMarca, nombre) VALUES (17, 'D300');
 INSERT INTO modelos (idMarca, nombre) VALUES (17, 'D350');
+INSERT INTO modelos (idMarca, nombre) VALUES (17, 'DR');
 INSERT INTO modelos (idMarca, nombre) VALUES (17, 'DAKOTA');
 INSERT INTO modelos (idMarca, nombre) VALUES (17, 'DART');
 INSERT INTO modelos (idMarca, nombre) VALUES (17, 'DART K');
@@ -989,7 +992,6 @@ INSERT INTO modelos (idMarca, nombre) VALUES (24, 'K1500');
 INSERT INTO modelos (idMarca, nombre) VALUES (24, 'K3500');
 INSERT INTO modelos (idMarca, nombre) VALUES (24, 'P3500');
 INSERT INTO modelos (idMarca, nombre) VALUES (24, 'S-15');
-INSERT INTO modelos (idMarca, nombre) VALUES (24, 'S15');
 INSERT INTO modelos (idMarca, nombre) VALUES (24, 'SAFARI');
 INSERT INTO modelos (idMarca, nombre) VALUES (24, 'SAFARI VAN');
 INSERT INTO modelos (idMarca, nombre) VALUES (24, 'SAVANA');
@@ -1257,9 +1259,8 @@ INSERT INTO modelos (idMarca, nombre) VALUES
 -- Inserts para la marca KENWORTH en la tabla modelos
 
 INSERT INTO modelos (idMarca, nombre) VALUES
-(36, '370'),
-(36, '388'),
 (36, 'CAMION'),
+(36, 'C500'),
 (36, 'KW55'),
 (36, 'PETERBILT'),
 (36, 'T170'),
@@ -1392,6 +1393,7 @@ INSERT INTO modelos (idMarca, nombre) VALUES
 INSERT INTO modelos (idMarca, nombre) VALUES
 (44, 'MP120MX');
 
+# MAZDA
 INSERT INTO modelos (idMarca, nombre) VALUES
 (45, '2'),
 (45, '3'),
@@ -1429,10 +1431,8 @@ INSERT INTO modelos (idMarca, nombre) VALUES
 (45, 'RX8'),
 (45, 'TRIBUTE');
 
+# MERCEDES BENZ
 INSERT INTO modelos (idMarca, nombre) VALUES
-(46, '709'),
-(46, '909'),
-(46, '971'),
 (46, 'A220'),
 (46, 'A250'),
 (46, 'ACTROS'),
@@ -1607,6 +1607,7 @@ INSERT INTO modelos (idMarca, nombre) VALUES
 (48, 'RX8'),
 (48, 'ZS');
 
+# MINI
 INSERT INTO modelos (idMarca, nombre) VALUES
 (49, 'COOPER'),
 (49, 'COOPER CHILI'),
@@ -1654,9 +1655,11 @@ VALUES (51, 'BAJAJ'),
        (51, 'TORINO TOWN Y PACK'),
        (51, 'TORINO COUNTRY');
 
+# NISSAN
 INSERT INTO modelos (idMarca, nombre)
 VALUES (52, '510'),
        (52, '610'),
+       (52, '620'),
        (52, '710'),
        (52, '720'),
        (52, '200 SX'),
@@ -1709,7 +1712,7 @@ VALUES (52, '510'),
        (52, 'NV3500'),
        (52, 'NX'),
        (52, 'PATHFINDER'),
-       (52, 'PICK UP D22'),
+       (52, 'PICK UP'),
        (52, 'PLATINA'),
        (52, 'PULSAR'),
        (52, 'PULSAR NX'),
@@ -1880,8 +1883,12 @@ VALUES (61, '700'),
 INSERT INTO modelos (idMarca, nombre)
 VALUES (62, 'AMERICAN');
 
+# RENAULT
 INSERT INTO modelos (idMarca, nombre)
-VALUES (63, '12'),
+VALUES (63, '5'),
+		 (63, '12'),
+		 (63, '18'),
+		 (63, 'ALLIANCE'),
        (63, 'CAPTUR'),
        (63, 'CLIO'),
        (63, 'DUSTER'),
@@ -2049,6 +2056,7 @@ VALUES (76, '6052'),
        (76, 'H4'),
        (76, 'H7');
 
+# VOLKSWAGEN
 INSERT INTO modelos (idMarca, nombre)
 VALUES (77, 'AMAROK'),
        (77, 'ARTEON'),
@@ -2077,15 +2085,17 @@ VALUES (77, 'AMAROK'),
        (77, 'FOX'),
        (77, 'GOL'),
        (77, 'GOLF'),
+       (77, 'GOLF A2'),
        (77, 'GOLF_A4'),
        (77, 'GOLF_GTI'),
        (77, 'GOLF_R'),
        (77, 'GOLF SPORTWAGEN'),
        (77, 'GTI'),
        (77, 'JETTA'),
+       (77, 'JETTA A2'),
+       (77, 'JETTA 43'),
+       (77, 'JETTA 44'),
        (77, 'JETTA BICENTENARIO'),
-       (77, 'JETTA CLASICO'),
-       (77, 'JETTA TDI'),
        (77, 'LUPO'),
        (77, 'MULTIVAN'),
        (77, 'PANEL'),
@@ -2093,7 +2103,6 @@ VALUES (77, 'AMAROK'),
        (77, 'PASSAT_CC'),
        (77, 'PEPPER'),
        (77, 'POINTER'),
-       (77, 'POINTER PICK UP'),
        (77, 'POLO'),
        (77, 'POLO GTI'),
        (77, 'RABBIT'),
@@ -2180,6 +2189,7 @@ VALUES (80, 'SEMICHATO CAPRE'),
        (80, 'INTERCENTURY');
 
 INSERT INTO anios (anioInicio, anioFin, anioTodo) VALUES
+(0, 0, TRUE),
 (1957,1986,FALSE),
 (1960,1965,FALSE),
 (1961,1966,FALSE),
@@ -2432,21 +2442,21 @@ INSERT INTO anios (anioInicio, anioFin, anioTodo) VALUES
 -- Relacionar modelo con un año
 -- Parametros (idModelo, anioInicio, anioFin, todoAnio )
 -- CALL proc_insertar_modelos(p_idModelo, p_anioInicio, p_anioFin, p_anioTodo, @p_idModeloAnio)
-CALL proc_insertar_modelos(211, 1998, 2005, FALSE, @p_idModeloAnio); -- astro: chevrolet
-CALL proc_insertar_modelos(210, 2001, 2006, FALSE, @p_idModeloAnio); -- astra: chevrolet
-CALL proc_insertar_modelos(214, 2006, 2012, FALSE, @p_idModeloAnio); -- aveo: chevrolet
-CALL proc_insertar_modelos(214, 2012, 2017, FALSE, @p_idModeloAnio); -- aveo: chevrolet
-CALL proc_insertar_modelos(236, 2008, 2016, FALSE, @p_idModeloAnio); -- captiva: chevrolet
-CALL proc_insertar_modelos(241, 1975, 1978, FALSE, @p_idModeloAnio); -- chevy: chevrolet
-CALL proc_insertar_modelos(522, 1990, 1998, FALSE, @p_idModeloAnio); -- aerostar: ford
-CALL proc_insertar_modelos(529, 1995, 1999, FALSE, @p_idModeloAnio); -- contour: ford
-CALL proc_insertar_modelos(532, 1972, 1982, FALSE, @p_idModeloAnio); -- courier: ford
-CALL proc_insertar_modelos(544, 1961, 1967, FALSE, @p_idModeloAnio); -- econoline: ford
-CALL proc_insertar_modelos(1300, 1993, 1997, FALSE, @p_idModeloAnio); -- altima: nissan
-CALL proc_insertar_modelos(1299, 2000, 2006, FALSE, @p_idModeloAnio); -- almera: nissan
-CALL proc_insertar_modelos(1301, 2008, 2010, FALSE, @p_idModeloAnio); -- aprio: nissan
-CALL proc_insertar_modelos(1310, 1981, 1983, FALSE, @p_idModeloAnio); -- datsun: nissan
-CALL proc_insertar_modelos(1657, 0, 0, TRUE, @p_idModeloAnio ); -- camion: universal
+CALL proc_insertar_modelos(205, 1998, 2005, FALSE, @p_idModeloAnio); -- astro: chevrolet
+CALL proc_insertar_modelos(204, 2001, 2006, FALSE, @p_idModeloAnio); -- astra: chevrolet
+CALL proc_insertar_modelos(207, 2006, 2012, FALSE, @p_idModeloAnio); -- aveo: chevrolet
+CALL proc_insertar_modelos(207, 2012, 2017, FALSE, @p_idModeloAnio); -- aveo: chevrolet
+CALL proc_insertar_modelos(215, 2008, 2016, FALSE, @p_idModeloAnio); -- captiva: chevrolet
+CALL proc_insertar_modelos(219, 1975, 1978, FALSE, @p_idModeloAnio); -- chevy: chevrolet
+CALL proc_insertar_modelos(434, 1990, 1998, FALSE, @p_idModeloAnio); -- aerostar: ford
+CALL proc_insertar_modelos(441, 1995, 1999, FALSE, @p_idModeloAnio); -- contour: ford
+CALL proc_insertar_modelos(444, 1972, 1982, FALSE, @p_idModeloAnio); -- courier: ford
+CALL proc_insertar_modelos(456, 1961, 1967, FALSE, @p_idModeloAnio); -- econoline: ford
+CALL proc_insertar_modelos(1211, 1993, 1997, FALSE, @p_idModeloAnio); -- altima: nissan
+CALL proc_insertar_modelos(1210, 2000, 2006, FALSE, @p_idModeloAnio); -- almera: nissan
+CALL proc_insertar_modelos(1212, 2008, 2010, FALSE, @p_idModeloAnio); -- aprio: nissan
+CALL proc_insertar_modelos(1221, 1981, 1983, FALSE, @p_idModeloAnio); -- datsun: nissan
+CALL proc_insertar_modelos(1541, 0, 0, TRUE, @p_idModeloAnio ); -- camion: universal
 
 -- insertar producto en inventario y relacionar con proveedorProductos y registroProductos
 -- CALL proc_insertar_producto
