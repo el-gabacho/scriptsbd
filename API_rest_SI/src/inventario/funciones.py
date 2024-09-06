@@ -596,6 +596,86 @@ def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMi
         return {"error": str(e)}
 
 # FUNCION PARA EDITAR UN PRODUCTO ACTIVO
+def modificar_producto(idInventario, codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, precioCompra, mayoreo, 
+                   menudeo, colocado, idUnidadMedida, idCategoria, idProveedor, imagenes, vehiculos):
+    session = db.session
+
+    try:
+        with session.begin():  # Iniciar la transacción
+
+            # Procedimiento 1: Modificar un producto mediante su ID
+            sql = text("""
+                CALL proc_actualizar_producto_con_comparacion(:idInventario, :idCategoria, :idUnidadMedida, :codigoBarras, 
+                :nombre, :descripcion, :cantidadActual, :cantidadMinima, :precioCompra, :mayoreo, :menudeo, :colocado, 
+                :idProveedor)
+            """)
+            session.execute(sql, {
+                'idInventario':idInventario,
+                'idCategoria': idCategoria,
+                'idUnidadMedida': idUnidadMedida,
+                'codigoBarras': codigoBarras,
+                'nombre': nombre,
+                'descripcion': descripcion,
+                'cantidadActual': cantidadActual,
+                'cantidadMinima': cantidadMinima,
+                'precioCompra': precioCompra,
+                'mayoreo': mayoreo,
+                'menudeo': menudeo,
+                'colocado': colocado,
+                'idProveedor': idProveedor
+            })
+
+            # Procedimiento 2: Modificar imágenes para el producto
+            sql = text("""
+                CALL proc_actualiza_img_producto(:idInventario, :imagenes)
+            """)
+            session.execute(sql, {
+                'idInventario': idInventario,
+                'imagenes': imagenes
+            })
+
+            # Procedimiento 3: Procesar cada vehículo, recolectar los IDs generados en Editar
+            modelo_anios_ids = []
+            for vehiculo in vehiculos:
+                sql = text("""
+                    CALL proc_insertar_modelos(:idModelo, :anioInicio, :anioFin, :anioTodo, @p_idModeloAnio)
+                """)
+                session.execute(sql, {
+                    'idModelo': vehiculo['idModelo'],
+                    'anioInicio': vehiculo['anioInicio'],
+                    'anioFin': vehiculo['anioFin'],
+                    'anioTodo': vehiculo['todoAnio']
+                })
+
+                # Obtener el ID del modelo-año generado
+                result = session.execute(text("SELECT @p_idModeloAnio")).first()
+                modelo_anio_id = result[0]
+                print(f"ID de modelo-año obtenido: {modelo_anio_id}")  # Agregar para depuración
+                
+                if modelo_anio_id:
+                    modelo_anios_ids.append(modelo_anio_id)
+
+            # Convertir la lista de IDs a una cadena separada por comas
+            modelo_anios_ids_str = ','.join(map(str, modelo_anios_ids))
+
+            # Procedimiento 4: Relacionar el producto con los IDs de los modelos-años
+            sql = text("""
+                CALL proc_editar_producto_modeloanios(:idInventario, :nuevaListaModelosAnios)
+            """)
+            session.execute(sql, {
+                'idInventario': idInventario,
+                'nuevaListaModelosAnios': modelo_anios_ids_str
+            })
+
+        # Si llegamos aquí, todo salió bien, y se hace commit automáticamente
+        return idInventario
+
+    except SQLAlchemyError as e:
+        # Manejo de errores, hacer rollback
+        session.rollback()
+        print(f"Error: {str(e)}")  # Agregar para depuración
+        return {"error": str(e)}
+
 
 # FUNCIÓN PARA ELIMINAR UN PRODUCTO ACTIVO
 def eliminar_producto(idInventario, idUsuario):
@@ -634,6 +714,33 @@ def reactivar_producto(idInventario):
         # Manejo de errores, hacer rollback
         session.rollback()
         print(f"Error: {str(e)}")  # Agregar para depuración
+        return {"error": str(e)}
+
+### FUNCION PARA AGREGAR EXISTENCIAS A UN PRODUCTO
+def agregar_existencias_producto(idUsuario, idInventario, cantidadNueva, precioCompra, mayoreo, menudeo, colocado):
+    session = db.session  # Obtener la sesión de la base de datos
+
+    try:
+        with session.begin():  # Iniciar una transacción
+            # Llamar al procedimiento almacenado usando `text` para prevenir inyección SQL
+            sql = text("CALL proc_insertar_entrada_producto(:idUsuario, :idInventario, :cantidadNueva, :precioCompra, :mayoreo, :menudeo, :colocado)")
+            session.execute(sql, {
+                'idUsuario': idUsuario,
+                'idInventario': idInventario,
+                'cantidadNueva': cantidadNueva,
+                'precioCompra': precioCompra,
+                'mayoreo': mayoreo,
+                'menudeo': menudeo,
+                'colocado': colocado
+            })
+
+        # Si se llega aquí, la transacción se completa con éxito (commit automático con `with session.begin()`)
+        return {'message': 'Existencias agregadas al producto correctamente'}
+
+    except SQLAlchemyError as e:
+        # Manejo de errores, hacer rollback explícito
+        session.rollback()
+        print(f"Error al agregar existencias a un producto: {str(e)}")
         return {"error": str(e)}
 
 

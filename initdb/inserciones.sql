@@ -2533,3 +2533,5 @@ CALL proc_finalizar_venta(3,280.0,280.0,'fhbcbxebbfrttgrw',TRUE,1,'NO APLICA');
 CALL proc_crear_venta(2,1,@v_idVenta);
 CALL proc_agregar_producto_venta(4,5,1,'COLOCADO',450.0,450.0);
 CALL proc_finalizar_venta(4,450.0,450.0,'qhjeudfhyskzfu',TRUE,2,'5s5f4g5h4d5h5j5v');
+
+SELECT * FROM inventario;
