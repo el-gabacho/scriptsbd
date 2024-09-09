@@ -310,7 +310,16 @@ BEGIN
     
     -- Verificar si el proveedor existe
     ELSEIF NOT EXISTS (SELECT 1 FROM proveedores WHERE idProveedor = p_idProveedor) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'El proveedor especificado no existe.';
+        -- Insertar el nuevo producto en inventario
+        INSERT INTO inventario (idCategoria, idUnidadMedida, codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, precioCompra, mayoreo, menudeo, colocado)
+        VALUES (p_idCategoria, p_idUnidadMedida, p_codigoBarras, p_nombre, p_descripcion, p_cantidadActual, p_cantidadMinima, p_precioCompra, p_mayoreo, p_menudeo, p_colocado);
+
+        -- Obtener el idInventario recién insertado
+        SET p_idInventario = LAST_INSERT_ID();
+
+        -- Insertar en registroProductos
+        INSERT INTO registroProductos (idInventario, idUsuarioRegistro)
+        VALUES (p_idInventario, p_idUsuario);
     
     -- Verificar si el usuario existe
     ELSEIF NOT EXISTS (SELECT 1 FROM usuarios WHERE idUsuario = p_idUsuario) THEN
@@ -566,22 +575,24 @@ BEGIN
                 colocado = p_colocado
             WHERE idInventario = p_idInventario;
         END IF;
+			
+			IF p_idProveedor != 0 THEN
+        		-- Obtener el proveedor actual del producto
+        		SELECT idProveedor INTO v_idProveedorActual 
+        		FROM proveedorProductos 
+        		WHERE idInventario = p_idInventario LIMIT 1;
 
-        -- Obtener el proveedor actual del producto
-        SELECT idProveedor INTO v_idProveedorActual 
-        FROM proveedorProductos 
-        WHERE idInventario = p_idInventario LIMIT 1;
-
-        -- Verificar si el proveedor ha cambiado o si no hay registro actual
-        IF v_idProveedorActual IS NULL THEN
-            -- No existe registro de proveedor, insertar uno nuevo
-            INSERT INTO proveedorProductos (idProveedor, idInventario)
-            VALUES (p_idProveedor, p_idInventario);
-        ELSEIF v_idProveedorActual != p_idProveedor THEN
-            -- Actualizar el proveedor si ha cambiado
-            UPDATE proveedorProductos
-            SET idProveedor = p_idProveedor
-            WHERE idInventario = p_idInventario;
+        		-- Verificar si el proveedor ha cambiado o si no hay registro actual
+        		IF v_idProveedorActual IS NULL THEN
+            	-- No existe registro de proveedor, insertar uno nuevo
+            	INSERT INTO proveedorProductos (idProveedor, idInventario)
+            	VALUES (p_idProveedor, p_idInventario);
+        		ELSEIF v_idProveedorActual != p_idProveedor THEN
+            	-- Actualizar el proveedor si ha cambiado
+            	UPDATE proveedorProductos
+            	SET idProveedor = p_idProveedor
+            	WHERE idInventario = p_idInventario;
+        		END IF;
         END IF;
     END IF;
 END $$
