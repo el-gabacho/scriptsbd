@@ -214,6 +214,9 @@ def obtener_productos():
             descripcion = eliminar_info_vehiculo(producto[2], vehiculos)
         else:
             descripcion = producto[2]
+        descripcion = descripcion.strip()
+        descripcion = descripcion.replace('  ', ' ')
+        descripcion = descripcion.replace('/  / ', '')
             
         categoria = extraer_categoria(producto[2])
         if not categoria:
@@ -223,7 +226,7 @@ def obtener_productos():
             "fila": producto[0],
             "CODIGO": producto[1],
             "NOMBRE": descripcion.split()[0],
-            "DESCRIPCION": descripcion,
+            "DESCRIPCION": " ".join(descripcion.split()[1:]),
             "COMPRA": producto[3],
             "MAYOREO": producto[4],
             "LLEVAR": producto[5],
@@ -304,7 +307,7 @@ def procesar_producto(producto):
         
         id_modelo_anios_string = obtener_ids_modelo_anios(producto['fila'], producto['vehiculos'])
         if id_modelo_anios_string is None:
-            manejar_error(producto['fila'], 'No se generó ningún idModeloAnio')
+            # manejar_error(producto['fila'], 'No se generó ningún idModeloAnio')
             return actualizado, None
 
         try:
@@ -363,7 +366,7 @@ try:
         elif registrado:
             total_insertados += 1
 
-    # Confirmar los cambiosx
+    # cursor.execute("DROP table tc_productos2;")
     cnx.commit()
 finally:
     # Cerrar el cursor y la conexión
