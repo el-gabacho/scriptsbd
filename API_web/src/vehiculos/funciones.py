@@ -1,6 +1,7 @@
 from init import db
 from vehiculos.modelos import Marca, MarcaSchema, Modelo, ModeloAnio, Anio, ModeloAutoparte
 from inventario.modelos import Inventario
+from categorias.modelos import Categoria
 from sqlalchemy import func, distinct
 from sqlalchemy.exc import IntegrityError
 
@@ -75,8 +76,15 @@ def obtener_modelos(idMarca):
         ModeloAnio, Modelo.idModelo == ModeloAnio.idModelo
     ).outerjoin(
         Anio, ModeloAnio.idAnio == Anio.idAnio
+    ).outerjoin(
+        ModeloAutoparte, ModeloAnio.idModeloAnio == ModeloAutoparte.idModeloAnio
+    ).outerjoin(
+        Inventario, ModeloAutoparte.idInventario == Inventario.idInventario
+    ).outerjoin(
+        Categoria, Inventario.idCategoria == Categoria.idCategoria
     ).filter(
-        Marca.idMarca == idMarca
+        Marca.idMarca == idMarca,
+        Categoria.nombre == 'PARABRISAS'
     ).group_by(
         Modelo.idModelo
     ).all()
@@ -88,6 +96,18 @@ def obtener_modelos(idMarca):
             anios_list = []
         else:
             anios_list = anios.split(',')
+            if anios_list[0] == '0-0':
+                anios_list.pop(0)
+                
+            anios_list = list(set(anios_list))
+            
+            anios_list_copy = anios_list.copy()
+            for i in range(len(anios_list_copy)): 
+                anios = anios_list_copy[i].split('-')
+                if anios[0] == anios[1]:
+                    anios_list.remove(anios_list_copy[i])
+                        
+            anios_list.sort()
         modelos_list.append({
             'id': resultado.idModelo,
             'nombre': resultado.nombreModelo,

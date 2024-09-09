@@ -1,6 +1,5 @@
-from sqlalchemy import func, case, or_
+from sqlalchemy import func, case, and_, between
 from sqlalchemy.exc import DBAPIError
-from sqlalchemy import or_, and_
 
 from init import db
 from inventario.modelos import Inventario, UnidadMedida, Imagenes
@@ -41,8 +40,8 @@ def get_productos(idMarca, idModelo, anioInicio, anioFin):
         Inventario.estado == 1,
         Marca.idMarca == idMarca,
         Modelo.idModelo == idModelo,
-        Anio.anioInicio == anioInicio,
-        Anio.anioFin == anioFin
+        Anio.anioInicio.between(anioInicio,anioFin),
+        Anio.anioFin.between(anioInicio,anioFin)
     ).group_by(
         Inventario.idInventario
     ).all()
