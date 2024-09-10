@@ -29,38 +29,38 @@ INSERT INTO usuarios (idRol, nombreCompleto, usuario, contrasenia) VALUES (3, "A
 INSERT INTO clientes (nombre) VALUES ('PUBLICO GENERAL');
 
 -- INSERCIONES A LA TABLA PROVEEDORES
-INSERT INTO proveedores (empresa) VALUES
-('APYMSA'),
-('AUTOMAGIC'),
-('AVANTI'),
-('BRUCK'),
-('CITSA'),
-('DEPO'),
-('DON LEO'),
-('ELECTRO'),
-('EUROGLAS'),
-('GARBO'),
-('GRIMEX'),
-('GUTIERREZ'),
-('IAPSA'),
-('INTERGLASS'),
-('LEGAZPI'),
-('MANIJAUTO'),
-('MIRSA'),
-('NACIONAL'),
-('OROZCO'),
-('PERNO'),
-('PUEBLA'),
-('QUEZADA'),
-('RADEC'),
-('RALTE'),
-('ROGODI'),
-('SAINTGOBAIN'),
-('SANGOBAY'),
-('SERVA'),
-('TYC'),
-('VITRO'),
-('ZUMPANGO');
+INSERT INTO proveedores (empresa, telefono, correo) VALUES
+('APYMSA', NULL, NULL),
+('AUTOMAGIC', NULL, NULL),
+('AVANTI', NULL, NULL),
+('BRUCK', NULL, NULL),
+('CITSA', NULL, NULL),
+('DEPO', NULL, NULL),
+('DON LEO', NULL, NULL),
+('ELECTRO', NULL, NULL),
+('EUROGLAS', NULL, NULL),
+('GARBO', NULL, NULL),
+('GRIMEX', NULL, NULL),
+('GUTIERREZ', NULL, NULL),
+('IAPSA', NULL, NULL),
+('INTERGLASS', NULL, NULL),
+('LEGAZPI', NULL, NULL),
+('MANIJAUTO','3336190362','ventas@manijauto.com.mx'),
+('MIRSA', NULL, NULL),
+('NACIONAL', NULL, NULL),
+('OROZCO', NULL, NULL),
+('PERNO', NULL, NULL),
+('PUEBLA', NULL, NULL),
+('QUEZADA', NULL, NULL),
+('RADEC','3336190505',NULL),
+('RALTE', NULL, NULL),
+('ROGODI', NULL, NULL),
+('SAINTGOBAIN', NULL, NULL),
+('SANGOBAY', NULL, NULL),
+('SERVA', NULL, NULL),
+('TYC', NULL, NULL),
+('VITRO', NULL, NULL),
+('ZUMPANGO', NULL, NULL);
 
 -- INSERCIONES A LA TABLA UNIDAD MEDIDAS (SOLO 2 TIPOS)
 
@@ -76,17 +76,17 @@ INSERT INTO tipoPagos (tipoPago, descripcion) VALUES ("DEPOSITO","Recibe foto de
 
 -- INSERCIONES A LA TABLA CATEGORIAS
 
-INSERT INTO categorias (nombre) VALUES ('ABRAZADERAS SUSPENSION');
+INSERT INTO categorias (nombre) VALUES ('ABRAZADERAS');
+INSERT INTO categorias (nombre) VALUES ('ACTIVADORES');
 INSERT INTO categorias (nombre) VALUES ('AJUSTADORES DE SUSPENSION');
 INSERT INTO categorias (nombre) VALUES ('AJUSTE DE UNIDAD');
 INSERT INTO categorias (nombre) VALUES ('ALERONES');
+INSERT INTO categorias (nombre) VALUES ('ALETAS');
 INSERT INTO categorias (nombre) VALUES ('ALMA FASCIAS');
-INSERT INTO categorias (nombre) VALUES ('AMORTIGUADOR SUSPENSION');
 INSERT INTO categorias (nombre) VALUES ('AMORTIGUADORES');
 INSERT INTO categorias (nombre) VALUES ('ANTI-IMPACTOS');
 INSERT INTO categorias (nombre) VALUES ('ARMOR ALL');
-INSERT INTO categorias (nombre) VALUES ('BALERO BASE AMORTIGUADOR');
-INSERT INTO categorias (nombre) VALUES ('BALERO DOBLE');
+INSERT INTO categorias (nombre) VALUES ('BALEROS');
 INSERT INTO categorias (nombre) VALUES ('BANDA POLY-V');
 INSERT INTO categorias (nombre) VALUES ('BANDA TIEMPO');
 INSERT INTO categorias (nombre) VALUES ('BARRA TENSORA');
@@ -98,46 +98,37 @@ INSERT INTO categorias (nombre) VALUES ('BISAGRAS');
 INSERT INTO categorias (nombre) VALUES ('BISELES');
 INSERT INTO categorias (nombre) VALUES ('BOMBA DE AGUA');
 INSERT INTO categorias (nombre) VALUES ('BOMBA DE DIRECCION HIDRAULICA');
-INSERT INTO categorias (nombre) VALUES ('BRAZO AUXILIAR');
+INSERT INTO categorias (nombre) VALUES ('BOTAGUAS');
+INSERT INTO categorias (nombre) VALUES ('BRAZOS');
 INSERT INTO categorias (nombre) VALUES ('BRAZO COMPENSADOR');
 INSERT INTO categorias (nombre) VALUES ('BRAZO CONTROL');
 INSERT INTO categorias (nombre) VALUES ('BRAZO FASCIA');
 INSERT INTO categorias (nombre) VALUES ('BRAZO PITMAN');
 INSERT INTO categorias (nombre) VALUES ('BRAZO PUENTE');
 INSERT INTO categorias (nombre) VALUES ('BRAZOS DEFENSA');
-INSERT INTO categorias (nombre) VALUES ('BUJE BRAZO');
-INSERT INTO categorias (nombre) VALUES ('BUJE CREMALLERA');
-INSERT INTO categorias (nombre) VALUES ('BUJE DE HORQUILLA');
-INSERT INTO categorias (nombre) VALUES ('BUJE DE PUENTE');
-INSERT INTO categorias (nombre) VALUES ('BUJE DE PUNTA');
-INSERT INTO categorias (nombre) VALUES ('BUJE DIRECCION');
-INSERT INTO categorias (nombre) VALUES ('BUJE EJE');
-INSERT INTO categorias (nombre) VALUES ('BUJE INFERIOR');
-INSERT INTO categorias (nombre) VALUES ('BUJE SUPERIOR');
-INSERT INTO categorias (nombre) VALUES ('BUJE TIRANTE');
-INSERT INTO categorias (nombre) VALUES ('BUJE TRANSMISION');
-INSERT INTO categorias (nombre) VALUES ('BUJE TRASERO');
+INSERT INTO categorias (nombre) VALUES ('BUJES');
 INSERT INTO categorias (nombre) VALUES ('BUJES DE SUSPENSION');
 INSERT INTO categorias (nombre) VALUES ('BUJES Y PERNOS');
 INSERT INTO categorias (nombre) VALUES ('CAJA DE DIRECCION');
 INSERT INTO categorias (nombre) VALUES ('CALAVERAS');
 INSERT INTO categorias (nombre) VALUES ('CAMARAS Y SENSORES');
-INSERT INTO categorias (nombre) VALUES ('CHAPAS Y CILINDROS');
-INSERT INTO categorias (nombre) VALUES ('CILINDROS DE IGNICION');
-INSERT INTO categorias (nombre) VALUES ('CILINDROS DE PUERTA');
+INSERT INTO categorias (nombre) VALUES ('CHAPAS');
+INSERT INTO categorias (nombre) VALUES ('CHICOTES');
+INSERT INTO categorias (nombre) VALUES ('CILINDROS');
 INSERT INTO categorias (nombre) VALUES ('CINCHOS Y SUJETADORES DE CABLE');
-INSERT INTO categorias (nombre) VALUES ('COFRE');
+INSERT INTO categorias (nombre) VALUES ('COFRES');
 INSERT INTO categorias (nombre) VALUES ('COMPLEMENTOS RADIADORES');
-INSERT INTO categorias (nombre) VALUES ('CONDENSADOR');
+INSERT INTO categorias (nombre) VALUES ('CONDENSADORES');
 INSERT INTO categorias (nombre) VALUES ('CONECTORES');
 INSERT INTO categorias (nombre) VALUES ('CONTROLES');
 INSERT INTO categorias (nombre) VALUES ('COPLE DE DIRECCION');
+INSERT INTO categorias (nombre) VALUES ('CORREDERAS');
+INSERT INTO categorias (nombre) VALUES ('COSTADOS');
 INSERT INTO categorias (nombre) VALUES ('CREMALLERAS DE DIRECCION');
 INSERT INTO categorias (nombre) VALUES ('CUARTOS');
 INSERT INTO categorias (nombre) VALUES ('CUBRE POLVO');
 INSERT INTO categorias (nombre) VALUES ('DEFENSAS');
-INSERT INTO categorias (nombre) VALUES ('DEPOSITO LIMPIABRISAS');
-INSERT INTO categorias (nombre) VALUES ('DEPOSITO RECUPERADOR');
+INSERT INTO categorias (nombre) VALUES ('DEPOSITOS');
 INSERT INTO categorias (nombre) VALUES ('ELEVADORES');
 INSERT INTO categorias (nombre) VALUES ('ESPEJOS');
 INSERT INTO categorias (nombre) VALUES ('ESTRIBOS');
@@ -146,20 +137,18 @@ INSERT INTO categorias (nombre) VALUES ('FAN CLUTCH');
 INSERT INTO categorias (nombre) VALUES ('FAROS');
 INSERT INTO categorias (nombre) VALUES ('FAROS NIEBLA');
 INSERT INTO categorias (nombre) VALUES ('FASCIAS');
+INSERT INTO categorias (nombre) VALUES ('FILOS EXTERIORES');
 INSERT INTO categorias (nombre) VALUES ('FILTRO ACEITE');
 INSERT INTO categorias (nombre) VALUES ('FLECHA HOMOCINETICA');
 INSERT INTO categorias (nombre) VALUES ('FOCO UNIVERSAL');
+INSERT INTO categorias (nombre) VALUES ('GOMAS');
 INSERT INTO categorias (nombre) VALUES ('GOMA TORNILLO ESTABILIZADOR');
 INSERT INTO categorias (nombre) VALUES ('GOMAS DE BARRA ESTABILIZADORA');
 INSERT INTO categorias (nombre) VALUES ('GOMAS VARILLAS ESTABILIZADORAS');
-INSERT INTO categorias (nombre) VALUES ('GRAPA DE PRESION');
-INSERT INTO categorias (nombre) VALUES ('GRAPA DE TAPICERIA');
-INSERT INTO categorias (nombre) VALUES ('GRAPA DOBLE P/PIJA Y TORNILLO');
-INSERT INTO categorias (nombre) VALUES ('GRAPA MOLDURA');
-INSERT INTO categorias (nombre) VALUES ('GRAPA PARABRISAS');
-INSERT INTO categorias (nombre) VALUES ('GUIA FASCIA');
-INSERT INTO categorias (nombre) VALUES ('HORQUILLAS INFERIORES DE SUSPENSIÓN');
-INSERT INTO categorias (nombre) VALUES ('HORQUILLAS SUPERIORES DE SUSPENSION');
+INSERT INTO categorias (nombre) VALUES ('GRAPAS');
+INSERT INTO categorias (nombre) VALUES ('GUIAS');
+INSERT INTO categorias (nombre) VALUES ('HORQUILLAS');
+INSERT INTO categorias (nombre) VALUES ('HORQUILLAS DE SUSPENSION');
 INSERT INTO categorias (nombre) VALUES ('HULES');
 INSERT INTO categorias (nombre) VALUES ('INTERRUPTORES');
 INSERT INTO categorias (nombre) VALUES ('JUEGOS');
@@ -172,28 +161,31 @@ INSERT INTO categorias (nombre) VALUES ('MANIJAS');
 INSERT INTO categorias (nombre) VALUES ('MARCO PARRILLA');
 INSERT INTO categorias (nombre) VALUES ('MARCO RADIADOR');
 INSERT INTO categorias (nombre) VALUES ('MAZA DE RUEDA');
+INSERT INTO categorias (nombre) VALUES ('MEDALLONES');
 INSERT INTO categorias (nombre) VALUES ('MOLDURAS');
+INSERT INTO categorias (nombre) VALUES ('MOTORES');
 INSERT INTO categorias (nombre) VALUES ('MOTO-VENTILADOR');
 INSERT INTO categorias (nombre) VALUES ('MUELAS PARA PIJA');
+INSERT INTO categorias (nombre) VALUES ('PALANCAS');
+INSERT INTO categorias (nombre) VALUES ('PANELES');
 INSERT INTO categorias (nombre) VALUES ('PARABRISAS');
 INSERT INTO categorias (nombre) VALUES ('PARRILLAS');
+INSERT INTO categorias (nombre) VALUES ('PERILLAS');
+INSERT INTO categorias (nombre) VALUES ('PERNOS');
 INSERT INTO categorias (nombre) VALUES ('PIJAS');
 INSERT INTO categorias (nombre) VALUES ('PLUMA LIMPIAPARABRISAS');
 INSERT INTO categorias (nombre) VALUES ('POLEA');
 INSERT INTO categorias (nombre) VALUES ('PORTA PLACAS');
 INSERT INTO categorias (nombre) VALUES ('PUERTAS');
 INSERT INTO categorias (nombre) VALUES ('RADIADORES');
-INSERT INTO categorias (nombre) VALUES ('RADIADORES MECANICOS');
 INSERT INTO categorias (nombre) VALUES ('REJILLAS');
 INSERT INTO categorias (nombre) VALUES ('REMACHES');
 INSERT INTO categorias (nombre) VALUES ('RESORTE DE SUSPENSION');
 INSERT INTO categorias (nombre) VALUES ('RETENEDORES');
 INSERT INTO categorias (nombre) VALUES ('ROLLO MOLDURA');
-INSERT INTO categorias (nombre) VALUES ('ROTULA INFERIOR');
-INSERT INTO categorias (nombre) VALUES ('ROTULA SUPERIOR');
-INSERT INTO categorias (nombre) VALUES ('ROTULA TRASERA');
+INSERT INTO categorias (nombre) VALUES ('ROTULOS');
 INSERT INTO categorias (nombre) VALUES ('SALPICADEROS');
-INSERT INTO categorias (nombre) VALUES ('SEGUROS BARRIL');
+INSERT INTO categorias (nombre) VALUES ('SEGUROS');
 INSERT INTO categorias (nombre) VALUES ('SEGUROS DE PRESION');
 INSERT INTO categorias (nombre) VALUES ('SEGUROS PARA VARILLA DE PTA');
 INSERT INTO categorias (nombre) VALUES ('SOPORTE BARRA TENSORA');
@@ -201,8 +193,7 @@ INSERT INTO categorias (nombre) VALUES ('SOPORTE MOTOR');
 INSERT INTO categorias (nombre) VALUES ('SPOYLER');
 INSERT INTO categorias (nombre) VALUES ('SWITCH DE IGNICION');
 INSERT INTO categorias (nombre) VALUES ('TAPA CAJA');
-INSERT INTO categorias (nombre) VALUES ('TAPON DE ACEITE');
-INSERT INTO categorias (nombre) VALUES ('TAPONES INTERIORES DE TAPICERIA');
+INSERT INTO categorias (nombre) VALUES ('TAPONES');
 INSERT INTO categorias (nombre) VALUES ('TENSOR');
 INSERT INTO categorias (nombre) VALUES ('TERMINAL EXTERIOR/INTERIOR/BIELETA');
 INSERT INTO categorias (nombre) VALUES ('TIRANTE');
@@ -219,88 +210,91 @@ INSERT INTO categorias (nombre) VALUES ('VARILLA LATERAL');
 INSERT INTO categorias (nombre) VALUES ('VARIOS');
 INSERT INTO categorias (nombre) VALUES ('VARIOS LAMINA');
 INSERT INTO categorias (nombre) VALUES ('VARIOS MICA');
+INSERT INTO categorias (nombre) VALUES ('VENTANILLAS CORREDIZAS');
+INSERT INTO categorias (nombre) VALUES ('VIDRIOS');
+INSERT INTO categorias (nombre) VALUES ('VISERAS');
 
 -- INSERCIONES A LA TABLA MARCA
 INSERT INTO marcas (nombre, urlLogo) VALUES
 ('ACURA','https://lofrev.net/wp-content/photos/2014/08/Acura-logo.gif'),
-('ALFA ROMEO', NULL),
-('AMC', NULL),
+('ALFA ROMEO', 'https://www.pngmart.com/files/9/Alfa-Romeo-Logo-PNG-Image.png'),
+('AMC', 'https://logos-world.net/wp-content/uploads/2022/12/American-Motors-Corporation-Logo-500x281.png'),
 ('AUDI','http://iuv.sdis86.net/wp-content/uploads/logos_constructeurs/audi_new-logo_09-e1437047622921.jpg'),
 ('BMW','https://logos-download.com/wp-content/uploads/2016/02/BMW_logo_big_transparent_png-700x700.png'),
 ('BUICK', 'https://keyautocompany.com/wp-content/uploads/2018/03/buick-logo.png'),
-('CADILLAC', NULL),
-('CAMION', NULL),
-('CATERPILLAR', NULL),
-('CHANGAN', NULL),
+('CADILLAC', 'https://www.pngarts.com/files/3/Cadillac-Logo-PNG-Image.png'),
+('CAMION', 'https://www.pngmart.com/files/23/Truck-Logo-PNG-File.png'),
+('CATERPILLAR', 'https://www.pngall.com/wp-content/uploads/5/Caterpillar-Logo-PNG-HD-Quality.png'),
+('CHANGAN', 'https://www.tc-performance.com/gfx/logo/changan.png'),
 ('CHEVROLET','http://iuv.sdis86.net/wp-content/uploads/logos_constructeurs/chevrolet.jpg'),
-('CHIREY', NULL),
+('CHIREY', 'https://seminuevosfarrera.com/static/media/logo-chirey.3c684ce3.png'),
 ('CHRYSLER','http://iuv.sdis86.net/wp-content/uploads/logos_constructeurs/Chrysler-logo-old1-800x440.png'),
-('CUPRA', NULL),
-('DATSUN', NULL),
+('CUPRA', 'https://www.recambiosoriginal.com/server/Portal_0011062/img/manufacturers/manufacturer_img2_287158.PNG'),
+('DATSUN', 'https://seeklogo.com/images/D/datsun-logo-FE6AB70DA0-seeklogo.com.png'),
 ('DINA','https://iconape.com/wp-content/files/tk/162664/png/dina-logo.png'),
-('DODGE', NULL),
-('EAGLE', NULL),
-('FAW', NULL),
+('DODGE', 'https://frontgas.de/wp-content/uploads/2020/06/dodge-logo.png'),
+('EAGLE', 'https://image.jimcdn.com/app/cms/image/transf/dimension=177x10000:format=png/path/s3cf792cad773e861/image/i082edada404d5365/version/1604305779/eagle-car-logo.png'),
+('FAW', 'https://arawheels.com/wp-content/uploads/2022/10/faw-logo.png'),
 ('FIAT','http://iuv.sdis86.net/wp-content/uploads/logos_constructeurs/1024px-Fiat_Logo.svg_-150x150.png'),
 ('FORD','http://iuv.sdis86.net/wp-content/uploads/logos_constructeurs/car_logo_PNG1666-800x307.png'),
-('FOTON', NULL),
+('FOTON', 'https://static.wikia.nocookie.net/logopedia/images/8/8a/Foton.png/revision/latest?cb=20200119195701'),
 ('FREIGHTLINER','https://cdn.shopify.com/s/files/1/1029/5377/products/FL_Logos_4_1024x1024.png?v=1496304150'),
-('GMC', NULL),
+('GMC', 'https://seeklogo.com/images/G/gmc-logo-CA04340D92-seeklogo.com.png'),
 ('HINO','https://aespares.wpenginepowered.com/wp-content/uploads/2017/07/Hino-logo-300x279.png'),
 ('HONDA','http://iuv.sdis86.net/wp-content/uploads/logos_constructeurs/honda_logo_3312.gif'),
-('HUMMER', NULL),
-('HYSTER', NULL),
+('HUMMER', 'https://logos-world.net/wp-content/uploads/2021/08/GMC-Hummer-Logo-2021.png'),
+('HYSTER', 'https://logos-world.net/wp-content/uploads/2023/03/Hyster-Logo-500x281.png'),
 ('HYUNDAI','https://www.autonoviny.sk/wp-content/uploads/2013/03/HYUNDAI-LOGO7-213x213.png'),
-('INFINITI', NULL),
+('INFINITI', 'https://pngimg.com/uploads/infiniti/infiniti_PNG23.png'),
 ('INTERNATIONAL','https://logoeps.com/wp-content/uploads/2013/03/international-vector-logo.png'),
 ('ISUZU','http://iuv.sdis86.net/wp-content/uploads/2015/07/isuzu-cars-logo-emblem-800x581.jpg'),
-('JAC', NULL),
-('JAGUAR', NULL),
-('JEEP', NULL),
+('JAC', 'https://seeklogo.com/images/J/jac-logo-CFA15E106A-seeklogo.com.png'),
+('JAGUAR', 'https://freepngdesign.com/content/uploads/images/jaguar-metallic-blue-logo-8532.png'),
+('JEEP', 'https://www.nicepng.com/png/detail/416-4160381_jeep-logo-logo-jeep.png'),
 ('KENWORTH','https://i.etsystatic.com/39729829/r/il/31b76d/4556513199/il_680x540.4556513199_8isf.jpg'),
 ('KIA','http://iuv.sdis86.net/wp-content/uploads/logos_constructeurs/kia-logo-hd-sk-png-800x466.png'),
-('KOMATSU', NULL),
+('KOMATSU', 'https://seeklogo.com/images/K/komatsu-logo-EA701DAFBA-seeklogo.com.png'),
 ('LAND ROVER','http://iuv.sdis86.net/wp-content/uploads/2015/09/Land-Rover-1.gif'),
-('LEXUS', NULL),
-('LINCOLN', NULL),
-('MACK', NULL),
-('MAN', NULL),
-('MARCO POLO', NULL),
+('LEXUS', 'https://seeklogo.com/images/L/Lexus-logo-A6EDA1B5EB-seeklogo.com.png'),
+('LINCOLN', 'https://seeklogo.com/images/L/Lincoln-logo-0C5DC906F9-seeklogo.com.png'),
+('MACK', 'https://seeklogo.com/images/M/mack-trucks-logo-756EA54CF0-seeklogo.com.png'),
+('MAN', 'https://seeklogo.com/images/M/Man-logo-8C14A29F13-seeklogo.com.png'),
+('MARCO POLO', 'https://seeklogo.com/images/P/polo-ralph-lauren-logo-C2CA8A53DF-seeklogo.com.png'),
 ('MAZDA','http://iuv.sdis86.net/wp-content/uploads/2015/07/mazda-logo-2400.gif'),
 ('MERCEDES BENZ','http://iuv.sdis86.net/wp-content/uploads/2015/07/Mercedes_Benz_logo-800x565.png'),
-('MERCURY', NULL),
-('MG', NULL),
-('MINI', NULL),
+('MERCURY', 'https://seeklogo.com/images/M/Mercury-logo-7C0D2FABD2-seeklogo.com.png'),
+('MG', 'https://seeklogo.com/images/M/MG-logo-C8D5AAF597-seeklogo.com.png'),
+('MINI', 'https://seeklogo.com/images/M/mini-cooper-logo-2B30B836FE-seeklogo.com.png'),
 ('MITSUBISHI','https://blueraymechanical.com/wp-content/uploads/2015/06/mitsubishi-277x300.png'),
 ('MOTO TAXI','https://media.slid.es/uploads/344625/images/1625283/Brand.png'),
 ('NISSAN','http://iuv.sdis86.net/wp-content/uploads/logos_constructeurs/b3779-nissan.gif'),
-('OLDSMOBILE', NULL),
-('OMODA', NULL),
-('OPEL', NULL),
-('PETERBILT', NULL),
-('PEUGEOT', NULL),
-('PLYMOUTH', NULL),
-('PONTIAC', NULL),
-('PORSCHE', NULL),
-('RAM', NULL),
-('RAMBLER', NULL),
+('OLDSMOBILE', 'https://seeklogo.com/images/O/Oldsmobile-logo-FCCD705575-seeklogo.com.png'),
+('OMODA', 'https://seeklogo.com/images/O/omoda-logo-6A84BC226E-seeklogo.com.png'),
+('OPEL', 'https://seeklogo.com/images/O/opel-new-logo-D9A5129C2D-seeklogo.com.png'),
+('PETERBILT', 'https://seeklogo.com/images/P/Peterbilt-logo-DCC7DC09FF-seeklogo.com.png'),
+('PEUGEOT', 'https://seeklogo.com/images/P/peugeot-logo-BF5B2383EF-seeklogo.com.png'),
+('PLYMOUTH', 'https://seeklogo.com/images/P/Plymouth-logo-F6A603CBFF-seeklogo.com.png'),
+('PONTIAC', 'https://seeklogo.com/images/P/Pontiac-logo-59F67011F7-seeklogo.com.png'),
+('PORSCHE', 'https://seeklogo.com/images/P/porsche-logo-5995000C95-seeklogo.com.png?v=638392745470000000'),
+('RAM', 'https://seeklogo.com/images/D/dodge-ram-logo-7F566E7B9F-seeklogo.com.png'),
+('RAMBLER', 'https://seeklogo.com/images/R/Rambler_ru-logo-FC3DAAFBA2-seeklogo.com.png'),
 ('RENAULT','https://seeklogo.com/images/R/Renault-logo-6EF3576C2E-seeklogo.com.png'),
 ('SAAB','http://iuv.sdis86.net/wp-content/uploads/2015/07/saab_logo_3520.gif'),
-('SATURN', NULL),
+('SATURN', 'https://seeklogo.com/images/S/Saturn-logo-5DF1ED1000-seeklogo.com.png'),
 ('SCANIA','https://seeklogo.com/images/S/Scania-logo-264C3E18C4-seeklogo.com.png'),
-('SCION', NULL),
+('SCION', 'https://seeklogo.com/images/S/Scion-logo-5A24E959D1-seeklogo.com.png'),
 ('SEAT','http://iuv.sdis86.net/wp-content/uploads/2015/07/seat_logo_rgb_highres-800x670.jpg'),
-('SINOTRUCK', NULL),
-('SMART', NULL),
-('STERLING', NULL),
+('SINOTRUCK', 'https://seeklogo.com/images/C/cnhtc-sinotruck-logo-B034E67EEF-seeklogo.com.png'),
+('SMART', 'https://seeklogo.com/images/S/Smart-logo-7AF8CBF351-seeklogo.com.png'),
+('STERLING', 'https://seeklogo.com/images/S/Sterling_Trucks-logo-D28F9372C7-seeklogo.com.png'),
 ('SUBARU','http://iuv.sdis86.net/wp-content/uploads/2015/07/Subaru-logo-and-wordmark-800x600.png'),
 ('SUZUKI','http://iuv.sdis86.net/wp-content/uploads/2015/07/suzuki-logo-e1440487741394.jpg'),
-('TESLA', NULL),
+('TESLA', 'https://seeklogo.com/images/T/tesla-logo-8068FDA2E7-seeklogo.com.png'),
 ('TOYOTA','http://iuv.sdis86.net/wp-content/uploads/logos_constructeurs/toyota-logo.png'),
 ('UNIVERSAL','https://th.bing.com/th/id/OIP.KjfkfL8wAv0ihVRI1rfkZQHaBe?rs=1&pid=ImgDetMain'),
 ('VOLKSWAGEN','http://iuv.sdis86.net/wp-content/uploads/logos_constructeurs/Volkswagen_logo-150x150.png'),
 ('VOLVO','http://iuv.sdis86.net/wp-content/uploads/2015/07/image001-150x150.jpg'),
-('YALE', NULL),
+('YALE', 'https://seeklogo.com/images/Y/Yale-logo-D7E200DB9F-seeklogo.com.png'),
 ('AUTOBUSES','https://images.vexels.com/media/users/3/128933/isolated/preview/b54944f7322722034cfda55e601b4f8d-travel-bus-round-icon.png?width=320');
 
 
