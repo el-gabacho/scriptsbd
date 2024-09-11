@@ -90,7 +90,7 @@ def procesar_producto(producto, usuarioId):
     
     if id_inventario:
         try:
-            db.session.execute(text(f"CALL proc_actualizar_producto_con_comparacion({id_inventario}, {id_categoria}, {id_unidad_medida}, '{producto['NOMBRE']}', '{producto['DESCRIPCION']}', {producto['EXISTENCIAS']}, {producto['CANT_MIN']}, {producto['COMPRA']}, {producto['MAYOREO']}, {producto['LLEVAR']}, {producto['COLOCADO']}, {id_proveedor})"))
+            db.session.execute(text(f"CALL proc_actualizar_producto_con_comparacion({id_inventario}, {id_categoria}, {id_unidad_medida}, '{producto['CODIGO']}', '{producto['NOMBRE']}', '{producto['DESCRIPCION']}', {producto['EXISTENCIAS']}, {producto['CANT_MIN']}, {producto['COMPRA']}, {producto['MAYOREO']}, {producto['LLEVAR']}, {producto['COLOCADO']}, {id_proveedor})"))
             actualizado = True
         except SQLAlchemyError as e:
             manejar_error(producto['fila'], str(e))
