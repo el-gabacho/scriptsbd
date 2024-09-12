@@ -1,5 +1,6 @@
 from flask import request, jsonify
-from categorias.funciones import obtener_categorias, crear_categoria, eliminar_categoria, actualizar_categoria
+from categorias.funciones import obtener_categorias, crear_categoria, eliminar_categoria, actualizar_categoria,\
+    obtener_categorias_similares
 from categorias import categories
 
 # -----------------------------------------------------------------------------------------------------------------------
@@ -65,7 +66,6 @@ def update_categoria(id):
         return jsonify({'Error': str(ve)}), 400
     except Exception as e:
         # Para más detalles en caso de error
-        print(f"Error en update_categoria: {str(e)}")  # Asegúrate de que esto te brinde detalles útiles
         return jsonify({'Error': 'Hubo un problema al actualizar la categoría. Verifica su servidor y notifique al administrador.'}), 500
     
     # -----------------------------------------------------------------------------------------------------------------------
@@ -73,7 +73,30 @@ def update_categoria(id):
 @categories.route('/categorias/<int:id>', methods=['DELETE'])
 def delete_categoria(id):
     try:
-        eliminar_categoria(id)
-        return jsonify({'message': 'Categoría eliminada correctamente'})
+        resultado = eliminar_categoria(id)
+        if resultado == 'productos_asociados':
+            return jsonify({'Error': 'No se puede eliminar la categoría porque tiene productos asociados.'}), 400
+        elif resultado == 'no_encontrado':
+            return jsonify({'Error': 'Categoría no encontrada.'}), 404
+        else:
+            return jsonify({'message': 'Categoría eliminada correctamente.'}), 200
+    except Exception as e:
+        return jsonify({'Error': 'Hubo un problema al eliminar la categoría. Verifique su servidor.'}), 500
+    
+# -----------------------------------------------------------------------------------------------------------------------
+
+# OBTENER INFORMACION DE CATEGORIAS MEDIANTE SU NOMBRE CON SIMILITUD ---------------------------------------
+@categories.route('/info_categorias_similitud/<nombre_categoria>', methods=['GET'])
+def get_info_categorias_similitud(nombre_categoria):
+    try:
+        # Obtén las categorías similares
+        categorias_similares = obtener_categorias_similares(nombre_categoria)
+
+        # Devuelve una lista vacía si no se encuentran categorías similares
+        if categorias_similares is None or len(categorias_similares) == 0:
+            return jsonify([])
+
+        # Devuelve la lista de categorías similares
+        return jsonify(categorias_similares)
     except Exception as e:
         return jsonify({'error': str(e)}), 500

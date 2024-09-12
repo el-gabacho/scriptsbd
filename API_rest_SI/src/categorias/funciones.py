@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from categorias.modelos import db, Categoria
+from sqlalchemy import func
 
 def obtener_categorias():
     from inventario.modelos import Inventario
@@ -68,7 +69,18 @@ def actualizar_categoria(idCategoria, nombre):
 # -----------------------------------------------------------------------------------------------------------------------
 
 def eliminar_categoria(idCategoria):
+    from inventario.modelos import Inventario
     categoria = Categoria.query.get(idCategoria)
+
+    if not categoria:
+        return 'no_encontrado'
+
+    # Verificar si hay productos asociados a la categoría
+    productos_asociados = Inventario.query.filter_by(idCategoria=idCategoria).count()
+
+    if productos_asociados > 0:
+        return 'productos_asociados'
+    
     db.session.delete(categoria)
     db.session.commit()
     return True
@@ -82,3 +94,33 @@ def obtener_id_categoria(categoria):
         Categoria.nombre == categoria
     ).first()
     return resultado[0] if resultado else None
+
+# -----------------------------------------------------------------------------------------------------------------------
+
+# OBTENER INFORMACION DE CATEGORIAS CON SIMILITUD EN EL NOMBRE -------------------------------------------
+def obtener_categorias_similares(nombre_categoria):
+    from inventario.modelos import Inventario
+    query = db.session.query(
+        Categoria.idCategoria,
+        Categoria.nombre,
+        func.count(Inventario.idInventario).label('numProductos')
+    ).outerjoin(
+        Inventario, Categoria.idCategoria == Inventario.idCategoria
+    ).filter(
+        Categoria.nombre.ilike(f'%{nombre_categoria}%')  # Buscar coincidencias parciales
+    ).group_by(
+        Categoria.idCategoria,
+        Categoria.nombre
+    ).order_by(
+        Categoria.idCategoria
+    ).all()
+
+    categorias = []
+    for item in query:
+        categorias.append({
+            'Id': item.idCategoria,
+            'Nombre': item.nombre,
+            'NumProductos': item.numProductos
+        })
+
+    return categorias
