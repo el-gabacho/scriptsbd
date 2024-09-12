@@ -48,6 +48,10 @@ def obtener_usuario(idUsuario):
     return usuario_dict
 
 def crear_usuario(nombre, username, password, idRol):
+    usuario_existente = Usuario.query.filter(Usuario.usuario.ilike(username)).first()
+    if usuario_existente:
+        raise ValueError(f'No se puede crear el usuario "{username}" porque ya existe.')
+    
     password_hash = generate_password_hash(password)
     nuevo_usuario = Usuario(
         nombreCompleto=nombre,
@@ -71,6 +75,16 @@ def actualizar_usuario(idUsuario, nombreCompleto, username, password, idRol, fec
     usuario = db.session.query(Usuario).filter(
         Usuario.idUsuario == idUsuario
     ).first()
+    if not usuario:
+        raise ValueError(f'No se encontró el usuario con ID {idUsuario}.')
+    
+    usuario_existente = Usuario.query.filter(Usuario.usuario.ilike(username)).first()
+    if usuario_existente and usuario_existente.idUsuario != idUsuario:
+        raise ValueError(f'Ya existe un usuario con el nombre de usuario "{username}".')
+    
+    if usuario.usuario == username:
+        return 'sin_cambio'
+    
     password_hash = generate_password_hash(password)
     usuario.nombreCompleto = nombreCompleto
     usuario.usuario = username

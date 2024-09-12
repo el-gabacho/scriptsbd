@@ -56,7 +56,7 @@ def update_categoria(id):
 
         resultado = actualizar_categoria(id, nombre)
         if resultado == 'sin_cambio':
-            return jsonify({'message': 'La categoría ya tenía el nombre proporcionado. No se realizaron cambios.'}), 200
+            return jsonify({'Error': 'La categoría ya tenía el nombre proporcionado. No se realizaron cambios.'}), 200
         elif resultado:
             return jsonify({'message': 'Categoría actualizada correctamente.'}), 200
         else:
@@ -65,7 +65,6 @@ def update_categoria(id):
         return jsonify({'Error': str(ve)}), 400
     except Exception as e:
         # Para más detalles en caso de error
-        print(f"Error en update_categoria: {str(e)}")  # Asegúrate de que esto te brinde detalles útiles
         return jsonify({'Error': 'Hubo un problema al actualizar la categoría. Verifica su servidor y notifique al administrador.'}), 500
     
     # -----------------------------------------------------------------------------------------------------------------------
@@ -76,4 +75,4 @@ def delete_categoria(id):
         eliminar_categoria(id)
         return jsonify({'message': 'Categoría eliminada correctamente'})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'Error': str(e)}), 500

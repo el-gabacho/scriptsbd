@@ -27,6 +27,10 @@ def obtener_proveedor(id):
         return result
     
 def crear_proveedor(empresa, nombreEncargado, telefono, correo):
+    proveedor_existente = Proveedor.query.filter(Proveedor.empresa.ilike(empresa)).first()
+    if proveedor_existente:
+        raise ValueError(f'No se puede crear el proveedor "{empresa}" porque ya existe.')
+    
     nuevo_proveedor = Proveedor(
         empresa=empresa,
         nombreEncargado=nombreEncargado,
@@ -45,6 +49,16 @@ def eliminar_proveedor(idProveedor):
 
 def actualizar_proveedor(idProveedor, empresa, nombreEncargado, telefono, correo):
     proveedor = Proveedor.query.get(idProveedor)
+    if not proveedor:
+        raise ValueError(f'No se encontró el proveedor con ID {idProveedor}.')
+    
+    proveedor_existente = Proveedor.query.filter(Proveedor.empresa.ilike(empresa)).first()
+    if proveedor_existente and proveedor_existente.idProveedor != idProveedor:
+        raise ValueError(f'Ya existe un proveedor con el nombre "{empresa}".')
+    
+    if proveedor.empresa == empresa:
+        return 'sin_cambio'
+    
     proveedor.empresa = empresa
     proveedor.nombreEncargado = nombreEncargado
     proveedor.telefono = telefono

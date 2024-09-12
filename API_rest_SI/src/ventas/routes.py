@@ -15,7 +15,7 @@ def get_ventas():
         ventas = obtener_ventas(filtros)
         return jsonify(ventas)
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'Error': 'Ocurrió un problema al obtener las ventas. Por favor, inténtalo más tarde.'}), 500
 
 @routes.route('/ventas/<int:id>/productos', methods=['GET'])
 def get_detalle_venta(id):
@@ -23,9 +23,9 @@ def get_detalle_venta(id):
         detalle_venta = obtener_detalle_venta(id)
         if detalle_venta:
             return jsonify(detalle_venta)
-        return jsonify({'message': 'Detalle de venta no encontrado'}), 404
+        return jsonify({'Error': 'Detalle de venta no encontrado'}), 404
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'Error': 'Ocurrió un problema al obtener los productos de la venta {id}. Por favor, inténtalo más tarde.'}), 500
 
 @routes.route('/ventas/usuario', methods=['GET'])
 def get_ventas_totales_por_usuario_fechas():
@@ -41,8 +41,9 @@ def get_ventas_totales_por_usuario_fechas():
         }
         ventas_totales = obtener_ventas_totales_por_usuario_fechas(filtros)
         return jsonify(ventas_totales)
+    
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'Error': 'Ocurrió un problema al obtener las ventas del usuario {id_usuario}. Por favor, inténtalo más tarde.'}), 500
 
 @routes.route('/ventas', methods=['POST'])
 def create_venta():
@@ -57,10 +58,15 @@ def create_venta():
         imprimioTicket = data.get('imprimio_ticket')
         idTipoPago = data.get('id_tipo_pago')
         referenciaUnica = data.get('referencia_unica')
+        
+        if not idUsuario or not idCliente or not productos or not montoTotal or not recibioDinero or not folioTicket or not imprimioTicket or not idTipoPago or not referenciaUnica:
+            return jsonify({'Error': 'Faltan datos para crear la venta'}), 400
+        
         id_venta = crear_venta(idUsuario, idCliente, productos, montoTotal, recibioDinero, folioTicket, imprimioTicket, idTipoPago, referenciaUnica)
         return jsonify({'idVenta': id_venta}), 201
+    
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'Error': 'Hubo un problema al crear la venta. Verifica su servidor y notifique al administrador.'}), 500
     
 @routes.route('/ventas/<int:id>', methods=['DELETE'])
 def reverse_venta(id):
@@ -68,7 +74,7 @@ def reverse_venta(id):
         revertir_venta(id)
         return jsonify({'message': 'Venta eliminada correctamente'})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'Error': 'Hubo un problema al revertir la venta. Verifica su servidor y notifique al administrador.'}), 500
 
 @routes.route('/ventas/<int:ventaId>/productos/<int:productoId>', methods=['DELETE'])
 def reverse_venta_producto(ventaId,productoId):
@@ -76,7 +82,7 @@ def reverse_venta_producto(ventaId,productoId):
         revertir_venta_producto(ventaId,productoId)
         return jsonify({'message': 'Producto eliminado de la venta correctamente'})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'Error': 'Hubo un problema al  el producto de la venta {ventaId}. Verifica su servidor y notifique al administrador.'}), 500
     
 @routes.route('/ventas/<int:ventaId>/productos/<int:productoId>', methods=['PUT'])
 def update_venta_producto(ventaId,productoId):
@@ -85,7 +91,11 @@ def update_venta_producto(ventaId,productoId):
         cantidad = data.get('cantidad')
         tipoVenta = data.get('tipoVenta')
         precioVenta = data.get('precio')
+        
+        if not cantidad or not tipoVenta or not precioVenta:
+            return jsonify({'Error': 'Faltan datos para modificar el producto de la venta'}), 400
+        
         response = modificar_venta_producto(ventaId,productoId,tipoVenta,cantidad,precioVenta)
         return jsonify({'message': 'Producto actualizado de la venta correctamente'})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'Error': 'Hubo un problema al actualizar la venta. Verifica su servidor y notifique al administrador.'}), 500
