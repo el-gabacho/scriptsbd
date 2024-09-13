@@ -366,7 +366,7 @@ try:
         elif registrado:
             total_insertados += 1
 
-    # cursor.execute("DROP table tc_productos2;")
+    cursor.execute("DROP table tc_productos2;")
     cnx.commit()
 finally:
     # Cerrar el cursor y la conexión
