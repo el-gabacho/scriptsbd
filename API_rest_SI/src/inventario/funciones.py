@@ -65,7 +65,7 @@ def get_productos():
         Inventario.estado == 1
     ).group_by(
         Inventario.idInventario
-    ).all()
+    ).limit(100).all()
 
     productos_list = []
     for producto in query:
@@ -278,7 +278,7 @@ def get_productos_similares(codigo_barras):
         Inventario.codigoBarras.like(f'%{codigo_barras}%')  # Buscar coincidencias parciales
     ).group_by(
         Inventario.idInventario
-    ).all()
+    ).limit(100).all()
 
     productos = []
     base_path = "C:\\imagenes_el_gabacho\\productosInventario"
@@ -413,7 +413,7 @@ def get_productos_avanzada(filtros):
     
     query = query.group_by(
         Inventario.idInventario
-    ).all()
+    ).limit(100).all()
 
     productos = []
     for item in query:
@@ -459,7 +459,7 @@ def obtener_stock_bajo():
             Inventario.cantidadMinima > Inventario.cantidadActual,  # Stock bajo
             Inventario.cantidadMinima == Inventario.cantidadActual  # Stock igual al mínimo
         )
-    ).all()
+    ).limit(100).all()
 
     producto_bajo = []
 
@@ -491,7 +491,7 @@ def get_productos_eliminados():
         Proveedor, ProveedorProducto.idProveedor == Proveedor.idProveedor
     ).filter(
         Inventario.estado == 0
-    ).all()
+    ).limit(100).all()
 
     producto_eliminado = []
 
