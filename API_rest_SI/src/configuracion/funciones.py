@@ -31,7 +31,7 @@ def actualizarConfiguracion(correo, direccion, encabezado, footer):
     
     # Verificar si el registro existe
     if config is None:
-        return {'message': 'No se encontró la configuración'}
+        return {'Error': 'No se encontró la configuración'}
     
     # Actualizar los datos de configuracion
     config.correo = correo
@@ -73,10 +73,10 @@ def actualizarHorario(horarios):
                 horario_db.horaInicio = horario['horaInicio']
                 horario_db.horaFin = horario['horaFin']
                 break
-        else:
-            # Si no se encuentra el horario en la base de datos, crear uno nuevo
-            nuevo_horario = Horario(dias=horario['dias'], horaInicio=horario['horaInicio'], horaFin=horario['horaFin'])
-            db.session.add(nuevo_horario)
+            else:
+                # Si no se encuentra el horario en la base de datos, crear uno nuevo
+                nuevo_horario = Horario(dias=horario['dias'], horaInicio=horario['horaInicio'], horaFin=horario['horaFin'])
+                db.session.add(nuevo_horario)
     
     # Guardar los cambios en la base de datos
     db.session.commit()

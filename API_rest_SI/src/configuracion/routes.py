@@ -10,7 +10,7 @@ def getConfiguracion():
         resultado = obtenerConfiguracion()
         return jsonify(resultado)
     except Exception as e:
-        return jsonify({'error': 'Error al obtener la configuracion'}), 500
+        return jsonify({'Error': 'Ocurrió un problema al obtener la configuracion. Por favor, inténtalo más tarde.'}), 500
     
 @routes.route('/configuracion', methods=['PUT'])
 def updateConfiguracion():
@@ -27,23 +27,24 @@ def updateConfiguracion():
         
         return jsonify(resultados)
     except Exception as e:
-        return jsonify({'error': 'Error al actualizar la configuracion'}), 500
+        return jsonify({'Error': 'Hubo un problema al actualizar la configuracion. Verifica su servidor y notifique al administrador.'}), 500
 
 @routes.route('/configuracion/imagenes', methods=['POST'])
 def upload_files():
     try:
         if 'files' not in request.files:
-            return jsonify({'message': 'No file part in the request'}), 400
+            return jsonify({'Error': 'No file part in the request'}), 400
 
         files = request.files.getlist('files')
 
         for file in files:
             if file.filename == '':
-                return jsonify({'message': 'No file selected for uploading'}), 400
+                return jsonify({'Error': 'No file selected for uploading'}), 400
 
             if file:
                 filename = secure_filename(file.filename)
                 file.save(os.path.join('C:\\Users\\VALENCIA\\Documents\\proyectos\\el-gabacho\\images', filename))
+        return jsonify({'message': 'Files successfully uploaded'}), 200
+            
     except Exception as e:
-        return jsonify({'message': 'Allowed file types are .webp'}), 400
-    return jsonify({'message': 'Files successfully uploaded'}), 200
+        return jsonify({'Error': 'Allowed file types are .webp'}), 400
