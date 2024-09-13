@@ -14,7 +14,7 @@ def get_categorias():
 
     except Exception as e:
         # Devuelve un mensaje genérico para el cliente y loguea el detalle
-        return jsonify({'Error': 'Ocurrió un problema al obtener las categorías. Por favor, inténtalo más tarde.'}), 500
+        return jsonify({'error': 'Ocurrió un problema al obtener las categorías. Por favor, verifique su servidor.'}), 500
 
 # -----------------------------------------------------------------------------------------------------------------------
 
@@ -27,7 +27,7 @@ def create_categoria():
 
         # Validar que el nombre no esté vacío
         if not nombre or nombre.strip() == '':
-            return jsonify({'Error': 'El nombre para crear la categoría es obligatorio.'}), 400
+            return jsonify({'error': 'El nombre para crear la categoría es obligatorio.'}), 400
 
         # Llamar a la función para crear la categoría
         id_categoria = crear_categoria(nombre)
@@ -37,11 +37,11 @@ def create_categoria():
 
     except ValueError as ve:
         # Manejar errores de validación específicos
-        return jsonify({'Error': str(ve)}), 400
+        return jsonify({'error': str(ve)}), 400
 
     except Exception as e:
         # Manejar errores inesperados
-        return jsonify({'Error': 'Hubo un problema al crear la categoría. Verifica su servidor y notifique al administrador.'}), 500
+        return jsonify({'error': 'Hubo un problema al crear la categoría. Verifica su servidor y notifique al administrador.'}), 500
 
 # -----------------------------------------------------------------------------------------------------------------------
 
@@ -53,20 +53,20 @@ def update_categoria(id):
 
         # Validar que el nombre no esté vacío
         if not nombre or nombre.strip() == '':
-            return jsonify({'Error': 'El nombre para editar la categoría es obligatorio.'}), 400
+            return jsonify({'error': 'El nombre para editar la categoría es obligatorio.'}), 400
 
         resultado = actualizar_categoria(id, nombre)
         if resultado == 'sin_cambio':
-            return jsonify({'Error': 'La categoría ya tenía el nombre proporcionado. No se realizaron cambios.'}), 200
+            return jsonify({'error': 'La categoría ya tenía el nombre proporcionado. No se realizaron cambios.'}), 200
         elif resultado:
             return jsonify({'message': 'Categoría actualizada correctamente.'}), 200
         else:
-            return jsonify({'Error': f'No se encontró la categoría con ID {id}.'}), 404
+            return jsonify({'error': f'No se encontró la categoría con ID {id}.'}), 404
     except ValueError as ve:
-        return jsonify({'Error': str(ve)}), 400
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         # Para más detalles en caso de error
-        return jsonify({'Error': 'Hubo un problema al actualizar la categoría. Verifica su servidor y notifique al administrador.'}), 500
+        return jsonify({'error': 'Hubo un problema al actualizar la categoría. Verifica su servidor y notifique al administrador.'}), 500
     
     # -----------------------------------------------------------------------------------------------------------------------
 
@@ -75,13 +75,13 @@ def delete_categoria(id):
     try:
         resultado = eliminar_categoria(id)
         if resultado == 'productos_asociados':
-            return jsonify({'Error': 'No se puede eliminar la categoría porque tiene productos asociados.'}), 400
+            return jsonify({'error': 'No se puede eliminar la categoría porque tiene productos asociados.'}), 400
         elif resultado == 'no_encontrado':
-            return jsonify({'Error': 'Categoría no encontrada.'}), 404
+            return jsonify({'error': 'Categoría no encontrada.'}), 404
         else:
             return jsonify({'message': 'Categoría eliminada correctamente.'}), 200
     except Exception as e:
-        return jsonify({'Error': 'Hubo un problema al eliminar la categoría. Verifique su servidor.'}), 500
+        return jsonify({'error': 'Hubo un problema al eliminar la categoría. Verifique su servidor.'}), 500
     
 # -----------------------------------------------------------------------------------------------------------------------
 
@@ -99,4 +99,4 @@ def get_info_categorias_similitud(nombre_categoria):
         # Devuelve la lista de categorías similares
         return jsonify(categorias_similares)
     except Exception as e:
-        return jsonify({'Error': str(e)}), 500
+        return jsonify({'error': 'Ocurrió un problema al obtener las categorías. Por favor, verifique su servidor.'}), 500

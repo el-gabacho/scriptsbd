@@ -9,15 +9,15 @@ def iniciar_sesion(username, password):
     
     # Verificar si el usuario no existe o si la contraseña es incorrecta
     if user is None or not user.check_password(password):
-        return jsonify({'Error':'Las credenciales que has ingresado no son correctas. Por favor, verifica tu nombre de usuario y contraseña e inténtalo de nuevo.'}), 401
+        return jsonify({'error':'Las credenciales que has ingresado no son correctas. Por favor, verifica tu nombre de usuario y contraseña e inténtalo de nuevo.'}), 401
     
     # Verificar si el usuario está deshabilitado
     if user.estado == 0:
-        return jsonify({'Error' : 'No tienes permisos para acceder a esta sección, tu cuenta está deshabilitada. Contacta con el administrador para más detalles.'}), 403
+        return jsonify({'error' : 'No tienes permisos para acceder a esta sección, tu cuenta está deshabilitada. Contacta con el administrador para más detalles.'}), 403
     
     # Verificar si el usuario tiene un idRol no permitido (idRol == 3)
     if user.idRol == 3:
-        return jsonify({'Error': 'No tienes permisos para acceder a esta sección. Contacta con el administrador para más detalles.'}), 403
+        return jsonify({'error': 'No tienes permisos para acceder a esta sección. Contacta con el administrador para más detalles.'}), 403
     
     # Verificar si el idRol es 1 o 2 (roles permitidos)
     if user.idRol in [1, 2]:
