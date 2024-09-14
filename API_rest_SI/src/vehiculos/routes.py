@@ -3,13 +3,13 @@ from sqlalchemy.exc import ProgrammingError
 from vehiculos.funciones import get_marcas_count_modelos, get_buscar_marcas_similar, \
     crear_marca, editar_marca, eliminar_marca, get_modelos_count_productos, get_buscar_modelos_similar, \
     crear_modelo, editar_modelo, eliminar_modelo
-from vehiculos import vehicles as routes
+from vehiculos import vehicles
 
 # -----------------------------------------------------------------------------------------------------------------------------------
 
 # CONSULTA PRINCIPAL DE VEHICULOS : MARCAS
 
-@routes.route('/marcas_numero_modelos', methods=['GET'])
+@vehicles.route('/marcas_numero_modelos', methods=['GET'])
 def get_marcas_with_model_count():
     try:
         marcas = get_marcas_count_modelos()
@@ -22,7 +22,7 @@ def get_marcas_with_model_count():
 # CRUD DE MARCA: BUSCAR POR NOMBRE DE LA MARCA, CREAR NUEVA MARCA, EDITAR MARCA Y ELIMINAR MARCA
 
 # BUSCAR POR NOMBRE DE LA MARCA SIMILITUD
-@routes.route('/buscar_marca_similar/<string:nombremarca>', methods=['GET'])
+@vehicles.route('/buscar_marca_similar/<string:nombremarca>', methods=['GET'])
 def search_marca_similar(nombremarca):
     try:
         marcas = get_buscar_marcas_similar(nombremarca)
@@ -40,7 +40,7 @@ def search_marca_similar(nombremarca):
 # -----------------------------------------------------------------------------------------------------------------------------------
 
 # CREAR UNA NUEVA MARCA
-@routes.route('/nueva_marca', methods=['POST'])
+@vehicles.route('/nueva_marca', methods=['POST'])
 def create_marca():
     try:
         data = request.get_json()
@@ -67,7 +67,7 @@ def create_marca():
 # -----------------------------------------------------------------------------------------------------------------------
 
 # EDITAR UNA MARCA
-@routes.route('/editar_marca/<int:id>', methods=['PUT'])
+@vehicles.route('/editar_marca/<int:id>', methods=['PUT'])
 def update_marca(id):
     try:
         data = request.get_json()
@@ -105,7 +105,7 @@ def update_marca(id):
 # -----------------------------------------------------------------------------------------------------------------------
 
 # ELIMINAR UNA MARCA
-@routes.route('/eliminar_marca/<int:id>', methods=['DELETE'])
+@vehicles.route('/eliminar_marca/<int:id>', methods=['DELETE'])
 def delete_marca(id):
     try:
         # Llamar a la función para eliminar la marca
@@ -125,7 +125,7 @@ def delete_marca(id):
 
 # CONSULTA SECUNDARIA DE VEHICULOS : MARCAS (ID) : MODELOS
 
-@routes.route('/modelos_numero_productos/<int:id>', methods=['GET'])
+@vehicles.route('/modelos_numero_productos/<int:id>', methods=['GET'])
 def get_modelos_with_productos_count(id):
     try:
         modelo = get_modelos_count_productos(id)
@@ -137,7 +137,7 @@ def get_modelos_with_productos_count(id):
 # -----------------------------------------------------------------------------------------------------------------------------------
 # CRUD DE MODELO: BUSCAR POR NOMBRE DEL MODELO, CREAR NUEVO MODELO, EDITAR MODELO Y ELIMINAR MODELO
 
-@routes.route('/buscar_modelo_similar/<int:id>/<string:nombremodelo>', methods=['GET'])
+@vehicles.route('/buscar_modelo_similar/<int:id>/<string:nombremodelo>', methods=['GET'])
 def search_modelo_similar(id, nombremodelo):
     try:
         modelo = get_buscar_modelos_similar(id, nombremodelo)
@@ -150,38 +150,81 @@ def search_modelo_similar(id, nombremodelo):
         return jsonify(modelo)
     
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Ocurrió un problema al obtener los modelos de la marca. Por favor, verifique su servidor.'}), 500
+
+# -----------------------------------------------------------------------------------------------------------------------
     
 # CREAR UN NUEVO MODELO
-@routes.route('/nuevo_modelo', methods=['POST'])
+@vehicles.route('/crear_modelo', methods=['POST'])
 def create_modelo():
     try:
         data = request.get_json()
-        idModelo = data.get('idMarca');
-        nombreModelo = data.get('nombre')
+        idMarca = data.get('idMarca')
+        print(f"se obtiene : {idMarca}")
+        nombre = data.get('nombre')
+        print(f"se obtiene : {nombre}")
 
-        id_modelo = crear_modelo(idModelo, nombreModelo)
-        return jsonify({'Modelo': id_modelo}), 201
+        # Validar que el nombre del modelo no esté vacío
+        if not nombre or nombre.strip() == '':
+            return jsonify({'error': 'El nombre del modelo es obligatorio.'}), 400
+
+        # Llamar a la función de creación de modelo
+        resultado = crear_modelo(idMarca, nombre)
+        
+        # Verificar el resultado y devolver los mensajes correspondientes
+        if resultado == 'marca_no_encontrada':
+            return jsonify({'error': f'No se encontró la marca con ID {idMarca}.'}), 404
+        elif resultado == 'modelo_existente':
+            return jsonify({'error': f'Ya existe un modelo con el nombre "{nombre}" para la marca proporcionada.'}), 409
+        else:
+            return jsonify({'message': 'Modelo creado correctamente', 'idModelo': resultado}), 201
+
     except Exception as e:
-        return jsonify({'error':str(e)}), 500
+        return jsonify({'error': 'Ocurrió un problema al crear el modelo. Por favor, verifique su servidor.'}), 500
+
+# -----------------------------------------------------------------------------------------------------------------------
 
 # EDITAR UN MODELO
-@routes.route('/editar_modelo/<int:id>', methods=['PUT'])
+@vehicles.route('/editar_modelo/<int:id>', methods=['PUT'])
 def update_modelo(id):
     try:
         data = request.get_json()
         nombre = data.get('nombre')
-        editar_modelo(id, nombre)
-        return jsonify({'message': 'Modelo actualizado correctamente'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        
+        # Validar que el nombre no esté vacío
+        if not nombre or nombre.strip() == '':
+            return jsonify({'error': 'El nombre del modelo es obligatorio.'}), 400
 
+        # Intentar editar el modelo
+        resultado = editar_modelo(id, nombre)
+        
+        if resultado == 'sin_cambio':
+            return jsonify({'error': 'El modelo ya tenía el nombre proporcionado. No se realizaron cambios.'}), 200
+        elif resultado:
+            return jsonify({'message': 'Modelo actualizado correctamente'}), 200
+        else:
+            return jsonify({'error': f'No se encontró el modelo con ID {id}.'}), 404
+
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
+    except Exception as e:
+        return jsonify({'error': 'Ocurrió un problema al actualizar el modelo. Por favor, verifique su servidor.'}), 500
+
+# -----------------------------------------------------------------------------------------------------------------------
 
 # ELIMINAR UNA MARCA
-@routes.route('/eliminar_modelo/<int:id>', methods=['DELETE'])
+@vehicles.route('/eliminar_modelo/<int:id>', methods=['DELETE'])
 def delete_modelo(id):
     try:
-        eliminar_modelo(id)
-        return jsonify({'message': 'Modelo eliminado correctamente'})
+        # Intentar eliminar el modelo y obtener el resultado
+        resultado = eliminar_modelo(id)
+        
+        if resultado == 'no_encontrado':
+            return jsonify({'error': f'No se encontró el modelo con ID {id}.'}), 404
+        elif resultado == 'tiene_productos':
+            return jsonify({'error': 'El modelo tiene productos asociados y no se puede eliminar.'}), 409
+        else:
+            return jsonify({'message': 'Modelo eliminado correctamente'}), 200
+
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Ocurrió un problema al eliminar el modelo. Por favor, verifique su servidor.'}), 500

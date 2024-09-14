@@ -172,8 +172,9 @@ def get_modelos_count_productos(idMarca):
             })
 
     return modelos_list
+    
 # -----------------------------------------------------------------------------------------------------------------------------------
-# -----------------------------------------------------------------------------------------------------------------------------------
+
 # CRUD DE MODELOS: BUSCAR POR NOMBRE DEL MODELO, REALIZAR UN NUEVO MODELO, EDITAR MODELO Y ELIMINAR MODELO
 def get_buscar_modelos_similar(idMarca,nombremodelo):
     resultados = db.session.query(
@@ -207,23 +208,71 @@ def get_buscar_modelos_similar(idMarca,nombremodelo):
 
     return modelos_list
 
+# -----------------------------------------------------------------------------------------------------------------------
 # CREAR UN NUEVO MODELO
-def crear_modelo(idMarca,nombre):
-    nuevo_modelo = Modelo(idMarca = idMarca, nombre=nombre)
+def crear_modelo(idMarca, nombre):
+    # Verificar si la marca existe
+    marca = Marca.query.get(idMarca)
+    if not marca:
+        return 'marca_no_encontrada'
+
+    # Verificar si ya existe un modelo con el mismo nombre para esta marca
+    modelo_existente = Modelo.query.filter_by(idMarca=idMarca, nombre=nombre).first()
+    if modelo_existente:
+        return 'modelo_existente'
+
+    # Crear el nuevo modelo
+    nuevo_modelo = Modelo(idMarca=idMarca, nombre=nombre)
     db.session.add(nuevo_modelo)
     db.session.commit()
     return nuevo_modelo.idModelo
 
+# -----------------------------------------------------------------------------------------------------------------------
+
 # EDITAR UNA MARCA POR IDMARCA
 def editar_modelo(idModelo, nombre):
     modelo = Modelo.query.get(idModelo)
+
+    # Validar si el modelo existe
+    if not modelo:
+        raise ValueError(f'No se encontró el modelo con ID {idModelo}.')
+
+    # Verificar si el nombre ya existe en otro modelo de la misma marca
+    modelo_existente = Modelo.query.filter_by(idMarca=modelo.idMarca, nombre=nombre).first()
+    if modelo_existente and modelo_existente.idModelo != idModelo:
+        raise ValueError(f'Ya existe un modelo con el nombre "{nombre}" para esta marca.')
+
+    # Verificar si el nombre es el mismo que el actual
+    if modelo.nombre == nombre:
+        return 'sin_cambio'
+
+    # Actualizar el nombre del modelo
     modelo.nombre = nombre
     db.session.commit()
     return True
 
+# -----------------------------------------------------------------------------------------------------------------------
+
 # ELIMINAR UNA MARCA POR IDMARCA
 def eliminar_modelo(idModelo):
+    # Buscar el modelo por ID
     modelo = Modelo.query.get(idModelo)
+
+    # Validar si el modelo existe
+    if not modelo:
+        return 'no_encontrado'
+
+    # Contar el número de productos relacionados
+    numero_productos = db.session.query(func.count(ModeloAutoparte.idModeloAutoparte)).filter(
+        ModeloAutoparte.idModeloAnio == ModeloAnio.idModeloAnio,
+        ModeloAnio.idModelo == idModelo
+    ).scalar()
+
+    # Validar si el modelo tiene productos asociados
+    if numero_productos > 0:
+        return 'tiene_productos'
+
+    # Eliminar el modelo
     db.session.delete(modelo)
     db.session.commit()
     return True
