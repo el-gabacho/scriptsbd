@@ -75,7 +75,7 @@ def delete_categoria(id):
     try:
         resultado = eliminar_categoria(id)
         if resultado == 'productos_asociados':
-            return jsonify({'error': 'No se puede eliminar la categoría porque tiene productos asociados.'}), 400
+            return jsonify({'error': 'No se puede eliminar la categoría porque tiene productos asociados.'}), 409
         elif resultado == 'no_encontrado':
             return jsonify({'error': 'Categoría no encontrada.'}), 404
         else:
