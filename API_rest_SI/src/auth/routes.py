@@ -18,22 +18,3 @@ def login():
     except Exception as e:
         print(e)
         return jsonify({'error':'Hubo un problema con el servidor. Por favor, inténtalo más tarde o contacta con el administrador si el problema persiste.'}), 500
-
-# @auth.route('/signup', methods=['POST'])
-# def signup():
-#     data = request.get_json()
-#     username = data.get('username')
-#     password = data.get('password')
-#     if not username or not password:
-#         return jsonify({'error': 'Missing username or password'}), 400
-#     user = Usuario.query.filter_by(usuario=username).first()
-#     if user is not None:
-#         return jsonify({'error': 'Username already exists'}), 400
-#     user = Usuario(usuario=username)
-#     user.set_password(password)
-#     user.save()
-#     return jsonify({'message': 'User created successfully'})
-
-@auth.route('/logout', methods=['POST'])
-def logout():
-    return jsonify({'message': 'User logged out successfully'})

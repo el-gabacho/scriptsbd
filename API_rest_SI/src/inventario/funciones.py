@@ -477,7 +477,7 @@ def obtener_stock_bajo():
     return producto_bajo
 
 # OBTENER INFO DE LOS PRODUCTOS DESACTIVADOS O PREVIAMENTE ELIMINADOS PERO DESACTIVADOS
-def get_productos_eliminados():
+def get_productos_eliminados(codigo_barras):
     query = db.session.query(
         Inventario.idInventario,
         Inventario.codigoBarras,
@@ -491,7 +491,11 @@ def get_productos_eliminados():
         Proveedor, ProveedorProducto.idProveedor == Proveedor.idProveedor
     ).filter(
         Inventario.estado == 0
-    ).limit(100).all()
+    )
+    if codigo_barras:
+        query = query.filter(Inventario.codigoBarras.like(f"%{codigo_barras}%"))
+        
+    query = query.limit(100).all()
 
     producto_eliminado = []
 

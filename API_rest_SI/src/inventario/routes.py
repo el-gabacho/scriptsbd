@@ -113,7 +113,9 @@ def get_stock_bajo():
 @routes.route('/productos_eliminados', methods=['GET'])
 def get_producto_eliminado():
     try:
-        eliminado_producto = get_productos_eliminados()
+        codigoBarras = request.args.get('codigo_barras', None)
+        print(f"Received data: {codigoBarras}")  # Verifica los datos recibidos
+        eliminado_producto = get_productos_eliminados(codigoBarras)
 
         # Devuelve una lista vacía si no se encuentran productos similares
         if eliminado_producto is None or len(eliminado_producto) == 0:
@@ -121,6 +123,7 @@ def get_producto_eliminado():
         
         return jsonify(eliminado_producto)
     except Exception as e:
+        print(f"Error en get_producto_eliminado: {str(e)}")
         return jsonify({'error': str(e)}), 500
     
 # ---------------------------------------------------------------------------------------------
