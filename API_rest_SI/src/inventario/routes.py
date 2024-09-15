@@ -27,6 +27,7 @@ def get_info_productos_preciso_by(codigo_barras):
         producto_preciso = get_producto_preciso(codigo_barras)
         return jsonify(producto_preciso)
     except Exception as e:
+        print(f"Error en get_info_productos_preciso_by: {str(e)}")
         return jsonify({'error': str(e)}), 500
     
 # TODOS LOS PRODUCTOS CON INFORMACION CON CODIGO SIMILAR

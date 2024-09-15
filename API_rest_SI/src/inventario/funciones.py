@@ -168,7 +168,6 @@ def get_producto_preciso(codigo_barras):
     ).outerjoin(
         Imagenes, Inventario.idInventario == Imagenes.idInventario
     ).filter(
-        Inventario.estado == 1,
         Inventario.codigoBarras == codigo_barras
     ).group_by(
         Inventario.idInventario

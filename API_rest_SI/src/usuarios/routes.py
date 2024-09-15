@@ -8,7 +8,7 @@ def get_usuarios():
         usuarios = obtener_usuarios()
         return jsonify(usuarios)
     except Exception as e:
-        return jsonify({'Error': 'Ocurrió un problema al obtener los usuarios. Por favor, inténtalo más tarde.'}), 500
+        return jsonify({'error': 'Ocurrió un problema al obtener los usuarios. Por favor, inténtalo más tarde.'}), 500
     
 @routes.route('/usuarios/<int:id>', methods=['GET'])
 def get_usuario(id):
@@ -16,9 +16,9 @@ def get_usuario(id):
         usuario = obtener_usuario(id)
         if usuario:
             return jsonify(usuario)
-        return jsonify({'Error': 'Usuario no encontrado'}), 404
+        return jsonify({'error': 'Usuario no encontrado'}), 404
     except Exception as e:
-        return jsonify({'Error': 'Ocurrió un problema al obtener el usuario. Por favor, inténtalo más tarde.'}), 500
+        return jsonify({'error': 'Ocurrió un problema al obtener el usuario. Por favor, inténtalo más tarde.'}), 500
 
 @routes.route('/usuarios', methods=['POST'])
 def create_usuario():
@@ -30,20 +30,20 @@ def create_usuario():
         idRol = data.get('idRol')
         
         if not nombre or nombre.strip() == '':
-            return jsonify({'Error': 'El nombre para crear el usuario es obligatorio.'}), 400
+            return jsonify({'error': 'El nombre para crear el usuario es obligatorio.'}), 400
         if not usuario or usuario.strip() == '':
-            return jsonify({'Error': 'El nombre de usuario para crear el usuario es obligatorio.'}), 400
+            return jsonify({'error': 'El nombre de usuario para crear el usuario es obligatorio.'}), 400
         if not contrasena or contrasena.strip() == '':
-            return jsonify({'Error': 'La contraseña para crear el usuario es obligatoria.'}), 400
+            return jsonify({'error': 'La contraseña para crear el usuario es obligatoria.'}), 400
         if not idRol:
-            return jsonify({'Error': 'El rol para crear el usuario es obligatorio.'}), 400
+            return jsonify({'error': 'El rol para crear el usuario es obligatorio.'}), 400
         
         id_usuario = crear_usuario(nombre, usuario, contrasena, idRol)
         return jsonify({'idUsuario': id_usuario}), 201
     except ValueError as ve:
-        return jsonify({'Error': str(ve)}), 400
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
-        return jsonify({'Error': 'Hubo un problema al crear el usuario. Verifica su servidor y notifique al administrador.'}), 500
+        return jsonify({'error': 'Hubo un problema al crear el usuario. Verifica su servidor y notifique al administrador.'}), 500
 
 
 @routes.route('/usuarios/<int:id>', methods=['DELETE'])
@@ -65,21 +65,21 @@ def update_usuario(id):
         fecha = data.get('fechaCreacion')
         
         if not nombre or nombre.strip() == '':
-            return jsonify({'Error': 'El nombre para editar el usuario es obligatorio.'}), 400
+            return jsonify({'error': 'El nombre para editar el usuario es obligatorio.'}), 400
         if not usuario or usuario.strip() == '':
-            return jsonify({'Error': 'El nombre de usuario para editar el usuario es obligatorio.'}), 400
+            return jsonify({'error': 'El nombre de usuario para editar el usuario es obligatorio.'}), 400
         if not contrasena or contrasena.strip() == '':
-            return jsonify({'Error': 'La contraseña para editar el usuario es obligatoria.'}), 400
+            return jsonify({'error': 'La contraseña para editar el usuario es obligatoria.'}), 400
         if not idRol:
-            return jsonify({'Error': 'El rol para editar el usuario es obligatorio.'}), 400
+            return jsonify({'error': 'El rol para editar el usuario es obligatorio.'}), 400
         
         resultado = actualizar_usuario(id, nombre, usuario, contrasena, idRol, fecha)
         if resultado == 'sin_cambio':
-            return jsonify({'Error': 'El usuario ya tenía los datos proporcionados. No se realizaron cambios.'}), 400
+            return jsonify({'error': 'El usuario ya tenía los datos proporcionados. No se realizaron cambios.'}), 400
         elif resultado:
             return jsonify({'message': 'Usuario actualizado correctamente'}), 200
             
     except ValueError as ve:
-        return jsonify({'Error': str(ve)}), 400
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
-        return jsonify({'Error': 'Hubo un problema al actualizar el usuario. Verifica su servidor y notifique al administrador.'}), 500
+        return jsonify({'error': 'Hubo un problema al actualizar el usuario. Verifica su servidor y notifique al administrador.'}), 500

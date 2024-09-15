@@ -8,7 +8,7 @@ def get_proveedores():
         proveedores = obtener_proveedores()
         return jsonify(proveedores)
     except Exception as e:
-        return jsonify({'Error': 'Ocurrió un problema al obtener los proveedores. Por favor, inténtalo más tarde.'}), 500
+        return jsonify({'error': 'Ocurrió un problema al obtener los proveedores. Por favor, inténtalo más tarde.'}), 500
     
     
 @routes.route('/proveedores/<int:id>', methods=['GET'])
@@ -17,9 +17,9 @@ def get_proveedor(id):
         proveedor = obtener_proveedor(id)
         if proveedor:
             return jsonify(proveedor)
-        return jsonify({'Error': 'Proveedor no encontrado'}), 404
+        return jsonify({'error': 'Proveedor no encontrado'}), 404
     except Exception as e:
-        return jsonify({'Error': 'Ocurrió un problema al obtener el proveedor. Por favor, inténtalo más tarde.'}), 500
+        return jsonify({'error': 'Ocurrió un problema al obtener el proveedor. Por favor, inténtalo más tarde.'}), 500
     
 
 @routes.route('/proveedores', methods=['POST'])
@@ -32,15 +32,15 @@ def create_proveedor():
         correo = data.get('correo')
         
         if not nombre or nombre.strip() == '':
-            return jsonify({'Error': 'El nombre para crear el proveedor es obligatorio.'}), 400
+            return jsonify({'error': 'El nombre para crear el proveedor es obligatorio.'}), 400
         
         id_proveedor = crear_proveedor(nombre, encargado, telefono, correo)
         return jsonify({'idCategoria': id_proveedor}), 201
     
     except ValueError as ve:
-        return jsonify({'Error': str(ve)}), 400
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
-        return jsonify({'Error': 'Hubo un problema al crear el proveedor. Verifica su servidor y notifique al administrador.'}), 500
+        return jsonify({'error': 'Hubo un problema al crear el proveedor. Verifica su servidor y notifique al administrador.'}), 500
     
 
 @routes.route('/proveedores/<int:id>', methods=['DELETE'])
@@ -49,7 +49,7 @@ def delete_proveedor(id):
         eliminar_proveedor(id)
         return jsonify({'message': 'Proveedor eliminado correctamente'})
     except Exception as e:
-        return jsonify({'Error': str(e)}), 500
+        return jsonify({'error': str(e)}), 500
 
 @routes.route('/proveedores/<int:id>', methods=['PUT'])
 def update_proveedor(id):
@@ -61,15 +61,15 @@ def update_proveedor(id):
         correo = data.get('correo')
         
         if not nombre or nombre.strip() == '':
-            return jsonify({'Error': 'El nombre para crear el proveedor es obligatorio.'}), 400
+            return jsonify({'error': 'El nombre para crear el proveedor es obligatorio.'}), 400
         
         resultado = actualizar_proveedor(id, nombre, encargado, telefono, correo)
         if resultado == 'sin_cambio':
-            return jsonify({'Error': 'El proveedor ya tenía la información proporcionada. No se realizaron cambios.'}), 200
+            return jsonify({'error': 'El proveedor ya tenía la información proporcionada. No se realizaron cambios.'}), 400
         elif resultado:
             return jsonify({'message': 'Proveedor actualizado correctamente'}), 200
     
     except ValueError as ve:
-        return jsonify({'Error': str(ve)}), 400
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
-        return jsonify({'Error': 'Hubo un problema al actualizar el proveedor. Verifica su servidor y notifique al administrador.'}), 500
+        return jsonify({'error': 'Hubo un problema al actualizar el proveedor. Verifica su servidor y notifique al administrador.'}), 500
