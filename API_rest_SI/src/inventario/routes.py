@@ -1,9 +1,11 @@
-from flask import jsonify, request
+from flask import jsonify, request, send_file
 from inventario.funciones import get_productos, get_producto_preciso, get_productos_similares, get_productos_avanzada,\
     obtener_stock_bajo, get_productos_eliminados, crear_producto, modificar_producto, eliminar_producto, reactivar_producto,\
-    agregar_existencias_producto
+    agregar_existencias_producto, obtener_imagen
 from inventario.func_importar import importar_productos
 from inventario import inventory as routes
+from PIL import Image
+import io
 import os
 from werkzeug.utils import secure_filename
 
@@ -307,12 +309,12 @@ def agregar_existencias_producto_route():
 def importar_productos_csv(usuarioId):
     try:
         if 'file' not in request.files:
-            return jsonify({'message': 'No file part in the request'}), 400
+            return jsonify({'error': 'No file part in the request'}), 400
         # Obtener el archivo CSV del cuerpo de la solicitud POST
         archivo = request.files.get('file')
         
         if archivo.filename == '':
-            return jsonify({'message': 'No file selected for uploading'}), 400
+            return jsonify({'error': 'No file selected for uploading'}), 400
         
         if archivo:
             # Guardar el archivo en el directorio de archivos temporales
@@ -322,5 +324,21 @@ def importar_productos_csv(usuarioId):
             resultado = importar_productos(ruta_archivo, usuarioId)
         
         return jsonify(resultado)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/images/<int:idInventario>/<int:imagenId>')
+def get_image(idInventario, imagenId):
+    try:
+        image_path = obtener_imagen(idInventario, imagenId)
+        with Image.open(image_path) as img:
+            img = img.convert("RGB")
+            img_io = io.BytesIO()
+            img.save(img_io, 'JPEG')
+            img_io.seek(0)
+        
+        return send_file(img_io, mimetype='image/jpeg')
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500

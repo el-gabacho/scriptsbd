@@ -755,3 +755,37 @@ def obtener_id_inventario(codigo):
         Inventario.codigoBarras == codigo
     ).first()
     return resultado[0] if resultado else None
+
+def obtener_imagen(idInventario, imagenId):
+    query = db.session.query(
+        Inventario.codigoBarras,
+        Imagenes.imgRepresentativa,
+        Imagenes.img2,
+        Imagenes.img3,
+        Imagenes.img4,
+        Imagenes.img5
+    ).outerjoin(
+        Inventario, Imagenes.idInventario == Inventario.idInventario
+    ).filter(
+        Imagenes.idInventario == idInventario
+    ).first()
+
+    if query is None:
+        raise ValueError("Producto no encontrado")
+
+    image_path = None
+    if imagenId == 1 and query.imgRepresentativa:
+        image_path = f"C:\\imagenes_el_gabacho\\productosInventario\\{query.codigoBarras}_1.webp"
+    elif imagenId == 2 and query.img2:
+        image_path = f"C:\\imagenes_el_gabacho\\productosInventario\\{query.codigoBarras}_2.webp"
+    elif imagenId == 3 and query.img3:
+        image_path = f"C:\\imagenes_el_gabacho\\productosInventario\\{query.codigoBarras}_3.webp"
+    elif imagenId == 4 and query.img4:
+        image_path = f"C:\\imagenes_el_gabacho\\productosInventario\\{query.codigoBarras}_4.webp"
+    elif imagenId == 5 and query.img5:
+        image_path = f"C:\\imagenes_el_gabacho\\productosInventario\\{query.codigoBarras}_5.webp"
+
+    if image_path is None:
+        raise ValueError("Imagen no encontrada")
+
+    return image_path
