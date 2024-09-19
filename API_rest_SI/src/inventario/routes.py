@@ -160,14 +160,24 @@ def create_producto():
         vehiculos = data.get('vehiculos', [])  # Definir valor por defecto vacío en caso de que no se proporcione
         print("Vehículos recibidos:", vehiculos)  # Agregar para depuración
 
+        # Validar que todos los campos obligatorios están presentes y no vacíos
+        if not all([codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima,
+                    precioCompra, mayoreo, menudeo, colocado, idUnidadMedida, idProveedor,
+                    idCategoria, idUsuario,imagenes, vehiculos]):
+            return jsonify({'error': 'Todos los campos obligatorios deben estar completos.'}), 400
+
         # Llamar a la función para crear el producto
         id_inventario = crear_producto(
             codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima,
             precioCompra, mayoreo, menudeo, colocado, idUnidadMedida, idCategoria,
             idProveedor, idUsuario, imagenes, vehiculos)
 
+        # Verificar si hubo un error y si el código es 409
         if isinstance(id_inventario, dict) and 'error' in id_inventario:
-            return jsonify({'error': id_inventario['error']}), 500
+            if id_inventario.get('code') == 409:
+                return jsonify({'error': id_inventario['error']}), 409
+            else:
+                return jsonify({'error': id_inventario['error']}), 500
 
         return jsonify({'idInventario': id_inventario}), 201
     except Exception as e:
@@ -287,14 +297,14 @@ def agregar_existencias_producto_route():
 
         # Verificación de los parámetros necesarios
         if not all([idUsuario, idInventario, cantidadNueva, precioCompra, mayoreo, menudeo, colocado]):
-            return jsonify({'error': 'Todos los campos son requeridos'}), 400
+            return jsonify({'error': 'Todos los campos obligatorios deben estar completos.'}), 400
 
         # Llamar a la función para agregar existencias
         result = agregar_existencias_producto(idUsuario, idInventario, cantidadNueva, precioCompra, mayoreo, menudeo, colocado)
 
         # Verificar si hubo un error durante la operación
         if 'error' in result:
-            return jsonify(result), 500
+            return jsonify(result), 400  # Cambié a 400 para indicar error de cliente
 
         return jsonify(result), 200
 

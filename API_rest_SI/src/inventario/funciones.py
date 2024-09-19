@@ -520,6 +520,16 @@ def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMi
     try:
         with session.begin():  # Iniciar la transacción
 
+            # Paso 1: Verificar si el producto ya existe
+            producto_existente = session.execute(
+                text("SELECT COUNT(*) FROM inventario WHERE codigoBarras = :codigoBarras"),
+                {'codigoBarras': codigoBarras}
+            ).scalar()
+
+            if producto_existente > 0:
+                # Si el producto ya existe, devolver un error con código 409
+                return {"error": f"El producto con este código '{codigoBarras}' ya existe.", "code": 409}
+
             # Procedimiento 1: Insertar producto y obtener idInventario
             sql = text("""
                 CALL proc_insertar_producto(:idCategoria, :idUnidadMedida, :codigoBarras, :nombre, :descripcion, 
@@ -592,7 +602,7 @@ def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMi
         # Si llegamos aquí, todo salió bien, y se hace commit automáticamente
         return id_inventario
 
-    except SQLAlchemyError as e:
+    except Exception as e:
         # Manejo de errores, hacer rollback
         session.rollback()
         print(f"Error: {str(e)}")  # Agregar para depuración
@@ -724,7 +734,22 @@ def agregar_existencias_producto(idUsuario, idInventario, cantidadNueva, precioC
     session = db.session  # Obtener la sesión de la base de datos
 
     try:
+
+        # Si ambos existen, continuar con la operación
         with session.begin():  # Iniciar una transacción
+
+            # Verificar si el usuario existe
+            usuario_existe = session.execute(text("SELECT COUNT(*) FROM Usuarios WHERE idUsuario = :idUsuario"), {'idUsuario': idUsuario}).scalar()
+
+            if usuario_existe == 0:
+                return {'error': 'El idUsuario no existe en el sistema.'}
+
+            # Verificar si el inventario existe
+            inventario_existe = session.execute(text("SELECT COUNT(*) FROM Inventario WHERE idInventario = :idInventario"), {'idInventario': idInventario}).scalar()
+
+            if inventario_existe == 0:
+                return {'error': 'El idInventario no existe en el sistema.'}
+            
             # Llamar al procedimiento almacenado usando `text` para prevenir inyección SQL
             sql = text("CALL proc_insertar_entrada_producto(:idUsuario, :idInventario, :cantidadNueva, :precioCompra, :mayoreo, :menudeo, :colocado)")
             session.execute(sql, {
@@ -740,11 +765,9 @@ def agregar_existencias_producto(idUsuario, idInventario, cantidadNueva, precioC
         # Si se llega aquí, la transacción se completa con éxito (commit automático con `with session.begin()`)
         return {'message': 'Existencias agregadas al producto correctamente'}
 
-    except SQLAlchemyError as e:
-        # Manejo de errores, hacer rollback explícito
-        session.rollback()
-        print(f"Error al agregar existencias a un producto: {str(e)}")
-        return {"error": str(e)}
+    except Exception as e:
+        session.rollback()  # Revertir la transacción en caso de error
+        return {'error': f'Ocurrió un error: {str(e)}'}
 
 
 ### FUNCION PARA LA FUNCION DE IMPORTAR PRODUCTOS
