@@ -209,19 +209,18 @@ def modificar_producto_route():
     try:
         # Obtener los datos enviados en el cuerpo de la solicitud
         data = request.get_json()
-        print("Datos recibidos:", data)  # Agregar para depuración
 
         # Extraer los valores necesarios del JSON recibido
         idInventario = data.get('idInventario')
-        codigoBarras = data.get('codigoBarras')
+        codigoBarras = data.get('codigo')
         nombre = data.get('nombre')
         descripcion = data.get('descripcion')
-        cantidadActual = data.get('cantidadActual')
+        cantidadActual = data.get('existencias')
         cantidadMinima = data.get('cantidadMinima')
         precioCompra = data.get('precioCompra')
-        mayoreo = data.get('mayoreo')
-        menudeo = data.get('menudeo')
-        colocado = data.get('colocado')
+        mayoreo = data.get('precioMayoreo')
+        menudeo = data.get('precioMenudeo')
+        colocado = data.get('precioColocado')
         idUnidadMedida = data.get('idUnidadMedida')
         idCategoria = data.get('idCategoria')
         idProveedor = data.get('idProveedor')
@@ -229,9 +228,10 @@ def modificar_producto_route():
         vehiculos = data.get('vehiculos')
 
         # Validar que el ID del producto esté presente
-        if not idInventario:
-            return jsonify({'error': 'ID del producto no proporcionado'}), 400
-
+        if not all([idInventario, codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima,
+                    precioCompra, mayoreo, menudeo, colocado, idUnidadMedida, idProveedor,
+                    idCategoria,imagenes, vehiculos]):
+            return jsonify({'error': 'Todos los campos obligatorios deben estar completos.'}), 400
         # Llamar a la función que realiza la modificación del producto
         resultado = modificar_producto(idInventario, codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima,
                                        precioCompra, mayoreo, menudeo, colocado, idUnidadMedida, idCategoria,

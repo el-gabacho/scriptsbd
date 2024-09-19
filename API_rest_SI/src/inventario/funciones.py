@@ -5,6 +5,9 @@ from inventario.modelos import Inventario, UnidadMedida, Imagenes
 from categorias.modelos import Categoria
 from proveedores.modelos import Proveedor, ProveedorProducto
 from vehiculos.modelos import Marca, ModeloAutoparte, ModeloAnio, Modelo, Anio
+import os
+
+IMAGE_ROOT_PATH = "C:\\imagenes_el_gabacho\\productosInventario\\"
 
 # OBTENER INFORMACION DE TODOS LOS PRODUTOS ACTIVOS
 def get_productos():
@@ -252,7 +255,6 @@ def get_productos_similares(codigo_barras):
     ).limit(100).all()
 
     productos = []
-    base_path = "C:\\imagenes_el_gabacho\\productosInventario"
     for item in query:
         aplicaciones = item.aplicaciones
         if aplicaciones:
@@ -571,7 +573,7 @@ def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMi
 def modificar_producto(idInventario, codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima, precioCompra, mayoreo, 
                    menudeo, colocado, idUnidadMedida, idCategoria, idProveedor, imagenes, vehiculos):
     session = db.session
-
+    imagenes_list = imagenes.split(',')
     try:
         with session.begin():  # Iniciar la transacción
 
@@ -598,6 +600,12 @@ def modificar_producto(idInventario, codigoBarras, nombre, descripcion, cantidad
             })
 
             # Procedimiento 2: Modificar imágenes para el producto
+            for i, imagen in enumerate(imagenes_list):
+                if imagen.lower() == 'false':
+                    image_path = f"{IMAGE_ROOT_PATH}{codigoBarras}_{i+1}.webp"
+                    if os.path.exists(image_path):
+                        os.remove(image_path)
+
             sql = text("""
                 CALL proc_actualiza_img_producto(:idInventario, :imagenes)
             """)
@@ -757,15 +765,15 @@ def obtener_imagen(idInventario, imagenId):
 
     image_path = None
     if imagenId == 1 and query.imgRepresentativa:
-        image_path = f"C:\\imagenes_el_gabacho\\productosInventario\\{query.codigoBarras}_1.webp"
+        image_path = f"{IMAGE_ROOT_PATH}{query.codigoBarras}_1.webp"
     elif imagenId == 2 and query.img2:
-        image_path = f"C:\\imagenes_el_gabacho\\productosInventario\\{query.codigoBarras}_2.webp"
+        image_path = f"{IMAGE_ROOT_PATH}{query.codigoBarras}_2.webp"
     elif imagenId == 3 and query.img3:
-        image_path = f"C:\\imagenes_el_gabacho\\productosInventario\\{query.codigoBarras}_3.webp"
+        image_path = f"{IMAGE_ROOT_PATH}{query.codigoBarras}_3.webp"
     elif imagenId == 4 and query.img4:
-        image_path = f"C:\\imagenes_el_gabacho\\productosInventario\\{query.codigoBarras}_4.webp"
+        image_path = f"{IMAGE_ROOT_PATH}{query.codigoBarras}_4.webp"
     elif imagenId == 5 and query.img5:
-        image_path = f"C:\\imagenes_el_gabacho\\productosInventario\\{query.codigoBarras}_5.webp"
+        image_path = f"{IMAGE_ROOT_PATH}{query.codigoBarras}_5.webp"
 
     if image_path is None:
         raise ValueError("Imagen no encontrada")
