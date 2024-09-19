@@ -2,7 +2,7 @@ from flask import jsonify, request
 from sqlalchemy.exc import ProgrammingError
 from vehiculos.funciones import get_marcas_count_modelos, get_buscar_marcas_similar, \
     crear_marca, editar_marca, eliminar_marca, get_modelos_count_productos, get_buscar_modelos_similar, \
-    crear_modelo, editar_modelo, eliminar_modelo
+    crear_modelo, editar_modelo, eliminar_modelo, obtener_datos_modelo_autopartes
 from vehiculos import vehicles
 
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -228,3 +228,12 @@ def delete_modelo(id):
 
     except Exception as e:
         return jsonify({'error': 'Ocurrió un problema al eliminar el modelo. Por favor, verifique su servidor.'}), 500
+    
+@vehicles.route('/vehiculos/<int:idInventario>', methods=['GET'])
+def get_vehiculos(idInventario):
+    try:
+        vehiculos = obtener_datos_modelo_autopartes(idInventario)
+        return jsonify(vehiculos), 200
+    except Exception as e:
+        print(e)
+        return jsonify({'error': 'Ocurrió un problema al obtener los vehículos.'}), 500

@@ -314,3 +314,31 @@ def obtener_id_modelo_anio(id_modelo, id_anio):
         ModeloAnio.idModelo == id_modelo, ModeloAnio.idAnio == id_anio
     ).first()
     return resultado[0] if resultado else None
+
+def obtener_datos_modelo_autopartes(idInventario):
+    resultado = db.session.query(
+        Marca.idMarca, Marca.nombre, Modelo.idModelo, Modelo.nombre, Anio.anioInicio, Anio.anioFin, Anio.anioTodo
+    ).select_from(ModeloAutoparte).outerjoin(
+        ModeloAnio, ModeloAutoparte.idModeloAnio == ModeloAnio.idModeloAnio
+    ).outerjoin(
+        Modelo, ModeloAnio.idModelo == Modelo.idModelo
+    ).outerjoin(
+        Marca, Modelo.idMarca == Marca.idMarca
+    ).outerjoin(
+        Anio, ModeloAnio.idAnio == Anio.idAnio
+    ).filter(
+        ModeloAutoparte.idInventario == idInventario
+    ).all()
+    
+    vehiculos = []
+    for vehiculo in resultado:
+        vehiculos.append({
+            'IdMarca': vehiculo[0],
+            'Marca': vehiculo[1],
+            'IdModelo': vehiculo[2],
+            'Modelo': vehiculo[3],
+            'AnioInicio': vehiculo[4],
+            'AnioFin': vehiculo[5],
+            'TodoAnio': vehiculo[6]
+        })
+    return vehiculos

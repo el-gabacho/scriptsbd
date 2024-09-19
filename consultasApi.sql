@@ -211,3 +211,8 @@ HAVING
     productoCompleto LIKE '%manija%'
     AND productoCompleto LIKE '%interior%'
     AND productoCompleto LIKE '%chevrolet%';
+
+SELECT m.idMarca, m.nombre, mo.idModelo, mo.nombre, a.anioInicio, a.anioFin, a.anioTodo 
+FROM modeloAutopartes mp LEFT JOIN modeloanios ma ON mp.idModeloAnio=ma.idModeloAnio 
+LEFT JOIN modelos mo ON ma.idModelo=mo.idModelo LEFT JOIN marcas m ON mo.idMarca=m.idMarca LEFT JOIN anios a ON ma.idAnio=a.idAnio
+WHERE mp.idInventario=2;
