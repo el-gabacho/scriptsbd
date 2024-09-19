@@ -76,21 +76,7 @@ def get_productos():
             aplicaciones = [app.strip() for app in aplicaciones.split(',') if app.strip()]
 
         # Construir la lista de imágenes
-        base_path = "C:\\imagenes_el_gabacho\\productosInventario"
-        imagenes = []
-        if producto.imgRepresentativa:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_1.webp")
-        if producto.img2:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_2.webp")
-        if producto.img3:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_3.webp")
-        if producto.img4:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_4.webp")
-        if producto.img5:
-            imagenes.append(f"{base_path}\\{producto.codigoBarras}_5.webp")
-
-        if not imagenes:
-            imagenes.append('SIN IMAGEN')
+        imagenes_str = f"{producto.imgRepresentativa},{producto.img2},{producto.img3},{producto.img4},{producto.img5}"
 
         productos_list.append({
             'IdInventario': producto.idInventario,
@@ -107,7 +93,7 @@ def get_productos():
             'Proveedor': producto.proveedorEmpresa,
             'Categoria': producto.categoriaNombre,
             'Aplicaciones': aplicaciones,
-            'Imagenes': imagenes
+            'Imagenes': imagenes_str
         })
 
     return productos_list
@@ -181,21 +167,7 @@ def get_producto_preciso(codigo_barras):
         aplicaciones = ["SIN NINGUNA APLICACION"]
 
     # Construir la lista de imágenes
-    base_path = "C:\\imagenes_el_gabacho\\productosInventario"
-    imagenes = []
-    if query.imgRepresentativa:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_1.webp")
-    if query.img2:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_2.webp")
-    if query.img3:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_3.webp")
-    if query.img4:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_4.webp")
-    if query.img5:
-        imagenes.append(f"{base_path}\\{query.codigoBarras}_5.webp")
-
-    if not imagenes:
-        imagenes.append('SIN IMAGEN')
+    imagenes_str = f"{producto.imgRepresentativa},{producto.img2},{producto.img3},{producto.img4},{producto.img5}"
 
     producto = {
         'IdInventario': query.idInventario,
@@ -212,7 +184,7 @@ def get_producto_preciso(codigo_barras):
         'Proveedor': query.proveedorEmpresa,
         'Categoria': query.categoriaNombre,
         'Aplicaciones': aplicaciones,
-        'Imagenes': imagenes
+        'Imagenes': imagenes_str
     }
 
     return producto
@@ -288,20 +260,7 @@ def get_productos_similares(codigo_barras):
         else:
             aplicaciones = ["SIN NINGUNA APLICACION"]
 
-        imagenes = []
-        if item.imgRepresentativa:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_1.webp")
-        if item.img2:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_2.webp")
-        if item.img3:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_3.webp")
-        if item.img4:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_4.webp")
-        if item.img5:
-            imagenes.append(f"{base_path}\\{item.codigoBarras}_5.webp")
-
-        if not imagenes:
-            imagenes.append('SIN IMAGEN')
+        imagenes_str = f"{item.imgRepresentativa},{item.img2},{item.img3},{item.img4},{item.img5}"
 
         productos.append({
             'IdInventario': item.idInventario,
@@ -318,7 +277,7 @@ def get_productos_similares(codigo_barras):
             'Proveedor': item.proveedorEmpresa,
             'Categoria': item.categoriaNombre,
             'Aplicaciones': aplicaciones,
-            'Imagenes': imagenes
+            'Imagenes': imagenes_str
         })
 
     return productos
