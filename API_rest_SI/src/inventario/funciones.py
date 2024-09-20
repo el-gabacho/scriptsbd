@@ -158,8 +158,6 @@ def get_producto_preciso(codigo_barras):
         Imagenes, Inventario.idInventario == Imagenes.idInventario
     ).filter(
         Inventario.codigoBarras == codigo_barras
-    ).group_by(
-        Inventario.idInventario
     ).first()
 
     # Procesar el campo de aplicaciones
@@ -170,7 +168,7 @@ def get_producto_preciso(codigo_barras):
         aplicaciones = ["SIN NINGUNA APLICACION"]
 
     # Construir la lista de imágenes
-    imagenes_str = f"{producto.imgRepresentativa},{producto.img2},{producto.img3},{producto.img4},{producto.img5}"
+    imagenes_str = f"{query.imgRepresentativa},{query.img2},{query.img3},{query.img4},{query.img5}"
 
     producto = {
         'IdInventario': query.idInventario,
