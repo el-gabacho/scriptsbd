@@ -657,24 +657,85 @@ def modificar_producto(idInventario, codigoBarras, nombre, descripcion, cantidad
         return {"error": str(e)}
 
 
-# FUNCIÓN PARA ELIMINAR UN PRODUCTO ACTIVO
+# FUNCIÓN PARA ELIMINAR UN PRODUCTO ACTIVO Y SUS IMÁGENES
 def eliminar_producto(idInventario, idUsuario):
     session = db.session  # Obtener la sesión de la base de datos
 
     try:
-        with session.begin():  # Iniciar una transacción
-            # Llamar al procedimiento almacenado usando `text` para prevenir inyección SQL
-            sql = text("CALL proc_eliminar_producto(:idInventario, :idUsuario)")
-            session.execute(sql, {'idInventario': idInventario, 'idUsuario': idUsuario})
+        # Verificar si el producto existe y está activo
+        producto = session.query(Inventario).filter_by(idInventario=idInventario, estado=True).first()
+        if producto is None:
+            return "no_existe"  # Indica que el producto no existe o no está activo
 
-        # Si se llega aquí, la transacción se completa con éxito (commit automático con `with session.begin()`)
-        return {'message': 'Producto eliminado o desactivado correctamente'}
+        # Iniciar la transacción solo si no hay una activa
+        if not session.is_active:
+            session.begin()
+
+        # Paso 1: Eliminar las imágenes del servidor
+        eliminar_imagenes_del_servidor(idInventario)
+
+        # Paso 2: Actualizar las imágenes en la base de datos (marcar como 'false')
+        sql_update_img = text("CALL proc_actualiza_img_producto(:idInventario, :imagenes)")
+        session.execute(sql_update_img, {'idInventario': idInventario, 'imagenes': 'false,false,false,false,false'})
+
+        # Paso 3: Llamar al procedimiento almacenado para eliminar el producto
+        sql = text("CALL proc_eliminar_producto(:idInventario, :idUsuario)")
+        session.execute(sql, {'idInventario': idInventario, 'idUsuario': idUsuario})
+
+        session.commit()  # Confirmar los cambios
+
+        return {'message': 'Producto y sus imágenes eliminados correctamente'}
 
     except SQLAlchemyError as e:
-        # Manejo de errores, hacer rollback explícito
-        session.rollback()
+        session.rollback()  # Hacer rollback en caso de error
         print(f"Error al eliminar el producto en eliminar_producto: {str(e)}")
         return {"error": str(e)}
+
+# FUNCIÓN PARA ELIMINAR LAS IMÁGENES DEL SERVIDOR
+def eliminar_imagenes_del_servidor(idInventario):
+    try:
+        # Depuración: Verifica si el idInventario es válido
+        print(f"Eliminando imágenes para el idInventario: {idInventario}")
+        
+        # Obtener el código de barras y las imágenes relacionadas usando el idInventario
+        query = db.session.query(
+            Inventario.codigoBarras,
+            Imagenes.imgRepresentativa,
+            Imagenes.img2,
+            Imagenes.img3,
+            Imagenes.img4,
+            Imagenes.img5
+        ).outerjoin(
+            Imagenes, Imagenes.idInventario == idInventario
+        ).filter(
+            Inventario.idInventario == idInventario
+        ).first()
+
+        if query is None:
+            print("Producto no encontrado, no se eliminarán imágenes.")
+            return  # Simplemente salimos sin hacer nada
+
+        codigo_barras = query.codigoBarras
+        print(f"Código de barras del producto: {codigo_barras}")
+
+        # Paso 1: Eliminar las imágenes correspondientes al código de barras
+        for imagenId, imagen_field in enumerate(
+            [query.imgRepresentativa, query.img2, query.img3, query.img4, query.img5], start=1
+        ):
+            if imagen_field:  # Si la imagen está presente
+                image_path = f"{IMAGE_ROOT_PATH}{codigo_barras}_{imagenId}.webp"
+                
+                # Verificar si el archivo existe y eliminarlo
+                if os.path.exists(image_path):
+                    os.remove(image_path)
+                    print(f"Imagen eliminada: {image_path}")
+                else:
+                    print(f"La imagen no existe o ya fue eliminada: {image_path}")
+            else:
+                print(f"No hay imagen en el campo {imagenId} para el código de barras {codigo_barras}.")
+
+    except Exception as e:
+        print(f"Error al eliminar imágenes: {str(e)}")
 
 
 # FUNCION PARA REACTIVAR UN PRODUCTO QUE FUE ELIMINADO Y SU ESTADO ESTA EN FALSE
@@ -683,6 +744,11 @@ def reactivar_producto(idInventario):
 
     try:
         with session.begin():  # Iniciar la transacción
+        # Verificar si el producto existe y está en estado False
+            producto = session.query(Inventario).filter_by(idInventario=idInventario, estado=False).first()
+            if producto is None:
+                return "no_valido"  # Si el producto no existe o no está inactivo, retornamos "no_valido"
+
             # Llamar al procedimiento almacenado usando text para pasar el parámetro de manera segura
             sql = text("CALL proc_reactivar_producto(:idInventario)")
             session.execute(sql, {'idInventario': idInventario})

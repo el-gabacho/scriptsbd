@@ -246,21 +246,33 @@ def modificar_producto_route():
 
 
 # ELIMINAR UN PRODUCTO
-
 @routes.route('/eliminar_producto', methods=['DELETE'])
 def eliminar_producto_route():
     try:
         # Obtener datos del cuerpo de la solicitud JSON
         data = request.get_json()
         print(f"Received data: {data}")  # Verifica los datos recibidos
+        
         # Extraer 'idInventario' y 'idUsuario' del cuerpo de la solicitud
         idInventario = data.get('IdInventario')
-        print(f"primer parametro ={idInventario}")
         idUsuario = data.get('IdUsuario')
-        print(f"segundo parametro ={idUsuario}")
+
+        # Validar que ambos parámetros son obligatorios
+        if idInventario is None or idUsuario is None:
+            return jsonify({'error': 'Los campos idInventario e idUsuario son obligatorios.'}), 400
+
+        print(f"primer parametro = {idInventario}")
+        print(f"segundo parametro = {idUsuario}")
+
         # Llamar a la función para eliminar el producto
         resultado = eliminar_producto(idInventario, idUsuario)
+
+        # Verificar si el producto no existe
+        if resultado == "no_existe":
+            return jsonify({'error': 'El producto no existe o no está activo.'}), 404
+
         return jsonify(resultado), 200
+
     except Exception as e:
         print(f"Error en eliminar_producto_route: {str(e)}")
         return jsonify({'error': str(e)}), 500
@@ -273,9 +285,19 @@ def reactive_producto():
         data = request.get_json()
         print(f"Received data: {data}")  # Verifica los datos recibidos
         idInventario = data.get('IdInventario')
-        print(f"primer parametro ={idInventario}")
+        print(f"primer parametro = {idInventario}")
+
+        # Validar que idInventario no sea nulo
+        if idInventario is None:
+            return jsonify({'error': 'El IdInventario no puede ser nulo.'}), 400
+
         # Llamar a la función para reactivar el producto
         resultado = reactivar_producto(idInventario)
+
+        # Verificar si el resultado es "no_valido"
+        if resultado == "no_valido":
+            return jsonify({'error': 'El producto no existe o no está en estado inactivo.'}), 404
+
         return jsonify(resultado), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
