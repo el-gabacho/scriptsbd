@@ -159,8 +159,6 @@ def get_producto_preciso(codigo_barras):
         Imagenes, Inventario.idInventario == Imagenes.idInventario
     ).filter(
         Inventario.codigoBarras == codigo_barras
-    ).group_by(
-        Inventario.idInventario
     ).first()
 
     # Validar que la consulta no sea None
