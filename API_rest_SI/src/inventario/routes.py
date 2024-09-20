@@ -27,6 +27,10 @@ def get_info_productos():
 def get_info_productos_preciso_by(codigo_barras):
     try:
         producto_preciso = get_producto_preciso(codigo_barras)
+        # Devuelve un mensaje si no se encuentra el producto
+        if producto_preciso is None or len (producto_preciso) == 0:
+            return jsonify(None)
+        
         return jsonify(producto_preciso)
     except Exception as e:
         print(f"Error en get_info_productos_preciso_by: {str(e)}")

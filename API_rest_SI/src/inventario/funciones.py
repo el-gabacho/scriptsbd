@@ -103,6 +103,7 @@ def get_productos():
 
 # OBTENER INFORMACION DEL PRODUCTO ACTIVO MEDIANTE SU CODIGO DE BARRAS DE MODO PRECISO ---------------------------------------
 def get_producto_preciso(codigo_barras):
+    # Ejecutar la consulta
     query = db.session.query(
         Inventario.idInventario,
         Inventario.codigoBarras,
@@ -162,6 +163,10 @@ def get_producto_preciso(codigo_barras):
         Inventario.idInventario
     ).first()
 
+    # Validar que la consulta no sea None
+    if query is None:
+        return None
+
     # Procesar el campo de aplicaciones
     aplicaciones = query.aplicaciones
     if aplicaciones:
@@ -170,7 +175,7 @@ def get_producto_preciso(codigo_barras):
         aplicaciones = ["SIN NINGUNA APLICACION"]
 
     # Construir la lista de imágenes
-    imagenes_str = f"{producto.imgRepresentativa},{producto.img2},{producto.img3},{producto.img4},{producto.img5}"
+    imagenes_str = f"{query.imgRepresentativa},{query.img2},{query.img3},{query.img4},{query.img5}"
 
     producto = {
         'IdInventario': query.idInventario,
