@@ -43,6 +43,12 @@ def crear_proveedor(empresa, nombreEncargado, telefono, correo):
 
 def eliminar_proveedor(idProveedor):
     proveedor = Proveedor.query.get(idProveedor)
+
+    # Eliminar los productos del proveedor
+    for producto in proveedor.proveedor_productos:
+        db.session.delete(producto)
+
+    # Ahora puedes eliminar el proveedor
     db.session.delete(proveedor)
     db.session.commit()
     return True

@@ -25,7 +25,7 @@ def get_productos():
         Inventario.estado,
         UnidadMedida.tipoMedida,
         func.coalesce(Categoria.nombre, 'SIN CATEGORIA').label('categoriaNombre'),
-        Proveedor.empresa.label('proveedorEmpresa'),
+        func.coalesce(Proveedor.empresa, 'SIN PROVEEDOR').label('proveedorEmpresa'),
         func.group_concat(
             func.concat(
                 Marca.nombre, ' ', Modelo.nombre, ' ',
@@ -48,9 +48,9 @@ def get_productos():
         Categoria, Inventario.idCategoria == Categoria.idCategoria
     ).join(
         UnidadMedida, Inventario.idUnidadMedida == UnidadMedida.idUnidadMedida
-    ).join(
+    ).outerjoin(
         ProveedorProducto, Inventario.idInventario == ProveedorProducto.idInventario
-    ).join(
+    ).outerjoin(
         Proveedor, ProveedorProducto.idProveedor == Proveedor.idProveedor
     ).outerjoin(
         ModeloAutoparte, Inventario.idInventario == ModeloAutoparte.idInventario
@@ -118,7 +118,7 @@ def get_producto_preciso(codigo_barras):
         Inventario.estado,
         UnidadMedida.tipoMedida,
         func.coalesce(Categoria.nombre, 'SIN CATEGORIA').label('categoriaNombre'),
-        Proveedor.empresa.label('proveedorEmpresa'),
+        func.coalesce(Proveedor.empresa, 'SIN PROVEEDOR').label('proveedorEmpresa'),
         func.group_concat(
             func.concat(
                 Marca.nombre, ' ', Modelo.nombre, ' ',
@@ -141,9 +141,9 @@ def get_producto_preciso(codigo_barras):
         Categoria, Inventario.idCategoria == Categoria.idCategoria
     ).join(
         UnidadMedida, Inventario.idUnidadMedida == UnidadMedida.idUnidadMedida
-    ).join(
+    ).outerjoin(
         ProveedorProducto, Inventario.idInventario == ProveedorProducto.idInventario
-    ).join(
+    ).outerjoin(
         Proveedor, ProveedorProducto.idProveedor == Proveedor.idProveedor
     ).outerjoin(
         ModeloAutoparte, Inventario.idInventario == ModeloAutoparte.idInventario
@@ -211,7 +211,7 @@ def get_productos_similares(codigo_barras):
         Inventario.estado,
         UnidadMedida.tipoMedida,
         func.coalesce(Categoria.nombre, 'SIN CATEGORIA').label('categoriaNombre'),
-        Proveedor.empresa.label('proveedorEmpresa'),
+        func.coalesce(Proveedor.empresa, 'SIN PROVEEDOR').label('proveedorEmpresa'),
         func.group_concat(
             func.concat(
                 Marca.nombre, ' ', Modelo.nombre, ' ',
@@ -234,9 +234,9 @@ def get_productos_similares(codigo_barras):
         Categoria, Inventario.idCategoria == Categoria.idCategoria
     ).join(
         UnidadMedida, Inventario.idUnidadMedida == UnidadMedida.idUnidadMedida
-    ).join(
+    ).outerjoin(
         ProveedorProducto, Inventario.idInventario == ProveedorProducto.idInventario
-    ).join(
+    ).outerjoin(
         Proveedor, ProveedorProducto.idProveedor == Proveedor.idProveedor
     ).outerjoin(
         ModeloAutoparte, Inventario.idInventario == ModeloAutoparte.idInventario
@@ -303,7 +303,7 @@ def get_productos_avanzada(filtros):
         Inventario.estado,
         UnidadMedida.tipoMedida,
         func.coalesce(Categoria.nombre, 'SIN CATEGORIA').label('categoriaNombre'),
-        Proveedor.empresa.label('proveedorEmpresa'),
+        func.coalesce(Proveedor.empresa, 'SIN PROVEEDOR').label('proveedorEmpresa'),
         func.group_concat(
             func.concat(
                 Marca.nombre, ' ', Modelo.nombre, ' ',
@@ -321,9 +321,9 @@ def get_productos_avanzada(filtros):
         Categoria, Inventario.idCategoria == Categoria.idCategoria
     ).join(
         UnidadMedida, Inventario.idUnidadMedida == UnidadMedida.idUnidadMedida
-    ).join(
+    ).outerjoin(
         ProveedorProducto, Inventario.idInventario == ProveedorProducto.idInventario
-    ).join(
+    ).outerjoin(
         Proveedor, ProveedorProducto.idProveedor == Proveedor.idProveedor
     ).outerjoin(
         ModeloAutoparte, Inventario.idInventario == ModeloAutoparte.idInventario
@@ -447,10 +447,10 @@ def get_productos_eliminados(codigo_barras):
         Inventario.nombre,
         Inventario.descripcion,
         Inventario.cantidadActual,
-        Proveedor.empresa.label('proveedorEmpresa')
-    ).join(
+        func.coalesce(Proveedor.empresa, 'SIN PROVEEDOR').label('proveedorEmpresa')
+    ).outerjoin(
         ProveedorProducto, Inventario.idInventario == ProveedorProducto.idInventario
-    ).join(
+    ).outerjoin(
         Proveedor, ProveedorProducto.idProveedor == Proveedor.idProveedor
     ).filter(
         Inventario.estado == 0
