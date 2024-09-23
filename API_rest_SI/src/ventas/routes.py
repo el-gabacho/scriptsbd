@@ -49,22 +49,24 @@ def get_ventas_totales_por_usuario_fechas():
 def create_venta():
     try:
         data = request.get_json()
-        idUsuario = data.get('id_usuario')
-        idCliente = data.get('id_cliente')
+        idUsuario = data.get('idUsuario')
+        idCliente = data.get('idCliente')
         productos = data.get('productos')
-        montoTotal = data.get('monto_total')
-        recibioDinero = data.get('recicio_dinero')
-        folioTicket = data.get('folio_ticket')
-        imprimioTicket = data.get('imprimio_ticket')
-        idTipoPago = data.get('id_tipo_pago')
-        referenciaUnica = data.get('referencia_unica')
+        montoTotal = data.get('montoTotal')
+        recibioDinero = data.get('reciboDinero')
+        folioTicket = data.get('folio')
+        imprimioTicket = data.get('imprimioTicket')
+        idTipoPago = data.get('idTipoPago')
+        referenciaUnica = data.get('referencia')
         
-        if not idUsuario or not idCliente or not productos or not montoTotal or not recibioDinero or not folioTicket or not imprimioTicket or not idTipoPago or not referenciaUnica:
+        if not idUsuario or not idCliente or not productos or not montoTotal or not recibioDinero or not folioTicket or not imprimioTicket or not idTipoPago:
             return jsonify({'error': 'Faltan datos para crear la venta'}), 400
-        
+        if not referenciaUnica:
+            referenciaUnica = 'NO APLICA'
         id_venta = crear_venta(idUsuario, idCliente, productos, montoTotal, recibioDinero, folioTicket, imprimioTicket, idTipoPago, referenciaUnica)
         return jsonify({'idVenta': id_venta}), 201
-    
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': 'Hubo un problema al crear la venta. Verifica su servidor y notifique al administrador.'}), 500
     

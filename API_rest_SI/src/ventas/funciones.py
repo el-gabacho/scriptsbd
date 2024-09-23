@@ -34,13 +34,41 @@ def obtener_ventas(filtros):
     return ventas_list
 
 def crear_venta(idUsuario, idCliente, productos, montoTotal, recibioDinero, folioTicket, imprimioTicket, idTipoPago, referenciaUnica):
-    db.session.execute(f"CALL proc_crear_venta({idUsuario}, {idCliente}, @v_idVenta)")
-    result = db.session.execute("SELECT @v_idVenta").first()
-    id_venta = result[0]
-    for producto in productos:
-        db.session.execute(f"CALL proc_agregar_producto_venta({id_venta}, {producto.idInventario}, {producto.cantidad}, {producto.tipoVenta}, {producto.precioVenta}, {producto.subtotal})")
-    db.session.execute(f"CALL proc_finalizar_venta({id_venta}, {montoTotal}, {recibioDinero}, {folioTicket}, {imprimioTicket}, {idTipoPago}, {referenciaUnica})")
-    db.session.commit()
+    session = db.session 
+
+    try:
+        with session.begin():
+            db.session.execute(text(f"CALL proc_crear_venta({idUsuario}, {idCliente}, @v_idVenta)"))
+
+            result = db.session.execute(text("SELECT @v_idVenta")).first()
+            id_venta = result[0]
+            for producto in productos:
+                sql_agregar_producto = "CALL proc_agregar_producto_venta(:idVenta, :idInventario, :cantidad, :tipoVenta, :precio, :subtotal)"
+                db.session.execute(text(sql_agregar_producto), {
+                    'idVenta': id_venta,
+                    'idInventario': producto['idInventario'],
+                    'cantidad': producto['cantidad'],
+                    'tipoVenta': producto['tipoVenta'],
+                    'precio': producto['precio'],
+                    'subtotal': producto['subtotal']
+                })
+            sql_finalizar_venta = "CALL proc_finalizar_venta(:idVenta, :montoTotal, :recibioDinero, :folioTicket, :imprimioTicket, :idTipoPago, :referenciaUnica)"
+            db.session.execute(text(sql_finalizar_venta), {
+                'idVenta': id_venta,
+                'montoTotal': montoTotal,
+                'recibioDinero': recibioDinero,
+                'folioTicket': folioTicket,
+                'imprimioTicket': imprimioTicket,
+                'idTipoPago': idTipoPago,
+                'referenciaUnica': referenciaUnica
+            })
+
+        return id_venta
+
+    except Exception as e:
+        session.rollback() 
+        print(e)
+        raise ValueError(f'Ocurrió un error: {str(e)}')
 
 def obtener_detalle_venta(idVenta):
     detalle_venta = db.session.query(VentaProducto.idVentaProducto, Inventario.codigoBarras, Inventario.nombre, Inventario.descripcion, VentaProducto.precioVenta, VentaProducto.cantidad, UnidadMedida.tipoMedida, VentaProducto.subtotal, VentaProducto.tipoVenta)\
