@@ -1042,22 +1042,12 @@ BEGIN
 	DECLARE p_idInventario INT;
 	DECLARE v_cantidadOriginal FLOAT;
    DECLARE v_existenciasActual FLOAT;
-   DECLARE v_existenciasActualizado FLOAT;
 	
 	SELECT idInventario INTO p_idInventario FROM ventaProductos WHERE idVentaProducto = p_idVentaProducto; 
    SELECT cantidadActual INTO v_existenciasActual FROM inventario WHERE idInventario = p_idInventario;
 	
    -- Obtener la cantidad original del producto en la venta
-   SELECT cantidad INTO v_cantidadOriginal
-   FROM ventaProductos
-   WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
-
-    -- Validar que la cantidad devuelta no sea mayor que la cantidad original
-   IF p_cantidad > v_cantidadOriginal THEN
-      SET v_existenciasActualizado = v_existenciasActual - (p_cantidad - v_cantidadOriginal);
-   ELSE
-   	SET v_existenciasActualizado = v_existenciasActual + (v_cantidadOriginal - p_cantidad);
-   END IF;
+   SELECT cantidad INTO v_cantidadOriginal FROM ventaProductos WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
 
     -- Actualizar la cantidad en ventaProductos
     UPDATE ventaProductos
@@ -1069,28 +1059,20 @@ BEGIN
    
    -- Actualizar la cantidad en el inventario
    UPDATE inventario
-   SET cantidadActual = v_existenciasActualizado
+   SET cantidadActual = v_existenciasActual + (v_cantidadOriginal - p_cantidad),
+   	estado = TRUE 
    WHERE idInventario = p_idInventario;
-    
-	 -- Verificar si toda la cantidad del producto ha sido devuelta
-   IF p_cantidad = 0 THEN
-      DELETE FROM ventaProductos
-    	WHERE idVenta = p_idVenta AND idVentaProducto = p_idVentaProducto;
-  		
-  		DELETE FROM pagoVenta WHERE idVenta = p_idVenta;
-      DELETE FROM ventas WHERE idVenta = p_idVenta;
-   ELSE
-   	-- Actualizar el montoTotal de la venta
-    	UPDATE ventas v
-    	JOIN (
-        SELECT idVenta, SUM(subtotal) AS nuevoMontoTotal
-        FROM ventaProductos
-        WHERE idVenta = p_idVenta
-        GROUP BY idVenta
-    	) vp ON v.idVenta = vp.idVenta
-    	SET v.montoTotal = vp.nuevoMontoTotal
-    	WHERE v.idVenta = p_idVenta;
-   END IF;
+   	
+   UPDATE ventas v
+   JOIN (
+      SELECT idVenta, SUM(subtotal) AS nuevoMontoTotal
+      FROM ventaProductos
+      WHERE idVenta = p_idVenta
+      GROUP BY idVenta
+   ) vp ON v.idVenta = vp.idVenta
+   SET v.montoTotal = vp.nuevoMontoTotal
+   WHERE v.idVenta = p_idVenta;
+
 END //
 
 DELIMITER ;

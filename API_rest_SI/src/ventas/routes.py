@@ -104,6 +104,7 @@ def reverse_venta_producto(ventaId,productoId):
 def update_venta_producto(ventaId,productoId):
     try:
         data = request.get_json()
+        print(data)
         cantidad = data.get('cantidad')
         tipoVenta = data.get('tipoVenta')
         precioVenta = data.get('precio')
@@ -113,5 +114,7 @@ def update_venta_producto(ventaId,productoId):
         
         response = modificar_venta_producto(ventaId,productoId,tipoVenta,cantidad,precioVenta)
         return jsonify({'message': 'Producto actualizado de la venta correctamente'})
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'error': 'Hubo un problema al actualizar la venta. Verifica su servidor y notifique al administrador.'}), 500

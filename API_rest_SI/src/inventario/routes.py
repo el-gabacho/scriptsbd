@@ -121,7 +121,6 @@ def get_stock_bajo():
 def get_producto_eliminado():
     try:
         codigoBarras = request.args.get('codigo_barras', None)
-        print(f"Received data: {codigoBarras}")  # Verifica los datos recibidos
         eliminado_producto = get_productos_eliminados(codigoBarras)
 
         # Devuelve una lista vacía si no se encuentran productos similares

@@ -92,7 +92,6 @@ def crear_venta(idUsuario, idCliente, productos, montoTotal, recibioDinero, foli
 
     except Exception as e:
         session.rollback() 
-        print(e)
         raise ValueError(f'Ocurrió un error: {str(e)}')
 
 def obtener_detalle_venta(idVenta):
@@ -152,6 +151,12 @@ def revertir_venta_producto(ventaId,productoId):
     return True
 
 def modificar_venta_producto(ventaId,productoId,tipoVenta,cantidad,precioVenta):
-    db.session.execute(text(f"CALL proc_modificar_venta_producto({ventaId},{productoId},'{tipoVenta}',{cantidad},{precioVenta})"))
-    db.session.commit()
-    return True
+    session = db.session 
+
+    try:
+        with session.begin():
+            session.execute(text(f"CALL proc_modificar_venta_producto({ventaId},{productoId},'{tipoVenta}',{cantidad},{precioVenta})"))
+            return True
+    except Exception as e:
+            session.rollback() 
+            raise ValueError(f'Ocurrió un error: {str(e)}')
