@@ -16,12 +16,7 @@ def iniciar_sesion(username, password):
         return jsonify({'error' : 'No tienes permisos para acceder a esta sección, tu cuenta está deshabilitada. Contacta con el administrador para más detalles.'}), 403
     
     # Verificar si el usuario tiene un idRol no permitido (idRol == 3)
-    if user.idRol == 3:
-        return jsonify({'error': 'No tienes permisos para acceder a esta sección. Contacta con el administrador para más detalles.'}), 403
-    
-    # Verificar si el idRol es 1 o 2 (roles permitidos)
-    if user.idRol in [1, 2]:
-        sesion['id'] = user.idUsuario
-        sesion['idRol'] = user.idRol
-        sesion['usuario'] = user.usuario
-        return jsonify(sesion)
+    sesion['id'] = user.idUsuario
+    sesion['idRol'] = user.idRol
+    sesion['usuario'] = user.usuario
+    return jsonify(sesion)
