@@ -1,5 +1,6 @@
 from flask import request, jsonify
-from ventas.funciones import obtener_ventas, obtener_detalle_venta, obtener_ventas_totales_por_usuario_fechas, crear_venta, revertir_venta, revertir_venta_producto, modificar_venta_producto
+from ventas.funciones import obtener_ventas, obtener_detalle_venta, obtener_ventas_totales_por_usuario_fechas, crear_venta,\
+      revertir_venta, revertir_venta_producto, modificar_venta_producto, obtener_venta_preciso
 from ventas import sales as routes
 
 @routes.route('/ventas', methods=['GET'])
@@ -16,6 +17,19 @@ def get_ventas():
         return jsonify(ventas)
     except Exception as e:
         return jsonify({'error': 'Ocurrió un problema al obtener las ventas. Por favor, inténtalo más tarde.'}), 500
+    
+@routes.route('/venta_preciso/<ticket>', methods=['GET'])
+def get_venta_preciso(ticket):
+    try:
+        venta_preciso = obtener_venta_preciso(ticket)
+        # Devuelve un mensaje si no se encuentra el producto
+        if venta_preciso is None or len (venta_preciso) == 0:
+            return jsonify(None)
+        
+        return jsonify(venta_preciso)
+    except Exception as e:
+        print(f"Error en get_venta_preciso: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @routes.route('/ventas/<int:id>/productos', methods=['GET'])
 def get_detalle_venta(id):

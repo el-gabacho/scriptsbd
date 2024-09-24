@@ -33,6 +33,31 @@ def obtener_ventas(filtros):
         })
     return ventas_list
 
+def obtener_venta_preciso(ticket):  
+    query = db.session.query(Venta.idVenta, Venta.folioTicket, PagoVenta.referenciaUnica, TipoPago.tipoPago, Venta.montoTotal, Venta.fechaVenta, Usuario.usuario
+        ).join(PagoVenta, Venta.idVenta == PagoVenta.idVenta
+        ).join(TipoPago, PagoVenta.idTipoPago == TipoPago.idTipoPago
+        ).join(Usuario, Venta.idUsuario == Usuario.idUsuario
+        ).filter(Venta.folioTicket == ticket
+        ).first()
+    
+    # Validar que no se encontró una venta
+    if query is None:
+        return None
+    
+    # Usar 'query' para acceder a los valores
+    venta = {
+        'Id': query.idVenta,
+        'Folio': query.folioTicket,
+        'Referencia': query.referenciaUnica,
+        'TipoPago': query.tipoPago,
+        'MontoTotal': query.montoTotal,
+        'Fecha': query.fechaVenta.isoformat() + 'Z',
+        'Usuario': query.usuario
+    }
+    
+    return venta
+
 def crear_venta(idUsuario, idCliente, productos, montoTotal, recibioDinero, folioTicket, imprimioTicket, idTipoPago, referenciaUnica):
     session = db.session 
 
