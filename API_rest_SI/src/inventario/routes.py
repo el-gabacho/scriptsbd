@@ -1,7 +1,7 @@
 from flask import jsonify, request, send_file
 from inventario.funciones import get_productos, get_producto_preciso, get_productos_similares, get_productos_avanzada,\
     obtener_stock_bajo, get_productos_eliminados, crear_producto, modificar_producto, eliminar_producto, reactivar_producto,\
-    agregar_existencias_producto, obtener_imagen
+    agregar_existencias_producto, obtener_imagen, obtener_producto_preciso_incluyendo_eliminados
 from inventario.func_importar import importar_productos
 from inventario import inventory as routes
 from PIL import Image
@@ -28,12 +28,24 @@ def get_info_productos_preciso_by(codigo_barras):
     try:
         producto_preciso = get_producto_preciso(codigo_barras)
         # Devuelve un mensaje si no se encuentra el producto
-        if producto_preciso is None or len (producto_preciso) == 0:
-            return jsonify(None)
+        if producto_preciso is None:
+            return jsonify({'error': 'Producto no encontrado'}), 404
         
         return jsonify(producto_preciso)
     except Exception as e:
         print(f"Error en get_info_productos_preciso_by: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@routes.route('/producto_preciso2/<codigo_barras>', methods=['GET'])
+def get_producto_preciso_sin_filtro(codigo_barras):
+    try:
+        producto_preciso = obtener_producto_preciso_incluyendo_eliminados(codigo_barras)
+        # Devuelve un mensaje si no se encuentra el producto
+        if producto_preciso is None:
+            return jsonify({'error': 'Producto no encontrado'}), 404
+        
+        return jsonify(producto_preciso)
+    except Exception as e:
         return jsonify({'error': str(e)}), 500
     
 # TODOS LOS PRODUCTOS CON INFORMACION CON CODIGO SIMILAR
