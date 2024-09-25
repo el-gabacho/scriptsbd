@@ -16,5 +16,4 @@ def login():
         sesion = iniciar_sesion(username, password)
         return sesion
     except Exception as e:
-        print(e)
         return jsonify({'error':'Hubo un problema con el servidor. Por favor, inténtalo más tarde o contacta con el administrador si el problema persiste.'}), 500

@@ -611,7 +611,6 @@ def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMi
             # Obtener el ID del producto insertado
             result = session.execute(text("SELECT @p_idInventario")).first()
             id_inventario = result[0]
-            print(f"ID de inventario obtenido: {id_inventario}")  # Agregar para depuración
 
             # Procedimiento 2: Insertar imágenes para el producto
             sql = text("""
@@ -638,7 +637,6 @@ def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMi
                 # Obtener el ID del modelo-año generado
                 result = session.execute(text("SELECT @p_idModeloAnio")).first()
                 modelo_anio_id = result[0]
-                print(f"ID de modelo-año obtenido: {modelo_anio_id}")  # Agregar para depuración
                 
                 if modelo_anio_id:
                     modelo_anios_ids.append(modelo_anio_id)
@@ -661,7 +659,6 @@ def crear_producto(codigoBarras, nombre, descripcion, cantidadActual, cantidadMi
     except Exception as e:
         # Manejo de errores, hacer rollback
         session.rollback()
-        print(f"Error: {str(e)}")  # Agregar para depuración
         return {"error": str(e)}
 
 # FUNCION PARA EDITAR UN PRODUCTO ACTIVO
@@ -671,7 +668,6 @@ def modificar_producto(idInventario, codigoBarras, nombre, descripcion, cantidad
     imagenes_list = imagenes.split(',')
     try:
         with session.begin():  # Iniciar la transacción
-
             # Procedimiento 1: Modificar un producto mediante su ID
             sql = text("""
                 CALL proc_actualizar_producto_con_comparacion(:idInventario, :idCategoria, :idUnidadMedida, :codigoBarras, 
@@ -725,7 +721,6 @@ def modificar_producto(idInventario, codigoBarras, nombre, descripcion, cantidad
                 # Obtener el ID del modelo-año generado
                 result = session.execute(text("SELECT @p_idModeloAnio")).first()
                 modelo_anio_id = result[0]
-                print(f"ID de modelo-año obtenido: {modelo_anio_id}")  # Agregar para depuración
                 
                 if modelo_anio_id:
                     modelo_anios_ids.append(modelo_anio_id)
@@ -745,11 +740,18 @@ def modificar_producto(idInventario, codigoBarras, nombre, descripcion, cantidad
         # Si llegamos aquí, todo salió bien, y se hace commit automáticamente
         return idInventario
 
+    except DBAPIError as e:
+        session.rollback()
+        error_message = e.orig.args[1]  # Obtener el mensaje de error
+        raise ValueError(f'Ocurrió un error: {error_message}')
     except SQLAlchemyError as e:
         # Manejo de errores, hacer rollback
         session.rollback()
-        print(f"Error: {str(e)}")  # Agregar para depuración
-        return {"error": str(e)}
+        raise ValueError(f'Ocurrió un error: {str(e)}')
+    except Exception as e:
+        session.rollback() 
+        raise ValueError(f'Ocurrió un error: {str(e)}')
+
 
 
 # FUNCIÓN PARA ELIMINAR UN PRODUCTO ACTIVO Y SUS IMÁGENES
@@ -783,15 +785,11 @@ def eliminar_producto(idInventario, idUsuario):
 
     except SQLAlchemyError as e:
         session.rollback()  # Hacer rollback en caso de error
-        print(f"Error al eliminar el producto en eliminar_producto: {str(e)}")
         return {"error": str(e)}
 
 # FUNCIÓN PARA ELIMINAR LAS IMÁGENES DEL SERVIDOR
 def eliminar_imagenes_del_servidor(idInventario):
     try:
-        # Depuración: Verifica si el idInventario es válido
-        print(f"Eliminando imágenes para el idInventario: {idInventario}")
-        
         # Obtener el código de barras y las imágenes relacionadas usando el idInventario
         query = db.session.query(
             Inventario.codigoBarras,
@@ -807,11 +805,9 @@ def eliminar_imagenes_del_servidor(idInventario):
         ).first()
 
         if query is None:
-            print("Producto no encontrado, no se eliminarán imágenes.")
             return  # Simplemente salimos sin hacer nada
 
         codigo_barras = query.codigoBarras
-        print(f"Código de barras del producto: {codigo_barras}")
 
         # Paso 1: Eliminar las imágenes correspondientes al código de barras
         for imagenId, imagen_field in enumerate(
@@ -823,7 +819,6 @@ def eliminar_imagenes_del_servidor(idInventario):
                 # Verificar si el archivo existe y eliminarlo
                 if os.path.exists(image_path):
                     os.remove(image_path)
-                    print(f"Imagen eliminada: {image_path}")
                 else:
                     print(f"La imagen no existe o ya fue eliminada: {image_path}")
             else:
@@ -854,7 +849,6 @@ def reactivar_producto(idInventario):
     except SQLAlchemyError as e:
         # Manejo de errores, hacer rollback
         session.rollback()
-        print(f"Error: {str(e)}")  # Agregar para depuración
         return {"error": str(e)}
 
 ### FUNCION PARA AGREGAR EXISTENCIAS A UN PRODUCTO

@@ -152,7 +152,7 @@ def extraer_vehiculos(nombre):
     marcas_encontradas = marca_regex.findall(nombre)
     anio_match = anio_regex.search(nombre)
     anio = anio_match.group(0) if anio_match else None
-
+    anio_eliminar = anio if anio else None
 
     for i, marca in enumerate(marcas_encontradas):
         marca = marca.upper()
@@ -199,7 +199,16 @@ def extraer_vehiculos(nombre):
         # Eliminar la sección procesada del nombre
         nombre = nombre[fin_seccion:]
 
-    return vehiculos
+    return vehiculos, anio_eliminar
+
+def eliminar_diagonales_solitarias(texto):
+    # Elimina las diagonales al principio del texto
+    texto = re.sub(r"^/", "", texto)
+    # Elimina las diagonales que están precedidas por un carácter no alfanumérico
+    texto = re.sub(r"(?<=\W)/", "", texto)
+    # Elimina las diagonales al final del texto o que están seguidas por un carácter no alfanumérico
+    texto = re.sub(r"/(?=\W|$)", "", texto)
+    return texto
 
 def obtener_productos():
     productos_list = []
@@ -209,14 +218,18 @@ def obtener_productos():
     productos = cursor.fetchall()
 
     for producto in productos:
-        vehiculos = extraer_vehiculos(producto[2])
+        vehiculos, anio_eliminar = extraer_vehiculos(producto[2])
         if vehiculos:
             descripcion = eliminar_info_vehiculo(producto[2], vehiculos)
+            if anio_eliminar:
+                descripcion = descripcion.replace(anio_eliminar, '')
+            descripcion = eliminar_diagonales_solitarias(descripcion)
         else:
             descripcion = producto[2]
         descripcion = descripcion.strip()
         descripcion = descripcion.replace('  ', ' ')
         descripcion = descripcion.replace('/  / ', '')
+        descripcion = descripcion.replace('()', '')
             
         categoria = extraer_categoria(producto[2])
         if not categoria:

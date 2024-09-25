@@ -28,7 +28,6 @@ def get_venta_preciso(ticket):
         
         return jsonify(venta_preciso)
     except Exception as e:
-        print(f"Error en get_venta_preciso: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @routes.route('/ventas/<int:id>/productos', methods=['GET'])
@@ -104,7 +103,6 @@ def reverse_venta_producto(ventaId,productoId):
 def update_venta_producto(ventaId,productoId):
     try:
         data = request.get_json()
-        print(data)
         cantidad = data.get('cantidad')
         tipoVenta = data.get('tipoVenta')
         precioVenta = data.get('precio')

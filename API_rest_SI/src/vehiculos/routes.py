@@ -160,9 +160,7 @@ def create_modelo():
     try:
         data = request.get_json()
         idMarca = data.get('idMarca')
-        print(f"se obtiene : {idMarca}")
         nombre = data.get('nombre')
-        print(f"se obtiene : {nombre}")
 
         # Validar que el nombre del modelo no esté vacío
         if not nombre or nombre.strip() == '':
@@ -235,5 +233,4 @@ def get_vehiculos(idInventario):
         vehiculos = obtener_datos_modelo_autopartes(idInventario)
         return jsonify(vehiculos), 200
     except Exception as e:
-        print(e)
         return jsonify({'error': 'Ocurrió un problema al obtener los vehículos.'}), 500

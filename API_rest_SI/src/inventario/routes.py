@@ -33,7 +33,6 @@ def get_info_productos_preciso_by(codigo_barras):
         
         return jsonify(producto_preciso)
     except Exception as e:
-        print(f"Error en get_info_productos_preciso_by: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @routes.route('/producto_preciso2/<codigo_barras>', methods=['GET'])
@@ -141,7 +140,6 @@ def get_producto_eliminado():
         
         return jsonify(eliminado_producto)
     except Exception as e:
-        print(f"Error en get_producto_eliminado: {str(e)}")
         return jsonify({'error': str(e)}), 500
     
 # ---------------------------------------------------------------------------------------------
@@ -153,7 +151,6 @@ def create_producto():
     try:
         # Obtener los datos del producto del cuerpo de la solicitud POST
         data = request.get_json()
-        print("Datos recibidos:", data)  # Agregar para depuración
         
         # Extraer los datos del JSON
         codigoBarras = data.get('codigo')
@@ -173,7 +170,6 @@ def create_producto():
         
         # Extraer la lista de vehículos
         vehiculos = data.get('vehiculos', [])  # Definir valor por defecto vacío en caso de que no se proporcione
-        print("Vehículos recibidos:", vehiculos)  # Agregar para depuración
 
         # Validar que todos los campos obligatorios están presentes y no vacíos
         if not all([codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima,
@@ -214,7 +210,6 @@ def upload_files():
                 filename = secure_filename(file.filename)
                 file.save(os.path.join('C:\\imagenes_el_gabacho\\productosInventario', filename))
     except Exception as e:
-        print(e)
         return jsonify({'message': 'Allowed file types are .webp'}), 400
     return jsonify({'message': 'Files successfully uploaded'}), 200
 
@@ -224,7 +219,6 @@ def modificar_producto_route():
     try:
         # Obtener los datos enviados en el cuerpo de la solicitud
         data = request.get_json()
-
         # Extraer los valores necesarios del JSON recibido
         idInventario = data.get('idInventario')
         codigoBarras = data.get('codigo')
@@ -243,10 +237,16 @@ def modificar_producto_route():
         vehiculos = data.get('vehiculos')
 
         # Validar que el ID del producto esté presente
-        if not all([idInventario, codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima,
-                    precioCompra, mayoreo, menudeo, colocado, idUnidadMedida, idProveedor,
+        if not all([idInventario, codigoBarras, nombre, descripcion, idUnidadMedida, idProveedor,
                     idCategoria,imagenes, vehiculos]):
             return jsonify({'error': 'Todos los campos obligatorios deben estar completos.'}), 400
+        if not all([cantidadActual, cantidadMinima, precioCompra, mayoreo, menudeo, colocado]):
+            cantidadActual = 0
+            cantidadMinima = 0
+            precioCompra = 0
+            mayoreo = 0
+            menudeo = 0
+            colocado = 0
         # Llamar a la función que realiza la modificación del producto
         resultado = modificar_producto(idInventario, codigoBarras, nombre, descripcion, cantidadActual, cantidadMinima,
                                        precioCompra, mayoreo, menudeo, colocado, idUnidadMedida, idCategoria,
@@ -255,6 +255,8 @@ def modificar_producto_route():
         # Retornar una respuesta con el ID del producto modificado
         return jsonify({'message': 'Producto modificado correctamente', 'idInventario': resultado}), 200
 
+    except ValueError as ve:
+        return jsonify({'error': str(ve)}), 400
     except Exception as e:
         # En caso de un error, devolver una respuesta con el error
         return jsonify({'error': str(e)}), 500
@@ -266,7 +268,6 @@ def eliminar_producto_route():
     try:
         # Obtener datos del cuerpo de la solicitud JSON
         data = request.get_json()
-        print(f"Received data: {data}")  # Verifica los datos recibidos
         
         # Extraer 'idInventario' y 'idUsuario' del cuerpo de la solicitud
         idInventario = data.get('IdInventario')
@@ -275,9 +276,6 @@ def eliminar_producto_route():
         # Validar que ambos parámetros son obligatorios
         if idInventario is None or idUsuario is None:
             return jsonify({'error': 'Los campos idInventario e idUsuario son obligatorios.'}), 400
-
-        print(f"primer parametro = {idInventario}")
-        print(f"segundo parametro = {idUsuario}")
 
         # Llamar a la función para eliminar el producto
         resultado = eliminar_producto(idInventario, idUsuario)
@@ -289,7 +287,6 @@ def eliminar_producto_route():
         return jsonify(resultado), 200
 
     except Exception as e:
-        print(f"Error en eliminar_producto_route: {str(e)}")
         return jsonify({'error': str(e)}), 500
     
 
@@ -298,9 +295,7 @@ def eliminar_producto_route():
 def reactive_producto():
     try:
         data = request.get_json()
-        print(f"Received data: {data}")  # Verifica los datos recibidos
         idInventario = data.get('IdInventario')
-        print(f"primer parametro = {idInventario}")
 
         # Validar que idInventario no sea nulo
         if idInventario is None:
@@ -347,7 +342,6 @@ def agregar_existencias_producto_route():
 
     except Exception as e:
         # Manejo de cualquier excepción no esperada
-        print(f"Error en agregar_existencias_producto_route: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 # ---------------------------------------------------------------------------------------------

@@ -14,10 +14,8 @@ def get_marcas_with_model_count():
         marcas = get_marcas()
         return jsonify(marcas)
     except ProgrammingError as e:
-        print(e)
         return jsonify({'error': 'Error en la estructura de la base de datos', 'details': str(e)}), 500
     except Exception as e:
-        print(e)
         return jsonify({'error': 'Ocurrió un error inesperado', 'details': str(e)}), 500
 
 # -----------------------------------------------------------------------------------------------------------------------------------
@@ -53,7 +51,6 @@ def get_models(id):
     except ProgrammingError as e:
         return jsonify({'error': 'Error en la estructura de la base de datos', 'details': str(e)}), 500
     except Exception as e:
-        print(e)
         return jsonify({'error': 'Ocurrió un error inesperado', 'details': str(e)}), 500
 
 # -----------------------------------------------------------------------------------------------------------------------------------
