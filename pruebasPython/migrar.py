@@ -40,13 +40,18 @@ correcciones = {
 
 # Expresión regular para extraer marca, modelo y año
 marca_regex = re.compile(r'\b(' + '|'.join(marcas) + r')\b', re.IGNORECASE)
-anio_regex = re.compile(r'\b((19[6-9]\d|20[0-2]\d)|(\d{2}|\d{4})\s*[-/]\s*(\d{2}|\d{4}))\b')
+anio_regex = re.compile(r'\b((\d{2}|\d{4})\s*[-/]\s*(\d{2}|\d{4})|(19[6-9]\d|20[0-2]\d))\b')
 categoria_regex = re.compile(r'\b(' + '|'.join(categorias) + r')\b', re.IGNORECASE)
 
 def migrate_and_cleanse_data():
     # Primera consulta
     cursor.execute("USE punto_venta;")
     cursor.execute("DELETE FROM tc_productos WHERE estatus=0 OR codigo_barras='';")
+    cursor.execute("""
+        UPDATE tc_productos
+        SET codigo_barras = REPLACE(codigo_barras, '/', '-')
+        WHERE codigo_barras LIKE '%/%';
+    """)
     cursor.execute("""
         DELETE p
         FROM tc_productos p
@@ -210,6 +215,18 @@ def eliminar_diagonales_solitarias(texto):
     texto = re.sub(r"/(?=\W|$)", "", texto)
     return texto
 
+def eliminar_caracteres_raros(texto):
+    texto = texto.replace('  ', ' ')
+    texto = texto.replace('/  / ', '')
+    texto = texto.replace('()', '')
+    texto = texto.lstrip(',')
+    texto = texto.lstrip('Y')
+    texto = texto.lstrip('-')
+    texto = texto.lstrip('.')
+    texto = texto.replace(', ,', '')
+    texto = re.sub(r"\s+", " ", texto)
+    return texto.strip()
+
 def obtener_productos():
     productos_list = []
     producto_dict = {}
@@ -224,12 +241,10 @@ def obtener_productos():
             if anio_eliminar:
                 descripcion = descripcion.replace(anio_eliminar, '')
             descripcion = eliminar_diagonales_solitarias(descripcion)
+            descripcion = eliminar_caracteres_raros(descripcion)
         else:
             descripcion = producto[2]
-        descripcion = descripcion.strip()
-        descripcion = descripcion.replace('  ', ' ')
-        descripcion = descripcion.replace('/  / ', '')
-        descripcion = descripcion.replace('()', '')
+        descripcion = eliminar_caracteres_raros(descripcion)
             
         categoria = extraer_categoria(producto[2])
         if not categoria:
@@ -365,12 +380,14 @@ def procesar_producto(producto):
 # Contadores para productos insertados y actualizados
 total_insertados = 0
 total_actualizados = 0
+total = 0
 try:
     migrate_and_cleanse_data()
     productos_list = obtener_productos()
+    total = len(productos_list)
 
     # Procesar cada producto en la lista de productos
-    for producto in productos_list:
+    for i, producto in enumerate(productos_list, 1):
         actualizado, registrado = procesar_producto(producto)
         if actualizado is None and registrado is None:
             continue
@@ -379,8 +396,14 @@ try:
         elif registrado:
             total_insertados += 1
 
+        if i % 1000 == 0:
+            print(f"Procesados {i} de {total} productos")
+
     cursor.execute("DROP table tc_productos2;")
     cnx.commit()
+except DatabaseError as e:
+    print(e)
+    cnx.rollback()
 finally:
     # Cerrar el cursor y la conexión
     cursor.close()

@@ -1,22 +1,18 @@
 import mysql.connector
 from PIL import Image
 import io
-import os
 
 # Conectar a la base de datos
 conn = mysql.connector.connect(
-    host='localhost',
+    host='localhost', port=3307,
     user='root',
     password='root',
-    database='punto_venta'
+    database='punto_venta', collation='utf8mb4_general_ci'
 )
+IMAGE_ROOT_PATH = "C:\\imagenes_el_gabacho\\productosInventario\\"
 
 # Crear un cursor
 cursor = conn.cursor()
-
-# Crear una carpeta para guardar las imágenes si no existe
-if not os.path.exists('images'):
-    os.makedirs('images')
 
 # Tamaño del lote
 batch_size = 100
@@ -34,19 +30,19 @@ for batch in range(num_batches):
     print(f'Procesando lote {batch + 1} de {num_batches}, registros {offset + 1} a {offset + batch_size}')
     
     # Ejecutar la consulta para obtener un lote de BLOBs que no están vacíos
-    cursor.execute(f"SELECT idproducto, imagen FROM tc_productos WHERE imagen != '' LIMIT {batch_size} OFFSET {offset}")
+    cursor.execute(f"SELECT codigo_barras, imagen FROM tc_productos WHERE imagen != '' LIMIT {batch_size} OFFSET {offset}")
     records = cursor.fetchall()
     
     # Procesar cada registro en el lote
     for record in records:
-        idproducto = record[0]
+        codigo_barras = record[0]
         imagen_blob = record[1]
         
         # Convertir los datos binarios a una imagen
         image = Image.open(io.BytesIO(imagen_blob))
         
         # Guardar la imagen en formato WebP
-        image.save(f'images/{idproducto}.webp', 'webp')
+        image.save(f'{IMAGE_ROOT_PATH}{codigo_barras}_1.webp', 'webp')
         
         # Liberar la memoria de la imagen
         image.close()

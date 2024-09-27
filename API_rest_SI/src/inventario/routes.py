@@ -11,6 +11,7 @@ from werkzeug.utils import secure_filename
 
 # ---------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------
+IMAGE_ROOT_PATH = "C:\\imagenes_el_gabacho\\"
 
 # TODOS LOS PRODUCTOS CON INFORMACION
 @routes.route('/info_productos', methods=['GET'])
@@ -359,7 +360,7 @@ def importar_productos_csv(usuarioId):
         
         if archivo:
             # Guardar el archivo en el directorio de archivos temporales
-            ruta_archivo = os.path.join('C:\\Users\\VALENCIA\\Documents\\proyectos\\el-gabacho\\files', archivo.filename)
+            ruta_archivo = os.path.join(f'{IMAGE_ROOT_PATH}\\files', archivo.filename)
             archivo.save(ruta_archivo)
             
             resultado = importar_productos(ruta_archivo, usuarioId)

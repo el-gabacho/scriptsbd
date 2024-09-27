@@ -4,6 +4,8 @@ from configuracion import config as routes
 from werkzeug.utils import secure_filename
 import os
 
+IMAGE_ROOT_PATH = "C:\\imagenes_el_gabacho\\"
+
 @routes.route('/configuracion', methods=['GET'])
 def getConfiguracion():
     try:
@@ -43,7 +45,7 @@ def upload_files():
 
             if file:
                 filename = secure_filename(file.filename)
-                file.save(os.path.join('C:\\Users\\VALENCIA\\Documents\\proyectos\\el-gabacho\\images', filename))
+                file.save(os.path.join(IMAGE_ROOT_PATH, filename))
         return jsonify({'message': 'Files successfully uploaded'}), 200
             
     except Exception as e:
