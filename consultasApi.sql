@@ -216,3 +216,10 @@ SELECT m.idMarca, m.nombre, mo.idModelo, mo.nombre, a.anioInicio, a.anioFin, a.a
 FROM modeloAutopartes mp LEFT JOIN modeloanios ma ON mp.idModeloAnio=ma.idModeloAnio 
 LEFT JOIN modelos mo ON ma.idModelo=mo.idModelo LEFT JOIN marcas m ON mo.idMarca=m.idMarca LEFT JOIN anios a ON ma.idAnio=a.idAnio
 WHERE mp.idInventario=2;
+
+# agregar los idInvetario de la imagenes temporales depues de ejecutar pruebasPython/save_images.py
+INSERT INTO imagenes (idInventario, imgRepresentativa)
+SELECT p1.idInventario, true
+FROM inventario p1
+JOIN punto_venta.tc_productos p2 ON p1.codigoBarras = p2.codigo_barras
+WHERE p2.imagen IS NOT NULL;
