@@ -72,7 +72,7 @@ def create_venta():
         idTipoPago = data.get('idTipoPago')
         referenciaUnica = data.get('referencia')
         
-        if not idUsuario or not idCliente or not productos or not montoTotal or not recibioDinero or not folioTicket or not imprimioTicket or not idTipoPago:
+        if not idUsuario or not idCliente or not productos or not montoTotal or not recibioDinero or not folioTicket or not idTipoPago:
             return jsonify({'error': 'Faltan datos para crear la venta'}), 400
         if not referenciaUnica:
             referenciaUnica = 'NO APLICA'
