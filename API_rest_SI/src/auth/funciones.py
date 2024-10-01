@@ -18,5 +18,6 @@ def iniciar_sesion(username, password):
     # Verificar si el usuario tiene un idRol no permitido (idRol == 3)
     sesion['id'] = user.idUsuario
     sesion['idRol'] = user.idRol
-    sesion['usuario'] = user.usuario
+    sesion['nombreUsuario'] = user.usuario
+    sesion['NombreCompleto'] = user.nombreCompleto
     return jsonify(sesion)
