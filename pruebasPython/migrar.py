@@ -5,7 +5,7 @@ import time
 from inflect import engine
 import Levenshtein
 
-cnx = mysql.connector.connect(user='root', password='root', host='localhost', port=3307, collation='utf8mb4_general_ci')
+cnx = mysql.connector.connect(user='admin', password='admin123', host='localhost', port=3306, collation='utf8mb4_general_ci')
 
 cursor = cnx.cursor()
 errores_list = []

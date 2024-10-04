@@ -7,7 +7,7 @@ from proveedores.modelos import Proveedor, ProveedorProducto
 from vehiculos.modelos import Marca, ModeloAutoparte, ModeloAnio, Modelo, Anio
 import os
 
-IMAGE_ROOT_PATH = "C:\\imagenes_el_gabacho\\productosInventario\\"
+IMAGE_ROOT_PATH = "/home/soygabacho/imagenes/productos/"
 
 # OBTENER INFORMACION DE TODOS LOS PRODUTOS ACTIVOS
 def get_productos():

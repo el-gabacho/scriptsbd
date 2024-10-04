@@ -11,7 +11,8 @@ from werkzeug.utils import secure_filename
 
 # ---------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------
-IMAGE_ROOT_PATH = "C:\\imagenes_el_gabacho\\"
+IMAGE_ROOT_PATH = "/home/soygabacho/imagenes/productos"
+FILE_ROOT_PATH = "/home/soygabacho/archivos"
 
 # TODOS LOS PRODUCTOS CON INFORMACION
 @routes.route('/info_productos', methods=['GET'])
@@ -209,7 +210,7 @@ def upload_files():
 
             if file:
                 filename = secure_filename(file.filename)
-                file.save(os.path.join('C:\\imagenes_el_gabacho\\productosInventario', filename))
+                file.save(os.path.join(IMAGE_ROOT_PATH, filename))
     except Exception as e:
         return jsonify({'message': 'Allowed file types are .webp'}), 400
     return jsonify({'message': 'Files successfully uploaded'}), 200
@@ -360,7 +361,7 @@ def importar_productos_csv(usuarioId):
         
         if archivo:
             # Guardar el archivo en el directorio de archivos temporales
-            ruta_archivo = os.path.join(f'{IMAGE_ROOT_PATH}\\files', archivo.filename)
+            ruta_archivo = os.path.join(FILE_ROOT_PATH, archivo.filename)
             archivo.save(ruta_archivo)
             
             resultado = importar_productos(ruta_archivo, usuarioId)

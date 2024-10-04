@@ -4,7 +4,7 @@ from configuracion import config as routes
 from werkzeug.utils import secure_filename
 import os
 
-IMAGE_ROOT_PATH = "C:\\imagenes_el_gabacho\\"
+IMAGE_ROOT_PATH = "/home/soygabacho/imagenes/carrrusel"
 
 @routes.route('/configuracion', methods=['GET'])
 def getConfiguracion():

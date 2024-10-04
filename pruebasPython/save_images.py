@@ -4,12 +4,12 @@ import io
 
 # Conectar a la base de datos
 conn = mysql.connector.connect(
-    host='localhost', port=3307,
-    user='root',
-    password='root',
+    host='localhost', port=3306,
+    user='admin',
+    password='admin123',
     database='punto_venta', collation='utf8mb4_general_ci'
 )
-IMAGE_ROOT_PATH = "C:\\imagenes_el_gabacho\\productosInventario\\"
+IMAGE_ROOT_PATH = "/home/soygabacho/imagenes/productos/"
 
 # Crear un cursor
 cursor = conn.cursor()
