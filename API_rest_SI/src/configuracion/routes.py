@@ -4,7 +4,7 @@ from configuracion import config as routes
 from werkzeug.utils import secure_filename
 import os
 
-IMAGE_ROOT_PATH = "/home/soygabacho/imagenes/carrrusel"
+IMAGE_ROOT_PATH = "/home/soygabacho/imagenes"
 
 @routes.route('/configuracion', methods=['GET'])
 def getConfiguracion():
@@ -45,7 +45,12 @@ def upload_files():
 
             if file:
                 filename = secure_filename(file.filename)
-                file.save(os.path.join(IMAGE_ROOT_PATH, filename))
+                if filename.split('.')[-1] != 'webp':
+                    return jsonify({'error': 'Allowed file types are .webp'}), 400
+                if filename == 'logo.webp':
+                    file.save(os.path.join(IMAGE_ROOT_PATH, filename))
+                else:
+                    file.save(os.path.join(f"{IMAGE_ROOT_PATH}/carrrusel", filename))
         return jsonify({'message': 'Files successfully uploaded'}), 200
             
     except Exception as e:
