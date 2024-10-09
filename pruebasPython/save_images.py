@@ -48,9 +48,9 @@ for batch in range(num_batches):
         image.close()
 
 cursor.execute("""
-    INSERT INTO imagenes (idInventario, imgRepresentativa)
+    INSERT INTO el_gabacho.imagenes (idInventario, imgRepresentativa)
     SELECT p1.idInventario, true
-    FROM inventario p1
+    FROM el_gabacho.inventario p1
     JOIN punto_venta.tc_productos p2 ON p1.codigoBarras = p2.codigo_barras
     WHERE p2.imagen IS NOT NULL;
 """)
