@@ -1,0 +1,177 @@
+import os
+import shutil
+import mysql.connector
+from collections import defaultdict
+
+# Configuración de la conexión a la base de datos
+conn = mysql.connector.connect(
+    user='root',
+    password='root',
+    host='localhost',
+    port=3306,
+    database='el_gabacho',
+    collation='utf8mb4_general_ci'
+)
+
+cursor = conn.cursor()
+
+def procesar_imagenes(carpeta_origen, carpeta_destino_base):
+    print("Iniciando el procesamiento de imágenes...")
+    imagenes_por_producto = defaultdict(list)
+
+    for archivo in os.listdir(carpeta_origen):
+        if archivo.endswith('.webp'):
+            codigo_barras = archivo.split('_')[0]
+            imagenes_por_producto[codigo_barras].append(archivo)
+            print(f"Imagen '{archivo}' agrupada bajo el código de barras: {codigo_barras}")
+
+    for codigo_barras, imagenes in imagenes_por_producto.items():
+        print(f"Procesando imágenes para el código de barras: {codigo_barras}")
+        
+        imagenes = [img for img in imagenes if img.count('_') == 1 and 1 <= int(img.split('_')[1].split('.')[0]) <= 5]
+        imagenes.sort()
+        imagenes = imagenes[:5]
+
+        print(f"Imágenes filtradas y ordenadas: {imagenes}")
+
+        cursor.execute("SELECT idInventario FROM inventario WHERE codigoBarras = %s", (codigo_barras,))
+        result = cursor.fetchone()
+        
+        if result:
+            id_inventario = result[0]
+            print(f"Producto encontrado: idInventario {id_inventario}")
+
+            cursor.execute("SELECT * FROM imagenes WHERE idInventario = %s", (id_inventario,))
+            imagenes_result = cursor.fetchone()
+            
+            if imagenes_result is None:
+                print("No hay registro de imágenes, proceder a insertar...")
+                mover_y_guardar_imagenes_insertar(id_inventario, imagenes, carpeta_origen, carpeta_destino_base)
+            else:
+                print("Ya existe un registro de imágenes, proceder a actualizar...")
+                mover_y_guardar_imagenes_actualizar(id_inventario, imagenes, carpeta_origen, carpeta_destino_base, imagenes_result)
+        else:
+            print(f"El producto con código de barras {codigo_barras} no existe en la tabla inventario.")
+
+def mover_y_guardar_imagenes_insertar(id_inventario, imagenes, carpeta_origen, carpeta_destino_base):
+    print(f"Moviendo y guardando imágenes para el idInventario {id_inventario}...")
+    os.makedirs(carpeta_destino_base, exist_ok=True)
+    
+    # Inicializar todas las imágenes en FALSE
+    img_representativa = img2 = img3 = img4 = img5 = False
+
+    for archivo in imagenes:
+        # Extraer el sufijo de la imagen (1, 2, 3, 4, 5)
+        sufijo = int(archivo.split('_')[1].split('.')[0])
+        
+        ruta_imagen_origen = os.path.join(carpeta_origen, archivo)
+        ruta_imagen_destino = os.path.join(carpeta_destino_base, archivo)
+        shutil.move(ruta_imagen_origen, ruta_imagen_destino)
+        print(f"Imagen '{archivo}' movida a {carpeta_destino_base}")
+
+        # Asignar TRUE a la variable correspondiente según el sufijo
+        if sufijo == 1:
+            img_representativa = True
+        elif sufijo == 2:
+            img2 = True
+        elif sufijo == 3:
+            img3 = True
+        elif sufijo == 4:
+            img4 = True
+        elif sufijo == 5:
+            img5 = True
+
+    # Insertar los registros en la base de datos
+    cursor.execute(""" 
+        INSERT INTO imagenes (idInventario, imgRepresentativa, img2, img3, img4, img5)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, (id_inventario, img_representativa, img2, img3, img4, img5))
+    conn.commit()
+    print(f"Registro de imágenes para el idInventario {id_inventario} creado.")
+
+def mover_y_guardar_imagenes_actualizar(id_inventario, imagenes, carpeta_origen, carpeta_destino_base, imagenes_result):
+    print(f"Actualizando imágenes para el idInventario {id_inventario}...")
+    os.makedirs(carpeta_destino_base, exist_ok=True)
+
+    # Extraer los valores del estado actual de las imágenes de imagenes_result
+    img_representativa_actual = bool(imagenes_result[2])  # Estado actual de imgRepresentativa
+    img2_actual = bool(imagenes_result[3])                # Estado actual de img2
+    img3_actual = bool(imagenes_result[4])                # Estado actual de img3
+    img4_actual = bool(imagenes_result[5])                # Estado actual de img4
+    img5_actual = bool(imagenes_result[6])                # Estado actual de img5
+
+    # Crear el diccionario de estado actual
+    estado_actual = {
+        'imgRepresentativa': img_representativa_actual,
+        'img2': img2_actual,
+        'img3': img3_actual,
+        'img4': img4_actual,
+        'img5': img5_actual
+    }
+
+    # Inicializar el nuevo estado de las imágenes en FALSE
+    nuevo_estado = {
+        'imgRepresentativa': False,
+        'img2': False,
+        'img3': False,
+        'img4': False,
+        'img5': False
+    }
+
+    # Mover cada imagen y actualizar el nuevo estado
+    for archivo in imagenes:
+        # Extraer el sufijo de la imagen (1, 2, 3, 4, 5)
+        sufijo = int(archivo.split('_')[1].split('.')[0])
+        
+        # Determinar la clave de estado según el sufijo
+        clave_estado = f'img{"Representativa" if sufijo == 1 else sufijo}'
+
+        ruta_imagen_origen = os.path.join(carpeta_origen, archivo)
+        ruta_imagen_destino = os.path.join(carpeta_destino_base, archivo)
+
+        # Mover la imagen a la carpeta de destino
+        shutil.move(ruta_imagen_origen, ruta_imagen_destino)
+        print(f"Imagen '{archivo}' movida a {carpeta_destino_base}")
+
+        # Marcar el nuevo estado como TRUE
+        nuevo_estado[clave_estado] = True
+
+    # Convertir booleanos a enteros para la comparación con los datos de la base de datos
+    nuevo_estado_enteros = {key: int(value) for key, value in nuevo_estado.items()}
+
+    # Verificar si hay diferencias y preparar los campos que se deben actualizar
+    campos_a_actualizar = []
+    valores_a_actualizar = []
+
+    for clave, nuevo_valor in nuevo_estado_enteros.items():
+        valor_actual = int(estado_actual[clave])  # Convertir el estado actual a entero para comparar
+        if valor_actual == 0 and nuevo_valor == 1:
+            # Solo actualizar si el valor actual era FALSE (0) y el nuevo valor es TRUE (1)
+            campos_a_actualizar.append(f"{clave} = %s")
+            valores_a_actualizar.append(nuevo_valor)
+
+    if campos_a_actualizar:
+        # Si hay cambios, preparar la consulta de actualización
+        consulta_update = f"""
+            UPDATE imagenes 
+            SET {', '.join(campos_a_actualizar)}
+            WHERE idInventario = %s
+        """
+        valores_a_actualizar.append(id_inventario)
+        cursor.execute(consulta_update, tuple(valores_a_actualizar))
+        conn.commit()
+        print(f"Registro de imágenes para el idInventario {id_inventario} actualizado.")
+    else:
+        print("No se detectaron cambios en los estados de las imágenes, solo se movieron los archivos.")
+
+
+# Uso del script
+carpeta_origen = r'C:\Users\eldel\OneDrive\Escritorio\IMGabachoTexto'
+carpeta_destino_base = r'C:\imagenes_el_gabacho\productosInventario'
+
+procesar_imagenes(carpeta_origen, carpeta_destino_base)
+
+# Cierre de la conexión
+cursor.close()
+conn.close()
+print("Conexión a la base de datos cerrada.")

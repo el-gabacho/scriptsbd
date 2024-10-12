@@ -2,8 +2,8 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 
 # Rutas de las carpetas
-carpeta_imagenes = r'C:\Users\Anonymous\Desktop\7790'
-output_folder = r'C:\Users\Anonymous\Desktop\IMGabachoTexto'
+carpeta_imagenes = r'C:\Users\eldel\OneDrive\Escritorio\7790'
+output_folder = r'C:\Users\eldel\OneDrive\Escritorio\IMGabachoTexto'
 
 # Crear la carpeta de salida si no existe
 if not os.path.exists(output_folder):
@@ -13,7 +13,7 @@ if not os.path.exists(output_folder):
 watermark_text = "EL GABACHO"
 
 # Cargar la fuente
-font_path = r"C:\Users\Anonymous\Desktop\BonaNova-Bold.ttf"
+font_path = r"C:\Users\eldel\OneDrive\Escritorio\BonaNova-Bold.ttf"
 
 # Inicializar un contador para el renombramiento
 contador = {}
