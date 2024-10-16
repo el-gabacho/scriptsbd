@@ -68,6 +68,8 @@ def crear_venta(idUsuario, idCliente, productos, montoTotal, recibioDinero, foli
             result = db.session.execute(text("SELECT @v_idVenta")).first()
             id_venta = result[0]
             for producto in productos:
+                if producto['precio'] == 0:
+                    raise ValueError(f'El producto {producto["codigoBarras"]} no tiene precio de venta')
                 sql_agregar_producto = "CALL proc_agregar_producto_venta(:idVenta, :idInventario, :cantidad, :tipoVenta, :precio, :subtotal)"
                 db.session.execute(text(sql_agregar_producto), {
                     'idVenta': id_venta,

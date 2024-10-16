@@ -74,6 +74,8 @@ def create_venta():
         
         if not idUsuario or not idCliente or not productos or not montoTotal or not recibioDinero or not folioTicket or not idTipoPago:
             return jsonify({'error': 'Faltan datos para crear la venta'}), 400
+        if montoTotal == 0 or not montoTotal:
+            return jsonify({'error': 'El monto total de la venta no puede ser cero'}), 400
         if not referenciaUnica:
             referenciaUnica = 'NO APLICA'
         id_venta = crear_venta(idUsuario, idCliente, productos, montoTotal, recibioDinero, folioTicket, imprimioTicket, idTipoPago, referenciaUnica)
