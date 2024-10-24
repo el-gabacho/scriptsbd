@@ -8,11 +8,10 @@ from PIL import Image
 import io
 import os
 from werkzeug.utils import secure_filename
+from config import IMAGE_ROOT_PATH, FILE_ROOT_PATH
 
 # ---------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------
-IMAGE_ROOT_PATH = "/home/soygabacho/imagenes/productos"
-FILE_ROOT_PATH = "/home/soygabacho/archivos"
 
 # TODOS LOS PRODUCTOS CON INFORMACION
 @routes.route('/info_productos', methods=['GET'])
@@ -382,6 +381,8 @@ def get_image(idInventario, imagenId):
         
         return send_file(img_io, mimetype='image/jpeg')
     except ValueError as ve:
+        print(ve)
         return jsonify({'error': str(ve)}), 400
     except Exception as e:
+        print(e)
         return jsonify({'error': str(e)}), 500

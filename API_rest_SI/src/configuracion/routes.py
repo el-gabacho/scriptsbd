@@ -3,8 +3,7 @@ from configuracion.funciones import obtenerConfiguracion, actualizarConfiguracio
 from configuracion import config as routes
 from werkzeug.utils import secure_filename
 import os
-
-IMAGE_ROOT_PATH = "/home/soygabacho/imagenes"
+from config import IMAGE_ROOT_PATH
 
 @routes.route('/configuracion', methods=['GET'])
 def getConfiguracion():

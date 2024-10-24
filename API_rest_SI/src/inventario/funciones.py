@@ -6,8 +6,7 @@ from categorias.modelos import Categoria
 from proveedores.modelos import Proveedor, ProveedorProducto
 from vehiculos.modelos import Marca, ModeloAutoparte, ModeloAnio, Modelo, Anio
 import os
-
-IMAGE_ROOT_PATH = "/home/soygabacho/imagenes/productos/"
+from config import IMAGE_ROOT_PATH
 
 # OBTENER INFORMACION DE TODOS LOS PRODUTOS ACTIVOS
 def get_productos():
@@ -693,7 +692,7 @@ def modificar_producto(idInventario, codigoBarras, nombre, descripcion, cantidad
             # Procedimiento 2: Modificar imágenes para el producto
             for i, imagen in enumerate(imagenes_list):
                 if imagen.lower() == 'false':
-                    image_path = f"{IMAGE_ROOT_PATH}{codigoBarras}_{i+1}.webp"
+                    image_path = os.path.join(IMAGE_ROOT_PATH,f"{codigoBarras}_{i+1}.webp")
                     if os.path.exists(image_path):
                         os.remove(image_path)
 
@@ -814,7 +813,7 @@ def eliminar_imagenes_del_servidor(idInventario):
             [query.imgRepresentativa, query.img2, query.img3, query.img4, query.img5], start=1
         ):
             if imagen_field:  # Si la imagen está presente
-                image_path = f"{IMAGE_ROOT_PATH}{codigo_barras}_{imagenId}.webp"
+                image_path = os.path.join(IMAGE_ROOT_PATH,f"{codigo_barras}_{imagenId}.webp")
                 
                 # Verificar si el archivo existe y eliminarlo
                 if os.path.exists(image_path):
@@ -920,15 +919,15 @@ def obtener_imagen(idInventario, imagenId):
 
     image_path = None
     if imagenId == 1 and query.imgRepresentativa:
-        image_path = f"{IMAGE_ROOT_PATH}{query.codigoBarras}_1.webp"
+        image_path = os.path.join(IMAGE_ROOT_PATH,f"{query.codigoBarras}_1.webp")
     elif imagenId == 2 and query.img2:
-        image_path = f"{IMAGE_ROOT_PATH}{query.codigoBarras}_2.webp"
+        image_path = os.path.join(IMAGE_ROOT_PATH,f"{query.codigoBarras}_2.webp")
     elif imagenId == 3 and query.img3:
-        image_path = f"{IMAGE_ROOT_PATH}{query.codigoBarras}_3.webp"
+        image_path = os.path.join(IMAGE_ROOT_PATH,f"{query.codigoBarras}_3.webp")
     elif imagenId == 4 and query.img4:
-        image_path = f"{IMAGE_ROOT_PATH}{query.codigoBarras}_4.webp"
+        image_path = os.path.join(IMAGE_ROOT_PATH,f"{query.codigoBarras}_4.webp")
     elif imagenId == 5 and query.img5:
-        image_path = f"{IMAGE_ROOT_PATH}{query.codigoBarras}_5.webp"
+        image_path = os.path.join(IMAGE_ROOT_PATH,f"{query.codigoBarras}_5.webp")
 
     if image_path is None:
         raise ValueError("Imagen no encontrada")

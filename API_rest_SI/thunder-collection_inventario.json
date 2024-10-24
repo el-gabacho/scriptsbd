@@ -1,0 +1,57 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "inventario",
+    "dateExported": "2024-10-24T19:26:38.727Z",
+    "version": "1.1",
+    "folders": [
+        {
+            "_id": "09316034-76d6-43fc-b247-bf77c0029db9",
+            "name": "auth",
+            "containerId": "",
+            "created": "2024-10-24T19:08:28.027Z",
+            "sortNum": 10000
+        },
+        {
+            "_id": "86465e9b-4628-4776-8bf3-4c1c82f6a987",
+            "name": "categorias",
+            "containerId": "",
+            "created": "2024-10-24T19:08:37.326Z",
+            "sortNum": 20000
+        }
+    ],
+    "requests": [
+        {
+            "_id": "b33c5339-2ebd-49f1-8174-f3aa74cbb7f1",
+            "colId": "829e068f-9adc-4bde-8de2-4819453a509f",
+            "containerId": "09316034-76d6-43fc-b247-bf77c0029db9",
+            "name": "login",
+            "url": "http://127.0.0.1:5000/auth/login",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2024-10-24T19:08:54.633Z",
+            "modified": "2024-10-24T19:16:00.428Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"usuario\":\"Juan123\",\n  \"contrasena\":\"Juan123@\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "a5b2aabd-a532-4c27-a740-733e35eaad03",
+            "colId": "829e068f-9adc-4bde-8de2-4819453a509f",
+            "containerId": "86465e9b-4628-4776-8bf3-4c1c82f6a987",
+            "name": "obtener categorias",
+            "url": "http://127.0.0.1:5000/categorias",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2024-10-24T19:20:55.120Z",
+            "modified": "2024-10-24T19:21:17.957Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        }
+    ]
+}

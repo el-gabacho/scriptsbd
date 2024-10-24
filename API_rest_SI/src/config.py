@@ -11,3 +11,8 @@ class Config():
 configuracion={
     'development':Config
 }
+
+#IMAGE_ROOT_PATH = "/home/soygabacho/imagenes/productos"
+#FILE_ROOT_PATH = "/home/soygabacho/archivos"
+IMAGE_ROOT_PATH = "C:\\imagenes_el_gabacho\\productos"
+FILE_ROOT_PATH = "C:\\imagenes_el_gabacho\\archivos"
